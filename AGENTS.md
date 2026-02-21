@@ -104,6 +104,10 @@ Patty/
 │   │   ├── SleepTab.tsx       # Self-contained sleep tab: Last Night stat card, history, entry modal (1/day), FAB
 │   │   └── FoodTab.tsx        # Self-contained food tab: today summary, grouped meal sections, photo+note modal, FAB
 │   │
+│   ├── recipes/
+│   │   ├── recipeData.ts      # Recipe type + 12 seed recipes (name, emoji, prep/cook time, tags, ingredients, steps)
+│   │   └── RecipeDetailModal.tsx # Full-screen modal: hero emoji, time chips, tag badges, ingredients list, numbered steps
+│   │
 │   ├── components/
 │   │   ├── WeightChart.tsx    # Recharts line chart for weight over time
 │   │   └── WaterRing.tsx      # Animated SVG progress ring for water daily goal

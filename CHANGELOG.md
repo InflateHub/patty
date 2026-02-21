@@ -2,6 +2,18 @@
 
 ---
 
+## [0.6.0] — Recipe Library
+*Goal: users can browse and view saved recipes.*
+
+- [x] `src/recipes/recipeData.ts` — `Recipe` type + 12 seed recipes (name, emoji, prep/cook time, tags, ingredients, steps)
+- [x] `src/recipes/RecipeDetailModal.tsx` — full-screen modal: hero emoji, prep/cook time chips, tag badges, ingredients list, numbered step-by-step instructions
+- [x] `src/pages/Recipes.tsx` — rewritten: `IonSearchbar` filters by name or tag in real time; responsive card grid (emoji + name + total time)
+- [x] Empty state when search returns no results
+- [x] `vite-env.d.ts` — `closeOutline` declared
+- [x] TypeScript clean
+
+---
+
 ## [0.5.0] — Food Log
 *Goal: photo-first meal capture across four categories.*
 

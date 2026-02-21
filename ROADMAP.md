@@ -66,13 +66,13 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.6.0 — Recipe Library
+## 0.6.0 — Recipe Library ✓
 *Goal: users can browse and view saved recipes.*
 
-- [ ] Recipe card list with name, prep time, and thumbnail
-- [ ] Recipe detail page: ingredients, step-by-step instructions, prep time
-- [ ] Seed library with 10–15 starter recipes
-- [ ] Search / filter by name
+- [x] Recipe card list with name, prep time, and thumbnail
+- [x] Recipe detail page: ingredients, step-by-step instructions, prep time
+- [x] Seed library with 10–15 starter recipes
+- [x] Search / filter by name
 
 ---
 
