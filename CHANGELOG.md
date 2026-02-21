@@ -2,6 +2,18 @@
 
 ---
 
+## [0.3.1] — Track Refactor
+*Goal: decompose the 656-line Track monolith into self-contained tab components for faster feature iteration.*
+
+- [x] `src/track/trackUtils.ts` — shared utility functions (`today`, `formatDate`, `isToday`, `formatTime`) and all inline style tokens (`S`, `QUICK_AMOUNTS`)
+- [x] `src/track/WeightTab.tsx` — fully self-contained: weight state, hooks, modals, FAB, JSX
+- [x] `src/track/WaterTab.tsx` — fully self-contained: water state, hooks, modals, FAB, JSX
+- [x] `src/pages/Track.tsx` rewritten as 51-line shell: header + segment switcher + renders active tab
+- [x] Zero behaviour change — identical UI and functionality
+- [x] TypeScript clean
+
+---
+
 ## [0.3.0] — Water Intake
 *Goal: one-tap water logging with an animated daily goal ring.*
 

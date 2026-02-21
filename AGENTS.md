@@ -90,22 +90,29 @@ Patty/
 │   ├── vite-env.d.ts          # Vite environment types + ionicons ambient declaration
 │   │
 │   ├── pages/
-│   │   ├── Track.tsx          # Track tab — weight tracking (0.2.0 complete)
+│   │   ├── Track.tsx          # Track tab shell — 51-line host: header + segment + active tab (0.3.1)
 │   │   ├── Recipes.tsx        # Recipes tab — recipe library (stub → 0.6)
 │   │   ├── Plan.tsx           # Plan tab — cooking + exercise planners (stub → 0.7–0.8)
 │   │   ├── Progress.tsx       # Progress tab — photos + trends (stub → 0.9)
 │   │   ├── Home.tsx           # Dashboard stub — full dashboard in 1.0.0
 │   │   └── Stub.css           # Shared empty-state styles for stub pages
 │   │
+│   ├── track/
+│   │   ├── trackUtils.ts      # Shared utils: today/formatDate/formatTime/isToday + style tokens S
+│   │   ├── WeightTab.tsx      # Self-contained weight tab: state, chart, history, modals, FAB
+│   │   └── WaterTab.tsx       # Self-contained water tab: state, ring, chips, modals, FAB
+│   │
 │   ├── components/
-│   │   └── WeightChart.tsx    # Recharts line chart for weight over time
+│   │   ├── WeightChart.tsx    # Recharts line chart for weight over time
+│   │   └── WaterRing.tsx      # Animated SVG progress ring for water daily goal
 │   │
 │   ├── hooks/
-│   │   └── useWeightLog.ts    # SQLite-backed weight log: addEntry / deleteEntry / getAll
+│   │   ├── useWeightLog.ts    # SQLite-backed weight log: addEntry / deleteEntry / getAll
+│   │   └── useWaterLog.ts     # SQLite-backed water log + localStorage daily goal
 │   │
 │   ├── db/
 │   │   ├── database.ts        # SQLite init (Capacitor native + jeep-sqlite WASM browser)
-│   │   └── migrations.ts      # Versioned SQL migrations (v1: weight_entries table)
+│   │   └── migrations.ts      # Versioned SQL migrations (v1: weight_entries, v2: water_entries)
 │       ├── variables.css      # MD3 tonal palette tokens + Ionic mapping, light + dark mode
 │       └── md3.css            # MD3 component overrides: shape, type, elevation, motion
 │
