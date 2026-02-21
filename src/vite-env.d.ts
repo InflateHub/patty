@@ -12,5 +12,7 @@ declare module 'ionicons/icons' {
   export const restaurantOutline: string;
   export const calendarOutline: string;
   export const trendingUpOutline: string;
+  export const waterOutline: string;
+  export const settingsOutline: string;
   export default icons;
 }

@@ -26,13 +26,13 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.3.0 — Water Intake
+## 0.3.0 — Water Intake ✓
 *Goal: one-tap water logging with a visual daily goal.*
 
-- [ ] Quick-add buttons: +250 ml, +500 ml, custom amount
-- [ ] Daily goal ring (progress toward configurable daily target)
-- [ ] Log resets at midnight
-- [ ] Daily history list
+- [x] Quick-add buttons: +150 ml, +250 ml, +500 ml, custom amount
+- [x] Daily goal ring (progress toward configurable daily target)
+- [x] Log resets at midnight
+- [x] Daily history list
 
 ---
 

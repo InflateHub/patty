@@ -2,6 +2,21 @@
 
 ---
 
+## [0.3.0] — Water Intake
+*Goal: one-tap water logging with an animated daily goal ring.*
+
+- [x] `water_entries` SQLite table added via migration v2
+- [x] `useWaterLog` hook — `addEntry`, `deleteEntry`, today's entries, running total, configurable daily goal (localStorage)
+- [x] `WaterRing` component — SVG animated progress ring, transitions colour to `--md-tertiary` when goal is reached
+- [x] Track tab gains Weight / Water segment switcher in the header toolbar
+- [x] Water view: ring card + quick-add chips (+150 ml, +250 ml, +500 ml, Custom) + goal row
+- [x] Custom amount and daily goal bottom-sheet modals
+- [x] Today's log list with swipe-to-delete and per-entry timestamps
+- [x] FAB on water tab opens custom-amount modal; chips handle one-tap adds
+- [x] TypeScript clean
+
+---
+
 ## [0.2.1] — Material Expressive 3 Design System
 *Goal: replace ad-hoc styles with a coherent MD3 tonal design language.*
 

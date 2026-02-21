@@ -22,7 +22,18 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
-  // 0.3.0 — water intake  (add here)
+  {
+    version: 2,
+    // 0.3.0 — water intake
+    statements: [
+      `CREATE TABLE IF NOT EXISTS water_entries (
+        id         TEXT    PRIMARY KEY NOT NULL,
+        date       TEXT    NOT NULL,
+        amount_ml  INTEGER NOT NULL,
+        created_at TEXT    NOT NULL
+      );`,
+    ],
+  },
   // 0.4.0 — sleep entries (add here)
   // 0.5.0 — food log      (add here)
 ];
