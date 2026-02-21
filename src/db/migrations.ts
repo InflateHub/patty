@@ -119,4 +119,12 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
+  {
+    version: 9,
+    // 0.9.4 — calorie fields on food log + recipes
+    statements: [
+      `ALTER TABLE food_entries ADD COLUMN kcal INTEGER;`,
+      `ALTER TABLE recipes ADD COLUMN kcal_per_serving INTEGER;`,
+    ],
+  },
 ];

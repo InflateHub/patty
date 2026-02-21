@@ -63,6 +63,11 @@ const RecipeDetailModal: React.FC<Props> = ({ recipe, onClose, onDelete }) => {
               {recipe.prepMin === 0 && recipe.cookMin === 0 && (
                 <span style={S.chip}>No cooking needed</span>
               )}
+              {recipe.kcalPerServing != null && (
+                <span style={{ ...S.chip, background: 'var(--md-tertiary-container)', color: 'var(--md-on-tertiary-container)' }}>
+                  ~{recipe.kcalPerServing} kcal / serving
+                </span>
+              )}
             </div>
             <div style={S.tagRow}>
               {recipe.tags.map((tag) => (

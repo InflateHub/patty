@@ -43,11 +43,13 @@ const EMPTY = (): Omit<Recipe, 'id'> => ({
 const RecipeFormModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
   const [form, setForm] = useState(EMPTY);
   const [tagsRaw, setTagsRaw] = useState('');
+  const [kcalRaw, setKcalRaw] = useState('');
   const [saving, setSaving] = useState(false);
 
   function reset() {
     setForm(EMPTY());
     setTagsRaw('');
+    setKcalRaw('');
     setSaving(false);
   }
 
@@ -101,10 +103,12 @@ const RecipeFormModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
       .split(',')
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
+    const kcalNum = kcalRaw.trim() ? parseInt(kcalRaw.trim(), 10) : undefined;
+    const kcalPerServing = Number.isFinite(kcalNum) && kcalNum! > 0 ? kcalNum : undefined;
 
     setSaving(true);
     try {
-      await onSave({ ...form, name, ingredients, steps, tags });
+      await onSave({ ...form, name, ingredients, steps, tags, kcalPerServing });
       reset();
       onClose();
     } catch {
@@ -169,7 +173,7 @@ const RecipeFormModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
 
         {/* Times */}
         <IonList lines="inset" style={{ marginBottom: 0 }}>
-          <IonListHeader style={S.listHeader}>Time</IonListHeader>
+          <IonListHeader style={S.listHeader}>Time &amp; Nutrition</IonListHeader>
           <IonItem>
             <IonInput
               label="Prep time (min)"
@@ -192,6 +196,17 @@ const RecipeFormModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
               onIonInput={(e) =>
                 setForm((f) => ({ ...f, cookMin: Math.max(0, parseInt(e.detail.value ?? '0', 10) || 0) }))
               }
+            />
+          </IonItem>
+          <IonItem>
+            <IonInput
+              label="Calories per serving (kcal, optional)"
+              labelPlacement="floating"
+              type="number"
+              min="0"
+              value={kcalRaw}
+              onIonInput={(e) => setKcalRaw(e.detail.value ?? '')}
+              placeholder="e.g. 480"
             />
           </IonItem>
         </IonList>

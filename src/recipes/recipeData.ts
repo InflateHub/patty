@@ -7,6 +7,7 @@ export interface Recipe {
   tags: string[];
   ingredients: string[];
   steps: string[];
+  kcalPerServing?: number;
 }
 
 export const RECIPES: Recipe[] = [

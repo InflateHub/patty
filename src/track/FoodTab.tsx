@@ -9,6 +9,7 @@ import {
   IonFabButton,
   IonHeader,
   IonIcon,
+  IonInput,
   IonItem,
   IonItemOption,
   IonItemOptions,
@@ -101,12 +102,16 @@ export const FoodTab: React.FC = () => {
   const [selectedMeal, setSelectedMeal] = useState<MealType>('breakfast');
   const [photoUri, setPhotoUri] = useState<string | undefined>();
   const [note, setNote] = useState('');
+  const [kcal, setKcal] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const todayStr = today();
   const grouped = todayEntries(todayStr);
   const totalToday = Object.values(grouped).reduce((n, arr) => n + arr.length, 0);
+  const allTodayEntries = Object.values(grouped).flat();
+  const kcalEntries = allTodayEntries.filter((e) => e.kcal != null);
+  const totalKcal = kcalEntries.reduce((sum, e) => sum + (e.kcal ?? 0), 0);
 
   /* ── Handlers ────────────────────────────────────────────────────── */
 
@@ -114,6 +119,7 @@ export const FoodTab: React.FC = () => {
     setSelectedMeal('breakfast');
     setPhotoUri(undefined);
     setNote('');
+    setKcal('');
     setSaving(false);
     setModalOpen(true);
   }
@@ -127,8 +133,9 @@ export const FoodTab: React.FC = () => {
 
   async function handleSave() {
     setSaving(true);
+    const kcalNum = kcal.trim() ? parseInt(kcal.trim(), 10) : undefined;
     try {
-      await addEntry(todayStr, selectedMeal, photoUri, note.trim() || undefined);
+      await addEntry(todayStr, selectedMeal, photoUri, note.trim() || undefined, Number.isFinite(kcalNum) ? kcalNum : undefined);
       setModalOpen(false);
     } catch {
       setSaving(false);
@@ -221,6 +228,11 @@ export const FoodTab: React.FC = () => {
               <span style={{ fontSize: 'var(--md-title-sm)', color: 'var(--md-on-surface-variant)' }}>
                 {totalToday === 1 ? 'entry' : 'entries'}
               </span>
+              {kcalEntries.length > 0 && (
+                <span style={{ fontSize: 'var(--md-title-sm)', color: 'var(--md-primary)', marginLeft: 8 }}>
+                  {totalKcal} kcal
+                </span>
+              )}
             </div>
           )}
         </IonCardContent>
@@ -336,6 +348,21 @@ export const FoodTab: React.FC = () => {
                 autoGrow
                 rows={3}
                 style={{ '--background': 'var(--md-surface-container)', '--border-radius': 'var(--md-shape-md)', '--padding-start': '14px', '--padding-end': '14px', '--padding-top': '12px', '--padding-bottom': '12px' } as React.CSSProperties}
+              />
+            </div>
+
+            {/* Calories */}
+            <div>
+              <div style={{ fontSize: 'var(--md-label-lg)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+                Calories (optional)
+              </div>
+              <IonInput
+                type="number"
+                min="0"
+                value={kcal}
+                onIonInput={(e) => setKcal(e.detail.value ?? '')}
+                placeholder="e.g. 450"
+                style={{ '--background': 'var(--md-surface-container)', '--border-radius': 'var(--md-shape-md)', '--padding-start': '14px', '--padding-end': '14px' } as React.CSSProperties}
               />
             </div>
 

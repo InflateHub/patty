@@ -21,6 +21,7 @@ function rowToUserRecipe(r: Record<string, unknown>): UserRecipe {
     tags: JSON.parse((r.tags as string) || '[]') as string[],
     ingredients: JSON.parse((r.ingredients as string) || '[]') as string[],
     steps: JSON.parse((r.steps as string) || '[]') as string[],
+    kcalPerServing: r.kcal_per_serving != null ? (r.kcal_per_serving as number) : undefined,
     custom: true,
     created_at: r.created_at as string,
   };
@@ -65,8 +66,8 @@ export function useRecipes() {
       try {
         const db = getDb();
         await db.run(
-          `INSERT INTO recipes (id, name, emoji, prep_min, cook_min, tags, ingredients, steps, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+          `INSERT INTO recipes (id, name, emoji, prep_min, cook_min, tags, ingredients, steps, kcal_per_serving, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
           [
             id,
             draft.name,
@@ -76,6 +77,7 @@ export function useRecipes() {
             JSON.stringify(draft.tags),
             JSON.stringify(draft.ingredients),
             JSON.stringify(draft.steps),
+            draft.kcalPerServing ?? null,
             created_at,
           ]
         );

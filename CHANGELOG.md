@@ -2,6 +2,19 @@
 
 ---
 
+## [0.9.4] — Calorie Estimation + Nutrition on Recipes
+*Goal: basic nutritional awareness in food log and recipe detail.*
+
+- [x] DB migration v9: `ALTER TABLE food_entries ADD COLUMN kcal INTEGER`; `ALTER TABLE recipes ADD COLUMN kcal_per_serving INTEGER`
+- [x] `src/recipes/recipeData.ts` — `kcalPerServing?: number` added to `Recipe` interface
+- [x] `src/hooks/useRecipes.ts` — `rowToUserRecipe` maps `kcal_per_serving`; `addRecipe` persists `kcalPerServing`
+- [x] `src/hooks/useFoodLog.ts` — `FoodEntry.kcal: number | null`; `addEntry` accepts optional `kcal` param
+- [x] `src/track/FoodTab.tsx` — optional kcal number input in Log Meal modal; total kcal shown in today's summary card when at least one entry has kcal
+- [x] `src/recipes/RecipeFormModal.tsx` — optional kcal-per-serving input in Time & Nutrition section
+- [x] `src/recipes/RecipeDetailModal.tsx` — kcal chip in hero when `kcalPerServing` is set (tertiary container colour)
+
+---
+
 ## [0.9.3] — Profile + Settings Page
 *Goal: collect personal data to unlock derived health metrics and personalise the app.*
 

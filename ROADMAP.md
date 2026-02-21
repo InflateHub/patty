@@ -145,13 +145,13 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.4 — Calorie Estimation + Nutrition on Recipes
+## 0.9.4 — Calorie Estimation + Nutrition on Recipes ✓
 *Goal: basic nutritional awareness in food log and recipe detail.*
 
-- [ ] Food log entry modal gains optional kcal field (stored in `food_entries` via migration v8)
-- [ ] Today's food summary card shows total kcal logged
-- [ ] Recipe detail page shows estimated kcal per serving (editable field on recipe form)
-- [ ] Recipe kcal stored in `recipes` table (migration v8 adds `kcal_per_serving` column)
+- [x] Food log entry modal gains optional kcal field (stored in `food_entries` via migration v9)
+- [x] Today's food summary card shows total kcal logged
+- [x] Recipe detail page shows estimated kcal per serving (editable field on recipe form)
+- [x] Recipe kcal stored in `recipes` table (migration v9 adds `kcal_per_serving` column)
 
 ---
 

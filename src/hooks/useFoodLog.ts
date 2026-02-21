@@ -9,6 +9,7 @@ export interface FoodEntry {
   meal: MealType;
   photo_uri: string | null;
   note: string | null;
+  kcal: number | null;
   created_at: string;    // ISO timestamp
 }
 
@@ -33,6 +34,7 @@ export function useFoodLog() {
         meal: r.meal as MealType,
         photo_uri: r.photo_uri as string | null,
         note: r.note as string | null,
+        kcal: r.kcal != null ? (r.kcal as number) : null,
         created_at: r.created_at as string,
       }));
       setEntries(rows);
@@ -53,16 +55,17 @@ export function useFoodLog() {
    * @param meal      'breakfast' | 'lunch' | 'dinner' | 'snack'
    * @param photo_uri Optional data URI of the photo
    * @param note      Optional free-text note
+   * @param kcal      Optional calorie count
    */
   const addEntry = useCallback(
-    async (date: string, meal: MealType, photo_uri?: string, note?: string) => {
+    async (date: string, meal: MealType, photo_uri?: string, note?: string, kcal?: number) => {
       const id = generateId();
       const created_at = new Date().toISOString();
       try {
         const db = getDb();
         await db.run(
-          'INSERT INTO food_entries (id, date, meal, photo_uri, note, created_at) VALUES (?, ?, ?, ?, ?, ?);',
-          [id, date, meal, photo_uri ?? null, note ?? null, created_at]
+          'INSERT INTO food_entries (id, date, meal, photo_uri, note, kcal, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);',
+          [id, date, meal, photo_uri ?? null, note ?? null, kcal ?? null, created_at]
         );
         await loadAll();
       } catch (err) {
