@@ -94,7 +94,8 @@ Patty/
 │   │   ├── Recipes.tsx        # Recipes tab — recipe library (stub → 0.6)
 │   │   ├── Plan.tsx           # Plan tab — cooking + exercise planners (stub → 0.7–0.8)
 │   │   ├── Progress.tsx       # Progress tab — stats card, photo gallery, compare modal, trend charts (0.9.0)
-│   │   ├── Home.tsx           # Dashboard stub — full dashboard in 1.0.0
+│   │   ├── Home.tsx           # Dashboard — live stats, greeting, BMI, profile icon button (0.9.3)
+│   │   ├── ProfilePage.tsx    # Profile + Settings page: About Me, Preferences, Derived Metrics (BMI/BMR/TDEE), App Info (0.9.3)
 │   │   └── Stub.css           # Shared empty-state styles for stub pages
 │   │
 │   ├── track/
@@ -128,7 +129,8 @@ Patty/
 │   │   ├── useMealPlan.ts        # SQLite-backed meal plan: assignSlot / clearSlot / weekPlan / groceryList; week helpers
 │   │   ├── useDailySummary.ts    # Per-day aggregate hook: weight + waterTotalMl + waterGoalMl + sleep for any date
 │   │   ├── useProgressPhotos.ts  # SQLite-backed progress photos: addPhoto / deletePhoto / allPhotos (date desc)
-│   │   └── useTrends.ts          # Last-30-day aggregation of weight/water/sleep; 7-day stats for Progress Hub
+│   │   ├── useTrends.ts          # Last-30-day aggregation of weight/water/sleep; 7-day stats for Progress Hub
+│   │   └── useProfile.ts         # SQLite-backed profile + preferences (settings KV table); metric utils: computeBMI/BMR/TDEE
 │   │
 │   ├── db/
 │   │   ├── database.ts        # SQLite init (Capacitor native + jeep-sqlite WASM browser)

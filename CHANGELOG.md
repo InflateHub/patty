@@ -2,6 +2,19 @@
 
 ---
 
+## [0.9.3] — Profile + Settings Page
+*Goal: collect personal data to unlock derived health metrics and personalise the app.*
+
+- [x] DB migration v8: `settings` key-value table (stores profile + preference keys)
+- [x] `src/hooks/useProfile.ts` — `useProfile` hook; pure metric utils: `computeBMI`, `computeBMR`, `computeTDEE`, `bmiCategory`, `ageFromDob`; type exports: `UserProfile`, `UserPrefs`, `Sex`, `ActivityLevel`, `Goal`, `WeightUnit`
+- [x] `src/pages/ProfilePage.tsx` — two-section page (About Me + Preferences) with inline save; Derived Metrics card (BMI with colour pill, BMR, TDEE); App Info footer; accessible from Home toolbar
+- [x] `src/pages/Home.tsx` — `personCircleOutline` toolbar button navigates to ProfilePage; greeting personalised with first name; BMI value + category label shown beneath weight stat in stats row
+- [x] `src/App.tsx` — `/tabs/profile` route added
+- [x] `vite-env.d.ts` — `personCircleOutline` declared
+- [x] TypeScript clean
+
+---
+
 ## [0.9.1] — Dashboard Home
 *Goal: Home tab shows a live at-a-glance summary of today's data.*
 

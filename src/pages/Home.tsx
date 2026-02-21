@@ -1,12 +1,16 @@
-/* Dashboard — 0.9.1 */
+/* Dashboard — 0.9.3 */
 import React, { useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
+  IonButton,
+  IonButtons,
   IonCard,
   IonCardContent,
   IonCol,
   IonContent,
   IonGrid,
   IonHeader,
+  IonIcon,
   IonItem,
   IonLabel,
   IonList,
@@ -17,20 +21,21 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
+import { personCircleOutline } from 'ionicons/icons';
 
 import { useWeightLog } from '../hooks/useWeightLog';
 import { useWaterLog } from '../hooks/useWaterLog';
 import { useSleepLog } from '../hooks/useSleepLog';
 import { useFoodLog } from '../hooks/useFoodLog';
+import { useProfile, computeBMI, bmiCategory } from '../hooks/useProfile';
 import { WaterRing } from '../components/WaterRing';
 import { WeightChart } from '../components/WeightChart';
 import { today, formatDuration } from '../track/trackUtils';
 
-function greeting(): string {
+function salutation(name: string): string {
   const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
+  const base = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  return name ? `${base}, ${name.split(' ')[0]}` : base;
 }
 
 const MEAL_LABELS: Record<string, string> = {
@@ -58,10 +63,20 @@ const sectionHeaderStyle: React.CSSProperties = {
 };
 
 const Home: React.FC = () => {
+  const history = useHistory();
   const { entries: weightEntries, latestEntry } = useWeightLog();
   const { todayTotal, dailyGoal, loading: waterLoading } = useWaterLog();
   const { lastNightEntry } = useSleepLog();
   const { entries: foodEntries } = useFoodLog();
+  const { profile } = useProfile();
+
+  const weightKg = latestEntry
+    ? latestEntry.unit === 'lbs'
+      ? latestEntry.value / 2.20462
+      : latestEntry.value
+    : 0;
+  const bmi = computeBMI(weightKg, profile.heightCm);
+  const bmiCat = bmiCategory(bmi);
 
   const todayDate = today();
 
@@ -85,6 +100,11 @@ const Home: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonTitle>Patty</IonTitle>
+          <IonButtons slot="end">
+            <IonButton onClick={() => history.push('/tabs/profile')}>
+              <IonIcon icon={personCircleOutline} style={{ fontSize: 26, color: 'var(--md-on-surface-variant)' }} />
+            </IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
 
@@ -104,7 +124,7 @@ const Home: React.FC = () => {
             fontFamily: 'var(--md-font)',
             color: 'var(--md-on-surface)',
           }}>
-            {greeting()}
+            {salutation(profile.name)}
           </p>
           <p style={{
             margin: '2px 0 0',
@@ -121,7 +141,7 @@ const Home: React.FC = () => {
           <IonCardContent style={{ padding: '16px 4px' }}>
             <IonGrid style={{ padding: 0 }}>
               <IonRow style={{ textAlign: 'center' }}>
-                {/* Weight */}
+                {/* Weight + BMI */}
                 <IonCol>
                   <p style={{ margin: 0, fontSize: 22, fontWeight: 600, fontFamily: 'var(--md-font)', color: 'var(--md-on-surface)' }}>
                     {latestEntry ? `${latestEntry.value} ${latestEntry.unit}` : '\u2014'}
@@ -129,6 +149,16 @@ const Home: React.FC = () => {
                   <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>
                     Weight
                   </p>
+                  {bmi > 0 && (
+                    <p style={{ margin: '3px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-primary)', fontWeight: 600 }}>
+                      BMI {bmi.toFixed(1)}
+                    </p>
+                  )}
+                  {bmiCat && (
+                    <p style={{ margin: '1px 0 0', fontSize: 10, fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>
+                      {bmiCat}
+                    </p>
+                  )}
                 </IonCol>
                 {/* Divider */}
                 <IonCol style={{ borderLeft: '1px solid var(--md-outline-variant)', borderRight: '1px solid var(--md-outline-variant)' }}>

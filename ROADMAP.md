@@ -133,14 +133,15 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.3 — Settings Page
-*Goal: users can configure app-level preferences.*
+## 0.9.3 — Profile + Settings Page ✓
+*Goal: collect personal data to unlock derived health metrics and personalise the app.*
 
-- [ ] New "Settings" route accessible from a toolbar icon on the Home page
-- [ ] Daily water goal (number input, persisted to localStorage)
-- [ ] Weight unit toggle: kg / lb (persisted; WeightTab and dashboard convert accordingly)
-- [ ] Notification preferences: enable/disable reminders per category (water, sleep, weigh-in)
-- [ ] App version display in footer
+- [x] DB migration v8: `settings` key-value SQLite table (profile + preferences)
+- [x] `src/hooks/useProfile.ts`: `useProfile` hook (read/write profile + prefs); pure utils: `computeBMI`, `computeBMR`, `computeTDEE`, `bmiCategory`, `ageFromDob`
+- [x] `src/pages/ProfilePage.tsx`: About Me (name, DOB, sex, height, activity, goal) + Preferences (weight unit, water goal) + Derived Metrics (BMI with category, BMR, TDEE) + App Info
+- [x] `src/pages/Home.tsx`: person-icon button in toolbar → pushes ProfilePage; greeting personalised with first name; BMI + category shown under weight stat
+- [x] `src/App.tsx`: route `/tabs/profile` wired to `ProfilePage`
+- [x] `vite-env.d.ts`: `personCircleOutline` declared
 
 ---
 

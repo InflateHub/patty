@@ -109,4 +109,14 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
+  {
+    version: 8,
+    // 0.9.3 — user profile + app settings (key-value store)
+    statements: [
+      `CREATE TABLE IF NOT EXISTS settings (
+        key   TEXT PRIMARY KEY NOT NULL,
+        value TEXT NOT NULL
+      );`,
+    ],
+  },
 ];
