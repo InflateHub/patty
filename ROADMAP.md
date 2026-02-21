@@ -97,16 +97,6 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.8.0 — Exercise Planner
-*Goal: structured short routines users can follow.*
-
-- [ ] Four routine categories: Beginner, Fat Loss, Mobility, Strength Basics
-- [ ] Routine detail: exercise list, sets/reps or duration, rest time
-- [ ] Session timer (per-exercise countdown)
-- [ ] Log completed session (date + routine name)
-
----
-
 ## 0.9.0 — Progress Hub
 *Goal: visual history of body changes and trends.*
 
