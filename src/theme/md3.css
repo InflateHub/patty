@@ -275,8 +275,10 @@ ion-segment-button {
   --color: var(--md-on-surface-variant);
   --color-checked: var(--md-on-surface);
   --border-radius: var(--md-shape-full);
-  --indicator-box-shadow: 0 1px 4px color-mix(in srgb, var(--md-shadow) 15%, transparent);
+  --indicator-box-shadow: none;
   --indicator-color: var(--md-surface-container-lowest);
+  --indicator-height: 100%;
+  --indicator-border-radius: var(--md-shape-full);
   min-height: 36px;
   font-size: var(--md-label-lg);
   font-weight: 500;
@@ -295,6 +297,16 @@ ion-datetime {
 ion-item-option {
   font-size: var(--md-label-lg);
   font-weight: 500;
+}
+
+/* ── Hide number input spinners ─────────────────────────────────────────── */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 /* ── Scrollbars ─────────────────────────────────────────────────────────── */

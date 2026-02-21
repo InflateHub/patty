@@ -7,6 +7,7 @@ declare module 'ionicons/icons' {
   const icons: Record<string, string>;
   export const add: string;
   export const trash: string;
+  export const createOutline: string;
   export const pulseOutline: string;
   export const restaurantOutline: string;
   export const calendarOutline: string;
