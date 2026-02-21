@@ -5,6 +5,8 @@
 // Icons are typed as `string` (they are SVG path strings at runtime).
 declare module 'ionicons/icons' {
   const icons: Record<string, string>;
+  export const add: string;
+  export const trash: string;
   export const pulseOutline: string;
   export const restaurantOutline: string;
   export const calendarOutline: string;

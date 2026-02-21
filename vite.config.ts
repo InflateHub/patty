@@ -10,6 +10,13 @@ export default defineConfig({
     react(),
     legacy()
   ],
+  optimizeDeps: {
+    exclude: ['@capacitor-community/sqlite'],
+  },
+  build: {
+    // Ensure WASM files are copied to the output
+    assetsInlineLimit: 0,
+  },
   test: {
     globals: true,
     environment: 'jsdom',

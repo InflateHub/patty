@@ -2,6 +2,20 @@
 
 ---
 
+## [0.2.0] — Weight Tracking
+*Goal: users can log and review their weight, persisted to SQLite.*
+
+- [x] SQLite database layer (`src/db/database.ts`, `src/db/migrations.ts`) — versioned migrations, shared by all future features
+- [x] `@capacitor-community/sqlite` + `jeep-sqlite` (browser WASM fallback) + `sql.js` installed
+- [x] `useWeightLog` hook — `addEntry`, `deleteEntry`, `getAll` backed by SQLite
+- [x] `WeightChart` component — Recharts `LineChart` in Patty slate-green, responsive
+- [x] Track tab fully replaced: chart + reverse-chronological list + swipe-to-delete
+- [x] FAB → sheet modal entry form (value, kg/lbs toggle, date picker, optional note)
+- [x] `main.tsx` bootstraps DB before mounting React
+- [x] TypeScript clean; unit tests passing
+
+---
+
 ## [0.1.0] — App Shell
 *Goal: navigable app in the browser with Patty's theme applied.*
 

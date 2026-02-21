@@ -16,13 +16,13 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.2.0 — Weight Tracking
+## 0.2.0 — Weight Tracking ✓
 *Goal: users can log and review their weight.*
 
-- [ ] Weight entry form (value + optional note + date)
-- [ ] Weight history list (reverse chronological)
-- [ ] Simple line graph of weight over time
-- [ ] Local data persistence (localStorage)
+- [x] Weight entry form (value + optional note + date)
+- [x] Weight history list (reverse chronological)
+- [x] Simple line graph of weight over time
+- [x] Local data persistence (SQLite via `@capacitor-community/sqlite`)
 
 ---
 
