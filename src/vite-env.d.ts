@@ -14,5 +14,7 @@ declare module 'ionicons/icons' {
   export const trendingUpOutline: string;
   export const waterOutline: string;
   export const settingsOutline: string;
+  export const moonOutline: string;
+  export const timeOutline: string;
   export default icons;
 }

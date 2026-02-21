@@ -2,6 +2,21 @@
 
 ---
 
+## [0.4.0] — Sleep Tracking
+*Goal: users can log sleep and see their patterns.*
+
+- [x] DB migration v3: `sleep_entries` table (`id`, `date`, `bedtime`, `waketime`, `duration_min`, `quality`, `note`)
+- [x] `src/hooks/useSleepLog.ts` — `addEntry` / `deleteEntry` / `getAll`; `avgDurationMin` derived stat
+- [x] `src/track/SleepTab.tsx` — self-contained tab: summary stat card, history list, FAB, entry modal
+- [x] Entry modal: bedtime + wake-up time pickers, live duration display, 1–5 star quality picker, optional note
+- [x] Wake-up midnight crossing handled automatically (wake date = next day if wake time ≤ bed time)
+- [x] `src/pages/Track.tsx` — third segment "Sleep" added; segment max-width widened to 400 px
+- [x] `trackUtils.ts` — `formatDuration(minutes)` utility added
+- [x] `vite-env.d.ts` — `moonOutline`, `timeOutline` declared
+- [x] TypeScript clean
+
+---
+
 ## [0.3.1] — Track Refactor
 *Goal: decompose the 656-line Track monolith into self-contained tab components for faster feature iteration.*
 

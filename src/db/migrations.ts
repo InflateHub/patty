@@ -34,6 +34,20 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
-  // 0.4.0 — sleep entries (add here)
+  {
+    version: 3,
+    // 0.4.0 — sleep tracking
+    statements: [
+      `CREATE TABLE IF NOT EXISTS sleep_entries (
+        id           TEXT     PRIMARY KEY NOT NULL,
+        date         TEXT     NOT NULL,
+        bedtime      TEXT     NOT NULL,
+        waketime     TEXT     NOT NULL,
+        duration_min INTEGER  NOT NULL,
+        quality      INTEGER  NOT NULL,
+        note         TEXT
+      );`,
+    ],
+  },
   // 0.5.0 — food log      (add here)
 ];

@@ -20,6 +20,15 @@ export function formatTime(isoTimestamp: string): string {
 
 export const QUICK_AMOUNTS = [150, 250, 500] as const;
 
+/** Format a duration in minutes as "X h Y m" (or "Y min" if < 1 h). */
+export function formatDuration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h} h`;
+  return `${h} h ${m} m`;
+}
+
 /* ── Shared inline style tokens ─────────────────────────────────────── */
 export const S = {
   /* Weight entry form */

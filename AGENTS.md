@@ -98,9 +98,10 @@ Patty/
 │   │   └── Stub.css           # Shared empty-state styles for stub pages
 │   │
 │   ├── track/
-│   │   ├── trackUtils.ts      # Shared utils: today/formatDate/formatTime/isToday + style tokens S
+│   │   ├── trackUtils.ts      # Shared utils: today/formatDate/formatTime/isToday/formatDuration + style tokens S
 │   │   ├── WeightTab.tsx      # Self-contained weight tab: state, chart, history, modals, FAB
-│   │   └── WaterTab.tsx       # Self-contained water tab: state, ring, chips, modals, FAB
+│   │   ├── WaterTab.tsx       # Self-contained water tab: state, ring, chips, modals, FAB
+│   │   └── SleepTab.tsx       # Self-contained sleep tab: stat card, history, star-quality entry modal, FAB
 │   │
 │   ├── components/
 │   │   ├── WeightChart.tsx    # Recharts line chart for weight over time
@@ -108,11 +109,12 @@ Patty/
 │   │
 │   ├── hooks/
 │   │   ├── useWeightLog.ts    # SQLite-backed weight log: addEntry / deleteEntry / getAll
-│   │   └── useWaterLog.ts     # SQLite-backed water log + localStorage daily goal
+│   │   ├── useWaterLog.ts     # SQLite-backed water log + localStorage daily goal
+│   │   └── useSleepLog.ts     # SQLite-backed sleep log: addEntry / deleteEntry / getAll / avgDurationMin
 │   │
 │   ├── db/
 │   │   ├── database.ts        # SQLite init (Capacitor native + jeep-sqlite WASM browser)
-│   │   └── migrations.ts      # Versioned SQL migrations (v1: weight_entries, v2: water_entries)
+│   │   └── migrations.ts      # Versioned SQL migrations (v1: weight_entries, v2: water_entries, v3: sleep_entries)
 │       ├── variables.css      # MD3 tonal palette tokens + Ionic mapping, light + dark mode
 │       └── md3.css            # MD3 component overrides: shape, type, elevation, motion
 │

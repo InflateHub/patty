@@ -36,13 +36,13 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.4.0 — Sleep Tracking
+## 0.4.0 — Sleep Tracking ✓
 *Goal: users can log sleep and see their patterns.*
 
-- [ ] Sleep entry form (bedtime, wake time, quality slider 1–5)
-- [ ] Calculated sleep duration display
-- [ ] Sleep history list with quality indicator
-- [ ] Average sleep duration stat
+- [x] Sleep entry form (bedtime, wake time, quality slider 1–5)
+- [x] Calculated sleep duration display
+- [x] Sleep history list with quality indicator
+- [x] Average sleep duration stat
 
 ---
 
