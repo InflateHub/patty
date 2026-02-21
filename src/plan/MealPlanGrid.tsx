@@ -1,13 +1,11 @@
-import React from 'react';
-import { IonIcon } from '@ionic/react';
-import { closeOutline } from 'ionicons/icons';
-import { SLOTS, type SlotType, type WeekPlan, type MealSlotEntry } from '../hooks/useMealPlan';
+﻿import React, { useState, useEffect, useRef } from 'react';
+import { SLOTS, type SlotType, type WeekPlan } from '../hooks/useMealPlan';
 
-// ── Slot display labels ───────────────────────────────────────────────────────
-const SLOT_LABEL: Record<SlotType, string> = {
-  breakfast: 'Breakfast',
-  lunch: 'Lunch',
-  dinner: 'Dinner',
+const DAY_ABBR  = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const SLOT_META: Record<SlotType, { label: string; emoji: string }> = {
+  breakfast: { label: 'Breakfast', emoji: 'â˜€ï¸' },
+  lunch:     { label: 'Lunch',     emoji: 'ðŸŒ¤ï¸' },
+  dinner:    { label: 'Dinner',    emoji: 'ðŸŒ™' },
 };
 
 interface Props {
@@ -15,158 +13,221 @@ interface Props {
   weekPlan: WeekPlan;
   onAddSlot: (date: string, slot: SlotType) => void;
   onClearSlot: (date: string, slot: SlotType) => void;
-  /** Optional: highlight this date as "today" */
   today: string;
 }
 
-const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-const SlotCell: React.FC<{
-  entry: MealSlotEntry | undefined;
-  onAdd: () => void;
-  onClear: () => void;
-}> = ({ entry, onAdd, onClear }) => {
-  if (entry) {
-    return (
-      <div
-        style={{
-          background: 'var(--md-primary-container)',
-          borderRadius: 'var(--md-shape-sm)',
-          padding: '6px 8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
-          minHeight: 44,
-          cursor: 'default',
-        }}
-      >
-        <span style={{ fontSize: 18, flexShrink: 0 }}>{entry.recipe_emoji}</span>
-        <span
-          style={{
-            flex: 1,
-            fontSize: 'var(--md-label-sm)',
-            fontFamily: 'var(--md-font)',
-            color: 'var(--md-on-primary-container)',
-            fontWeight: 500,
-            lineHeight: 1.3,
-            wordBreak: 'break-word',
-          }}
-        >
-          {entry.recipe_name}
-        </span>
-        <button
-          onClick={e => { e.stopPropagation(); onClear(); }}
-          aria-label="Remove"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 2,
-            color: 'var(--md-on-primary-container)',
-            display: 'flex',
-            alignItems: 'center',
-            flexShrink: 0,
-          }}
-        >
-          <IonIcon icon={closeOutline} style={{ fontSize: 16 }} />
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={onAdd}
-      style={{
-        background: 'var(--md-surface-container)',
-        border: `1.5px dashed var(--md-outline-variant)`,
-        borderRadius: 'var(--md-shape-sm)',
-        width: '100%',
-        minHeight: 44,
-        cursor: 'pointer',
-        color: 'var(--md-on-surface-variant)',
-        fontSize: 18,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-      aria-label="Add recipe"
-    >
-      +
-    </button>
-  );
-};
-
 const MealPlanGrid: React.FC<Props> = ({ dates, weekPlan, onAddSlot, onClearSlot, today }) => {
+  const defaultDate = dates.includes(today) ? today : dates[0];
+  const [selected, setSelected] = useState(defaultDate);
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  // When week changes, reset selection to today-or-first
+  useEffect(() => {
+    const next = dates.includes(today) ? today : dates[0];
+    setSelected(next);
+  }, [dates[0]]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Scroll selected pill into view
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const idx = dates.indexOf(selected);
+    const pill = strip.children[idx] as HTMLElement | undefined;
+    pill?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  }, [selected]);
+
+  const slotEntries = SLOTS.map(slot => ({
+    slot,
+    entry: weekPlan[selected]?.[slot],
+  }));
+
   return (
-    <div style={{ overflowX: 'auto', width: '100%' }}>
-      <table
+    <div style={{ fontFamily: 'var(--md-font)' }}>
+
+      {/* â”€â”€ Day strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div
+        ref={stripRef}
         style={{
-          width: '100%',
-          borderCollapse: 'separate',
-          borderSpacing: '4px 4px',
-          tableLayout: 'fixed',
-          fontFamily: 'var(--md-font)',
+          display: 'flex',
+          gap: 6,
+          overflowX: 'auto',
+          padding: '0 4px 12px',
+          scrollbarWidth: 'none',
         }}
       >
-        {/* Header row: day labels */}
-        <thead>
-          <tr>
-            {/* Slot label column */}
-            <th style={{ width: 72 }} />
-            {dates.map((date, i) => {
-              const isToday = date === today;
-              return (
-                <th
-                  key={date}
-                  style={{
-                    textAlign: 'center',
-                    paddingBottom: 6,
-                    fontSize: 'var(--md-label-md)',
-                    fontWeight: isToday ? 700 : 500,
-                    color: isToday ? 'var(--md-primary)' : 'var(--md-on-surface-variant)',
-                  }}
-                >
-                  {DAY_LABELS[i]}
-                  <br />
-                  <span style={{ fontSize: 'var(--md-label-sm)', fontWeight: 400 }}>
-                    {new Date(date + 'T00:00:00').getDate()}
-                  </span>
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {SLOTS.map(slot => (
-            <tr key={slot}>
-              {/* Slot label */}
-              <td
+        {dates.map((date, i) => {
+          const isSelected = date === selected;
+          const isToday    = date === today;
+          const dayNum     = new Date(date + 'T00:00:00').getDate();
+          const hasMeals   = SLOTS.some(s => !!weekPlan[date]?.[s]);
+
+          return (
+            <button
+              key={date}
+              onClick={() => setSelected(date)}
+              style={{
+                flexShrink: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 48,
+                height: 64,
+                gap: 2,
+                borderRadius: 'var(--md-shape-md)',
+                border: isToday && !isSelected
+                  ? '2px solid var(--md-primary)'
+                  : '2px solid transparent',
+                background: isSelected
+                  ? 'var(--md-primary)'
+                  : 'var(--md-surface-container)',
+                cursor: 'pointer',
+                padding: 0,
+                transition: 'background 150ms',
+              }}
+              aria-label={`${DAY_ABBR[i]} ${dayNum}`}
+              aria-pressed={isSelected}
+            >
+              <span
                 style={{
                   fontSize: 'var(--md-label-sm)',
-                  color: 'var(--md-on-surface-variant)',
                   fontWeight: 600,
-                  verticalAlign: 'top',
-                  paddingTop: 10,
+                  color: isSelected ? 'var(--md-on-primary)' : 'var(--md-on-surface-variant)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.04em',
                 }}
               >
-                {SLOT_LABEL[slot].slice(0, 5)}
-              </td>
-              {dates.map(date => (
-                <td key={date} style={{ verticalAlign: 'top' }}>
-                  <SlotCell
-                    entry={weekPlan[date]?.[slot]}
-                    onAdd={() => onAddSlot(date, slot)}
-                    onClear={() => onClearSlot(date, slot)}
-                  />
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                {DAY_ABBR[i]}
+              </span>
+              <span
+                style={{
+                  fontSize: 'var(--md-title-sm)',
+                  fontWeight: 700,
+                  color: isSelected ? 'var(--md-on-primary)' : 'var(--md-on-surface)',
+                  lineHeight: 1,
+                }}
+              >
+                {dayNum}
+              </span>
+              {/* Filled-meal dot */}
+              <span
+                style={{
+                  width: 5,
+                  height: 5,
+                  borderRadius: '50%',
+                  marginTop: 2,
+                  background: hasMeals
+                    ? (isSelected ? 'var(--md-on-primary)' : 'var(--md-primary)')
+                    : 'transparent',
+                  transition: 'background 150ms',
+                }}
+              />
+            </button>
+          );
+        })}
+      </div>
+
+      {/* â”€â”€ Slot cards for selected day â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {slotEntries.map(({ slot, entry }) => {
+          const meta = SLOT_META[slot];
+          return entry ? (
+            /* Filled slot */
+            <div
+              key={slot}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                background: 'var(--md-secondary-container)',
+                borderRadius: 'var(--md-shape-lg)',
+                padding: '14px 16px',
+              }}
+            >
+              {/* Slot indicator */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, flexShrink: 0, width: 44 }}>
+                <span style={{ fontSize: 22 }}>{meta.emoji}</span>
+                <span style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {meta.label.slice(0, 3)}
+                </span>
+              </div>
+              {/* Recipe */}
+              <span style={{ fontSize: 24, flexShrink: 0 }}>{entry.recipe_emoji}</span>
+              <span
+                style={{
+                  flex: 1,
+                  fontSize: 'var(--md-body-lg)',
+                  fontWeight: 600,
+                  color: 'var(--md-on-secondary-container)',
+                  lineHeight: 1.3,
+                }}
+              >
+                {entry.recipe_name}
+              </span>
+              <button
+                onClick={() => onClearSlot(selected, slot)}
+                aria-label="Remove"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 20,
+                  color: 'var(--md-on-surface-variant)',
+                  padding: 4,
+                  lineHeight: 1,
+                  flexShrink: 0,
+                }}
+              >
+                Ã—
+              </button>
+            </div>
+          ) : (
+            /* Empty slot */
+            <button
+              key={slot}
+              onClick={() => onAddSlot(selected, slot)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                background: 'var(--md-surface-container)',
+                border: '1.5px dashed var(--md-outline-variant)',
+                borderRadius: 'var(--md-shape-lg)',
+                padding: '14px 16px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, flexShrink: 0, width: 44 }}>
+                <span style={{ fontSize: 22 }}>{meta.emoji}</span>
+                <span style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  {meta.label.slice(0, 3)}
+                </span>
+              </div>
+              <span
+                style={{
+                  flex: 1,
+                  fontSize: 'var(--md-body-md)',
+                  color: 'var(--md-on-surface-variant)',
+                }}
+              >
+                {meta.label} â€” tap to add
+              </span>
+              <span
+                style={{
+                  fontSize: 24,
+                  color: 'var(--md-on-surface-variant)',
+                  opacity: 0.5,
+                  flexShrink: 0,
+                }}
+              >
+                +
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };

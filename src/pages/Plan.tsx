@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import {
   IonPage,
   IonHeader,
@@ -17,19 +17,12 @@ import {
   weekStart,
   weekDates,
   formatWeekRange,
-  SLOTS,
   type SlotType,
 } from '../hooks/useMealPlan';
 import MealPlanGrid from '../plan/MealPlanGrid';
 import GroceryList from '../plan/GroceryList';
 import RecipePickerModal from '../plan/RecipePickerModal';
 import type { Recipe } from '../recipes/recipeData';
-
-const SLOT_LABEL: Record<SlotType, string> = {
-  breakfast: 'Breakfast',
-  lunch: 'Lunch',
-  dinner: 'Dinner',
-};
 
 const todayStr = (): string => new Date().toISOString().slice(0, 10);
 
@@ -60,7 +53,7 @@ const Plan: React.FC = () => {
 
   return (
     <IonPage>
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <IonHeader>
         <IonToolbar style={{ '--background': 'var(--md-surface-container)' }}>
           <IonTitle style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-lg)' }}>
@@ -82,7 +75,7 @@ const Plan: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
-        {/* ── Week navigation ─────────────────────────────────────────────── */}
+        {/* â”€â”€ Week navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div
           style={{
             display: 'flex',
@@ -133,119 +126,7 @@ const Plan: React.FC = () => {
           </IonButton>
         </div>
 
-        {/* ── Today's Meals (only when viewing current week) ──────────────── */}
-        {weekContainsToday && (
-          <IonCard
-            style={{
-              margin: '12px 16px 0',
-              borderRadius: 'var(--md-shape-xl)',
-              '--background': 'var(--md-surface-container-high)',
-              boxShadow: 'none',
-              border: `1px solid var(--md-outline-variant)`,
-            }}
-          >
-            <IonCardContent style={{ padding: '16px 20px 20px' }}>
-              <IonListHeader style={{ padding: 0, marginBottom: 12 }}>
-                <span
-                  style={{
-                    fontSize: 'var(--md-label-lg)',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    color: 'var(--md-primary)',
-                  }}
-                >
-                  Today's Meals
-                </span>
-              </IonListHeader>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {SLOTS.map(slot => {
-                  const entry = weekPlan[today]?.[slot];
-                  return (
-                    <div
-                      key={slot}
-                      style={{ display: 'flex', alignItems: 'center', gap: 12 }}
-                    >
-                      <span
-                        style={{
-                          width: 80,
-                          flexShrink: 0,
-                          fontSize: 'var(--md-label-md)',
-                          color: 'var(--md-on-surface-variant)',
-                          fontFamily: 'var(--md-font)',
-                          fontWeight: 600,
-                        }}
-                      >
-                        {SLOT_LABEL[slot]}
-                      </span>
-                      {entry ? (
-                        <div
-                          style={{
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            background: 'var(--md-secondary-container)',
-                            borderRadius: 'var(--md-shape-md)',
-                            padding: '8px 12px',
-                            fontFamily: 'var(--md-font)',
-                          }}
-                        >
-                          <span style={{ fontSize: 22 }}>{entry.recipe_emoji}</span>
-                          <span
-                            style={{
-                              flex: 1,
-                              fontSize: 'var(--md-body-md)',
-                              color: 'var(--md-on-secondary-container)',
-                              fontWeight: 500,
-                            }}
-                          >
-                            {entry.recipe_name}
-                          </span>
-                          <button
-                            onClick={() => clearSlot(today, slot)}
-                            style={{
-                              background: 'transparent',
-                              border: 'none',
-                              cursor: 'pointer',
-                              fontSize: 18,
-                              color: 'var(--md-on-surface-variant)',
-                              padding: 0,
-                              lineHeight: 1,
-                            }}
-                            aria-label="Remove"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => openPicker(today, slot)}
-                          style={{
-                            flex: 1,
-                            background: 'var(--md-surface-container)',
-                            border: `1.5px dashed var(--md-outline-variant)`,
-                            borderRadius: 'var(--md-shape-md)',
-                            padding: '8px 16px',
-                            cursor: 'pointer',
-                            color: 'var(--md-on-surface-variant)',
-                            fontSize: 'var(--md-body-sm)',
-                            fontFamily: 'var(--md-font)',
-                            textAlign: 'left',
-                          }}
-                        >
-                          + Add recipe
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </IonCardContent>
-          </IonCard>
-        )}
-
-        {/* ── Weekly grid ─────────────────────────────────────────────────── */}
+        {/* â”€â”€ Day picker + slot cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <IonCard
           style={{
             margin: '12px 16px 0',
@@ -255,8 +136,8 @@ const Plan: React.FC = () => {
             border: `1px solid var(--md-outline-variant)`,
           }}
         >
-          <IonCardContent style={{ padding: '16px 12px 20px' }}>
-            <IonListHeader style={{ padding: '0 8px', marginBottom: 12 }}>
+          <IonCardContent style={{ padding: '16px 16px 20px' }}>
+            <IonListHeader style={{ padding: '0 0 4px', marginBottom: 8 }}>
               <span
                 style={{
                   fontSize: 'var(--md-label-lg)',
@@ -279,7 +160,7 @@ const Plan: React.FC = () => {
           </IonCardContent>
         </IonCard>
 
-        {/* ── Grocery list ─────────────────────────────────────────────────── */}
+        {/* â”€â”€ Grocery list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <IonCard
           style={{
             margin: '12px 16px 24px',
@@ -294,7 +175,7 @@ const Plan: React.FC = () => {
           </IonCardContent>
         </IonCard>
 
-        {/* ── Recipe picker modal ──────────────────────────────────────────── */}
+        {/* â”€â”€ Recipe picker modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <RecipePickerModal
           isOpen={pickerOpen}
           onClose={() => setPickerOpen(false)}
