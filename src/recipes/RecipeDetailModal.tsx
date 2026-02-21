@@ -14,21 +14,27 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { closeOutline, timeOutline, restaurantOutline } from 'ionicons/icons';
+import { closeOutline, timeOutline, restaurantOutline, trash } from 'ionicons/icons';
 import type { Recipe } from './recipeData';
 
 interface Props {
   recipe: Recipe | null;
   onClose: () => void;
+  onDelete?: () => void;
 }
 
-const RecipeDetailModal: React.FC<Props> = ({ recipe, onClose }) => {
+const RecipeDetailModal: React.FC<Props> = ({ recipe, onClose, onDelete }) => {
   return (
     <IonModal isOpen={recipe !== null} onDidDismiss={onClose}>
       <IonHeader>
         <IonToolbar>
           <IonTitle>{recipe?.name ?? ''}</IonTitle>
           <IonButtons slot="end">
+            {onDelete && (
+              <IonButton color="danger" onClick={onDelete}>
+                <IonIcon icon={trash} />
+              </IonButton>
+            )}
             <IonButton onClick={onClose}>
               <IonIcon icon={closeOutline} />
             </IonButton>

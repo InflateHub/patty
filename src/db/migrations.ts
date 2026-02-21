@@ -63,4 +63,21 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
+  {
+    version: 5,
+    // 0.6.1 — user-created recipes
+    statements: [
+      `CREATE TABLE IF NOT EXISTS recipes (
+        id          TEXT    PRIMARY KEY NOT NULL,
+        name        TEXT    NOT NULL,
+        emoji       TEXT    NOT NULL DEFAULT '🍴',
+        prep_min    INTEGER NOT NULL DEFAULT 0,
+        cook_min    INTEGER NOT NULL DEFAULT 0,
+        tags        TEXT    NOT NULL DEFAULT '',
+        ingredients TEXT    NOT NULL DEFAULT '[]',
+        steps       TEXT    NOT NULL DEFAULT '[]',
+        created_at  TEXT    NOT NULL
+      );`,
+    ],
+  },
 ];

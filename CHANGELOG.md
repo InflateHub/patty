@@ -2,6 +2,19 @@
 
 ---
 
+## [0.6.1] — User-Created Recipes
+*Goal: users can add, view, and delete their own custom recipes.*
+
+- [x] DB migration v5: `recipes` table (`id`, `name`, `emoji`, `prep_min`, `cook_min`, `tags`, `ingredients`, `steps`, `created_at`)
+- [x] `src/hooks/useRecipes.ts` — `addRecipe` / `deleteRecipe` / `getAllRecipes`; returns user recipes merged with seed `RECIPES` (seed-first order)
+- [x] `src/recipes/RecipeFormModal.tsx` — full form modal: name input, 30-emoji picker, prep/cook time, tags (comma-separated), dynamic ingredient rows, dynamic step rows with numbered circles
+- [x] `src/recipes/RecipeDetailModal.tsx` — optional `onDelete` prop; trash icon button appears in header for custom recipes only
+- [x] `src/pages/Recipes.tsx` — `IonFab` opens form modal; custom recipes show a "custom" badge; delete routed through detail modal
+- [x] `vite-env.d.ts` — `addOutline`, `removeCircleOutline` declared
+- [x] TypeScript clean
+
+---
+
 ## [0.6.0] — Recipe Library
 *Goal: users can browse and view saved recipes.*
 

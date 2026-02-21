@@ -106,7 +106,8 @@ Patty/
 │   │
 │   ├── recipes/
 │   │   ├── recipeData.ts      # Recipe type + 12 seed recipes (name, emoji, prep/cook time, tags, ingredients, steps)
-│   │   └── RecipeDetailModal.tsx # Full-screen modal: hero emoji, time chips, tag badges, ingredients list, numbered steps
+│   │   ├── RecipeDetailModal.tsx # Full-screen modal: hero emoji, time chips, tag badges, ingredients list, numbered steps
+│   │   └── RecipeFormModal.tsx   # Create-recipe modal: name, emoji picker, times, tags, dynamic ingredient + step rows
 │   │
 │   ├── components/
 │   │   ├── WeightChart.tsx    # Recharts line chart for weight over time
@@ -117,6 +118,7 @@ Patty/
 │   │   ├── useWaterLog.ts     # SQLite-backed water log + localStorage daily goal
 │   │   ├── useSleepLog.ts     # SQLite-backed sleep log: addEntry (1/day enforced) / deleteEntry / getAll / lastNightEntry / avgDurationMin
 │   │   ├── useFoodLog.ts      # SQLite-backed food log: addEntry / deleteEntry / entriesForDate / todayEntries (grouped by MealType)
+│   │   ├── useRecipes.ts      # SQLite-backed user recipes: addRecipe / deleteRecipe; allRecipes merges seed + user recipes
 │   │   └── useDailySummary.ts # Per-day aggregate hook: weight + waterTotalMl + waterGoalMl + sleep for any date
 │   │
 │   ├── db/

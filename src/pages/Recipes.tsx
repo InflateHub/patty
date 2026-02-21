@@ -1,8 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import {
+  IonBadge,
   IonCard,
   IonCardContent,
   IonContent,
+  IonFab,
+  IonFabButton,
   IonHeader,
   IonIcon,
   IonPage,
@@ -10,24 +13,35 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { timeOutline } from 'ionicons/icons';
-import { RECIPES } from '../recipes/recipeData';
+import { add, timeOutline } from 'ionicons/icons';
 import type { Recipe } from '../recipes/recipeData';
+import { useRecipes } from '../hooks/useRecipes';
 import RecipeDetailModal from '../recipes/RecipeDetailModal';
+import RecipeFormModal from '../recipes/RecipeFormModal';
+
+type AnyRecipe = Recipe & { custom?: true };
 
 const Recipes: React.FC = () => {
+  const { allRecipes, addRecipe, deleteRecipe } = useRecipes();
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<Recipe | null>(null);
+  const [selected, setSelected] = useState<AnyRecipe | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return RECIPES;
-    return RECIPES.filter(
+    if (!q) return allRecipes;
+    return allRecipes.filter(
       (r) =>
         r.name.toLowerCase().includes(q) ||
         r.tags.some((t) => t.includes(q))
     );
-  }, [query]);
+  }, [query, allRecipes]);
+
+  async function handleDelete() {
+    if (!selected?.custom) return;
+    await deleteRecipe(selected.id);
+    setSelected(null);
+  }
 
   return (
     <IonPage>
@@ -75,6 +89,9 @@ const Recipes: React.FC = () => {
                       ? `${recipe.prepMin + recipe.cookMin} min`
                       : 'No cook'}
                   </p>
+                  {recipe.custom && (
+                    <IonBadge style={S.customBadge}>custom</IonBadge>
+                  )}
                 </IonCardContent>
               </IonCard>
             ))}
@@ -82,7 +99,23 @@ const Recipes: React.FC = () => {
         )}
       </IonContent>
 
-      <RecipeDetailModal recipe={selected} onClose={() => setSelected(null)} />
+      <IonFab slot="fixed" vertical="bottom" horizontal="end">
+        <IonFabButton onClick={() => setShowForm(true)} style={S.fab}>
+          <IonIcon icon={add} />
+        </IonFabButton>
+      </IonFab>
+
+      <RecipeDetailModal
+        recipe={selected}
+        onClose={() => setSelected(null)}
+        onDelete={selected?.custom ? handleDelete : undefined}
+      />
+
+      <RecipeFormModal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        onSave={addRecipe}
+      />
     </IonPage>
   );
 };
@@ -150,6 +183,19 @@ const S = {
     fontFamily: 'var(--md-font)',
     fontSize: 'var(--md-body-md)',
     color: 'var(--md-on-surface-variant)',
+  },
+  customBadge: {
+    background: 'var(--md-tertiary-container)',
+    color: 'var(--md-on-tertiary-container)',
+    borderRadius: 'var(--md-shape-full)',
+    fontSize: 'var(--md-label-sm)',
+    fontFamily: 'var(--md-font)',
+    textTransform: 'lowercase' as const,
+    marginTop: 2,
+  },
+  fab: {
+    '--background': 'var(--md-primary-container)',
+    '--color': 'var(--md-on-primary-container)',
   },
 };
 

@@ -76,6 +76,16 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
+## 0.6.1 — User-Created Recipes ✓
+*Goal: users can add, view, and delete their own custom recipes.*
+
+- [x] Create recipe form: name, emoji picker, prep/cook time, tags, dynamic ingredients + steps
+- [x] SQLite persistence for user recipes (migration v5)
+- [x] Custom recipes appear in the grid alongside seed recipes (tagged "custom")
+- [x] Custom recipes deletable from the detail modal; seed recipes are read-only
+
+---
+
 ## 0.7.0 — Cooking Planner
 *Goal: plan meals for the week and get a grocery list.*
 
