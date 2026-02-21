@@ -2,6 +2,18 @@
 
 ---
 
+## [0.2.1] — Material Expressive 3 Design System
+*Goal: replace ad-hoc styles with a coherent MD3 tonal design language.*
+
+- [x] Full MD3 tonal palette derived from Patty seed `#5C7A6E` — light + dark mode
+- [x] `src/theme/variables.css` rewritten with MD3 tokens (`--md-primary`, `--md-surface`, `--md-shape-*`, `--md-title-lg`, etc.)
+- [x] `src/theme/md3.css` created — component-level overrides: toolbar, tab bar active indicator, cards (28px radius), FAB (tonal container), modal sheet, inputs, segments, lists
+- [x] Roboto font loaded via Google Fonts CDN
+- [x] Track.tsx restyled: chart wrapped in `IonCard`, history under `IonListHeader`, MD3 empty state with emoji illustration
+- [x] `AGENTS.md` updated with mandatory design system rules
+
+---
+
 ## [0.2.0] — Weight Tracking
 *Goal: users can log and review their weight, persisted to SQLite.*
 

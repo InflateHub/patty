@@ -1,5 +1,240 @@
-/* For information on how to create your own theme, please refer to:
-http://ionicframework.com/docs/theming/ */
+/* ── Patty – Material Expressive 3 Theme ─────────────────────────────────── *
+ * Seed colour: #5C7A6E (slate-green)                                          *
+ * Tonal palette generated following Material Design 3 guidelines.            *
+ * https://m3.material.io/styles/color/system/overview                        *
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── MD3 Tonal Palette (light) ─────────────────────────────────────────── */
+  --md-primary:              #5C7A6E;
+  --md-on-primary:           #FFFFFF;
+  --md-primary-container:    #CDEBD8;
+  --md-on-primary-container: #00201A;
+
+  --md-secondary:              #4D6359;
+  --md-on-secondary:           #FFFFFF;
+  --md-secondary-container:    #D0E8DF;
+  --md-on-secondary-container: #092019;
+
+  --md-tertiary:              #3C6373;
+  --md-on-tertiary:           #FFFFFF;
+  --md-tertiary-container:    #BFEBFC;
+  --md-on-tertiary-container: #001F2A;
+
+  --md-error:              #B3261E;
+  --md-on-error:           #FFFFFF;
+  --md-error-container:    #F9DEDC;
+  --md-on-error-container: #410E0B;
+
+  --md-background:         #F6FBF7;
+  --md-on-background:      #1A1C1B;
+  --md-surface:            #F6FBF7;
+  --md-on-surface:         #1A1C1B;
+  --md-surface-variant:    #DBE5DF;
+  --md-on-surface-variant: #404944;
+  --md-surface-container-lowest:  #FFFFFF;
+  --md-surface-container-low:     #F0F5F1;
+  --md-surface-container:         #EAF0EB;
+  --md-surface-container-high:    #E4EAE5;
+  --md-surface-container-highest: #DEE4DF;
+
+  --md-outline:         #707971;
+  --md-outline-variant: #BFC9C2;
+
+  --md-shadow:            #000000;
+  --md-scrim:             #000000;
+  --md-inverse-surface:   #2E312F;
+  --md-inverse-on-surface: #EFF1ED;
+  --md-inverse-primary:   #A2CDB9;
+
+  /* ── Shape scale (MD3) ──────────────────────────────────────────────────── */
+  --md-shape-xs:    4px;
+  --md-shape-sm:    8px;
+  --md-shape-md:    12px;
+  --md-shape-lg:    16px;
+  --md-shape-xl:    28px;
+  --md-shape-full:  9999px;
+
+  /* ── Type scale (Roboto) ────────────────────────────────────────────────── */
+  --md-font:             'Roboto', sans-serif;
+  --md-display-size:     3.5rem;
+  --md-headline-lg:      2rem;
+  --md-headline-md:      1.75rem;
+  --md-headline-sm:      1.5rem;
+  --md-title-lg:         1.375rem;
+  --md-title-md:         1rem;
+  --md-title-sm:         .875rem;
+  --md-body-lg:          1rem;
+  --md-body-md:          .875rem;
+  --md-body-sm:          .75rem;
+  --md-label-lg:         .875rem;
+  --md-label-md:         .75rem;
+  --md-label-sm:         .6875rem;
+
+  /* ── Ionic token mapping (light) ───────────────────────────────────────── */
+  --ion-font-family: var(--md-font);
+
+  --ion-color-primary:          var(--md-primary);
+  --ion-color-primary-rgb:      92, 122, 110;
+  --ion-color-primary-contrast: var(--md-on-primary);
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade:    #4E6A5F;
+  --ion-color-primary-tint:     #6D8A7E;
+
+  --ion-color-secondary:          var(--md-secondary);
+  --ion-color-secondary-rgb:      77, 99, 89;
+  --ion-color-secondary-contrast: var(--md-on-secondary);
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade:    #43574D;
+  --ion-color-secondary-tint:     #5F7369;
+
+  --ion-color-tertiary:          var(--md-tertiary);
+  --ion-color-tertiary-rgb:      60, 99, 115;
+  --ion-color-tertiary-contrast: var(--md-on-tertiary);
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade:    #345765;
+  --ion-color-tertiary-tint:     #4F7381;
+
+  --ion-color-success:          #386A20;
+  --ion-color-success-rgb:      56, 106, 32;
+  --ion-color-success-contrast: #FFFFFF;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade:    #2F5C1B;
+  --ion-color-success-tint:     #4C7A36;
+
+  --ion-color-warning:          #7C5900;
+  --ion-color-warning-rgb:      124, 89, 0;
+  --ion-color-warning-contrast: #FFFFFF;
+  --ion-color-warning-contrast-rgb: 255, 255, 255;
+  --ion-color-warning-shade:    #6C4D00;
+  --ion-color-warning-tint:     #896A1A;
+
+  --ion-color-danger:          var(--md-error);
+  --ion-color-danger-rgb:      179, 38, 30;
+  --ion-color-danger-contrast: var(--md-on-error);
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade:    #9E221A;
+  --ion-color-danger-tint:     #BB3C35;
+
+  --ion-color-medium:          var(--md-on-surface-variant);
+  --ion-color-medium-rgb:      64, 73, 68;
+  --ion-color-medium-contrast: #FFFFFF;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade:    #373F3C;
+  --ion-color-medium-tint:     #535D58;
+
+  --ion-color-light:          var(--md-surface-container-low);
+  --ion-color-light-rgb:      240, 245, 241;
+  --ion-color-light-contrast: var(--md-on-background);
+  --ion-color-light-contrast-rgb: 26, 28, 27;
+  --ion-color-light-shade:    #D4D9D5;
+  --ion-color-light-tint:     #F5FAF6;
+
+  /* Surfaces */
+  --ion-background-color:     var(--md-background);
+  --ion-background-color-rgb: 246, 251, 247;
+  --ion-text-color:           var(--md-on-background);
+  --ion-text-color-rgb:       26, 28, 27;
+
+  --ion-toolbar-background:   var(--md-surface-container-low);
+  --ion-toolbar-color:        var(--md-on-surface);
+  --ion-toolbar-border-color: transparent;
+
+  --ion-tab-bar-background:       var(--md-surface-container);
+  --ion-tab-bar-border-color:     transparent;
+  --ion-tab-bar-color:            var(--md-on-surface-variant);
+  --ion-tab-bar-color-selected:   var(--md-primary);
+
+  --ion-item-background:      transparent;
+  --ion-card-background:      var(--md-surface-container-lowest);
+  --ion-border-color:         var(--md-outline-variant);
+}
+
+/* ── Dark mode ──────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --md-primary:              #A2CDB9;
+    --md-on-primary:           #0B3728;
+    --md-primary-container:    #24503E;
+    --md-on-primary-container: #CDEBD8;
+
+    --md-secondary:              #B5CCBE;
+    --md-on-secondary:           #203529;
+    --md-secondary-container:    #374B40;
+    --md-on-secondary-container: #D0E8DF;
+
+    --md-tertiary:              #A2CDE0;
+    --md-on-tertiary:           #003547;
+    --md-tertiary-container:    #1E4D5F;
+    --md-on-tertiary-container: #BFEBFC;
+
+    --md-error:              #F2B8B5;
+    --md-on-error:           #601410;
+    --md-error-container:    #8C1D18;
+    --md-on-error-container: #F9DEDC;
+
+    --md-background:         #1A1C1B;
+    --md-on-background:      #E1E3DF;
+    --md-surface:            #1A1C1B;
+    --md-on-surface:         #E1E3DF;
+    --md-surface-variant:    #404944;
+    --md-on-surface-variant: #BFC9C2;
+    --md-surface-container-lowest:  #141715;
+    --md-surface-container-low:     #1A1C1B;  /* same as bg for flat look */
+    --md-surface-container:         #1E2120;
+    --md-surface-container-high:    #282B29;
+    --md-surface-container-highest: #333634;
+
+    --md-outline:         #899389;
+    --md-outline-variant: #404944;
+    --md-inverse-surface:    #E1E3DF;
+    --md-inverse-on-surface: #2E312F;
+    --md-inverse-primary:    #5C7A6E;
+
+    /* Ionic surface overrides for dark */
+    --ion-background-color:     var(--md-background);
+    --ion-background-color-rgb: 26, 28, 27;
+    --ion-text-color:           var(--md-on-background);
+    --ion-text-color-rgb:       225, 227, 223;
+
+    --ion-toolbar-background:   var(--md-surface-container-low);
+    --ion-toolbar-color:        var(--md-on-surface);
+
+    --ion-tab-bar-background:       var(--md-surface-container);
+    --ion-tab-bar-color:            var(--md-on-surface-variant);
+    --ion-tab-bar-color-selected:   var(--md-primary);
+
+    --ion-card-background:      var(--md-surface-container);
+    --ion-border-color:         var(--md-outline-variant);
+
+    --ion-color-primary:          var(--md-primary);
+    --ion-color-primary-rgb:      162, 205, 185;
+    --ion-color-primary-contrast: var(--md-on-primary);
+    --ion-color-primary-shade:    #8EB5A3;
+    --ion-color-primary-tint:     #ABD2C1;
+
+    --ion-color-secondary:          var(--md-secondary);
+    --ion-color-secondary-rgb:      181, 204, 190;
+    --ion-color-secondary-shade:    #9EB3A6;
+    --ion-color-secondary-tint:     #BCD1C5;
+
+    --ion-color-danger:          var(--md-error);
+    --ion-color-danger-rgb:      242, 184, 181;
+    --ion-color-danger-shade:    #D5A3A0;
+    --ion-color-danger-tint:     #F3BFBD;
+
+    --ion-color-medium:          var(--md-on-surface-variant);
+    --ion-color-medium-rgb:      191, 201, 194;
+
+    --ion-color-light:          var(--md-surface-container-high);
+    --ion-color-light-rgb:      40, 43, 41;
+    --ion-color-light-contrast: var(--md-on-surface);
+    --ion-color-light-contrast-rgb: 225, 227, 223;
+    --ion-color-light-shade:    #232623;
+    --ion-color-light-tint:     #333634;
+  }
+}
+
 
 /* ─── Patty — Slate-green palette ─────────────────────────────────────────── */
 

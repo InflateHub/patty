@@ -1,0 +1,310 @@
+/* ── Patty – Material Expressive 3 Component Overrides ───────────────────── *
+ * Applied globally on top of Ionic's base styles.                            *
+ * Follow MD3 shape, elevation, motion, and typography guidelines.            *
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Typography ─────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  font-family: var(--md-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── App shell ───────────────────────────────────────────────────────────── */
+ion-app {
+  background: var(--md-background);
+}
+
+/* ── Toolbar / App Bar ───────────────────────────────────────────────────── */
+ion-toolbar {
+  --background: var(--md-surface-container-low);
+  --color: var(--md-on-surface);
+  --border-color: transparent;
+  --border-width: 0;
+}
+
+ion-title {
+  font-size: var(--md-title-lg);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+ion-title[size="large"] {
+  font-size: var(--md-headline-sm);
+  font-weight: 500;
+  padding-inline: 20px;
+}
+
+/* ── Tab Bar ─────────────────────────────────────────────────────────────── */
+ion-tab-bar {
+  --background: var(--md-surface-container);
+  --border: none;
+  padding: 0 8px;
+  height: 64px;
+  border-top: 1px solid var(--md-outline-variant);
+}
+
+ion-tab-button {
+  --color: var(--md-on-surface-variant);
+  --color-selected: var(--md-primary);
+  --ripple-color: var(--md-primary);
+  border-radius: var(--md-shape-full);
+  position: relative;
+}
+
+/* MD3 active indicator on selected tab */
+ion-tab-button.tab-selected::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 32px;
+  background: var(--md-primary-container);
+  border-radius: var(--md-shape-full);
+  z-index: 0;
+}
+
+ion-tab-button ion-icon,
+ion-tab-button ion-label {
+  position: relative;
+  z-index: 1;
+}
+
+ion-tab-button ion-label {
+  font-size: var(--md-label-md);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* ── Content area ────────────────────────────────────────────────────────── */
+ion-content {
+  --background: var(--md-background);
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+ion-card {
+  --background: var(--md-surface-container-lowest);
+  border-radius: var(--md-shape-xl) !important;
+  box-shadow: none;
+  border: 1px solid var(--md-outline-variant);
+  margin: 12px 16px;
+}
+
+ion-card-header {
+  padding: 20px 20px 8px;
+}
+
+ion-card-title {
+  font-size: var(--md-title-md);
+  font-weight: 500;
+  color: var(--md-on-surface);
+}
+
+ion-card-content {
+  padding: 8px 20px 20px;
+  font-size: var(--md-body-md);
+}
+
+/* ── List & Items ────────────────────────────────────────────────────────── */
+ion-list {
+  background: transparent;
+  padding: 0 16px;
+}
+
+ion-list-header {
+  font-size: var(--md-label-lg);
+  font-weight: 500;
+  color: var(--md-primary);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding-inline-start: 4px;
+  min-height: 40px;
+}
+
+ion-item {
+  --background: var(--md-surface-container-lowest);
+  --background-hover: color-mix(in srgb, var(--md-on-surface) 8%, transparent);
+  --background-activated: color-mix(in srgb, var(--md-on-surface) 12%, transparent);
+  --border-color: var(--md-outline-variant);
+  --inner-border-width: 0 0 1px 0;
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  --min-height: 56px;
+  border-radius: 0;
+  font-size: var(--md-body-lg);
+}
+
+ion-item:first-child {
+  border-radius: var(--md-shape-md) var(--md-shape-md) 0 0;
+}
+
+ion-item:last-child {
+  border-radius: 0 0 var(--md-shape-md) var(--md-shape-md);
+  --inner-border-width: 0;
+}
+
+ion-item:only-child {
+  border-radius: var(--md-shape-md);
+  --inner-border-width: 0;
+}
+
+ion-label h3 {
+  font-size: var(--md-body-lg);
+  font-weight: 500;
+  color: var(--md-on-surface);
+}
+
+ion-label p {
+  font-size: var(--md-body-sm);
+  color: var(--md-on-surface-variant);
+}
+
+ion-note {
+  font-size: var(--md-label-md);
+  color: var(--md-on-surface-variant);
+  font-weight: 400;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+ion-button {
+  --border-radius: var(--md-shape-full);
+  --box-shadow: none;
+  font-size: var(--md-label-lg);
+  font-weight: 500;
+  letter-spacing: .00625em;
+  height: 40px;
+  --padding-start: 24px;
+  --padding-end: 24px;
+}
+
+ion-button[fill="solid"] {
+  --background: var(--md-primary);
+  --color: var(--md-on-primary);
+  --background-hover: color-mix(in srgb, var(--md-on-primary) 8%, var(--md-primary));
+  --background-activated: color-mix(in srgb, var(--md-on-primary) 12%, var(--md-primary));
+}
+
+ion-button[fill="clear"],
+ion-button:not([fill]) {
+  --color: var(--md-primary);
+  --background-hover: color-mix(in srgb, var(--md-primary) 8%, transparent);
+  --background-activated: color-mix(in srgb, var(--md-primary) 12%, transparent);
+}
+
+/* ── FAB ─────────────────────────────────────────────────────────────────── */
+ion-fab-button {
+  --background: var(--md-primary-container);
+  --color: var(--md-on-primary-container);
+  --background-hover: color-mix(in srgb, var(--md-on-primary-container) 8%, var(--md-primary-container));
+  --background-activated: color-mix(in srgb, var(--md-on-primary-container) 12%, var(--md-primary-container));
+  --border-radius: var(--md-shape-lg);
+  --box-shadow: 0 3px 8px color-mix(in srgb, var(--md-shadow) 15%, transparent),
+                0 1px 3px color-mix(in srgb, var(--md-shadow) 10%, transparent);
+  width: 56px;
+  height: 56px;
+}
+
+ion-fab-button ion-icon {
+  font-size: 24px;
+}
+
+/* ── Modal / Bottom Sheet ────────────────────────────────────────────────── */
+ion-modal {
+  --border-radius: var(--md-shape-xl) var(--md-shape-xl) 0 0;
+  --background: var(--md-surface-container-low);
+  --box-shadow: 0 -2px 16px color-mix(in srgb, var(--md-shadow) 12%, transparent);
+}
+
+/* Drag handle for bottom sheets */
+ion-modal ion-content::before {
+  content: '';
+  display: block;
+  width: 32px;
+  height: 4px;
+  background: var(--md-outline-variant);
+  border-radius: var(--md-shape-full);
+  margin: 12px auto 0;
+}
+
+ion-modal ion-toolbar {
+  --background: var(--md-surface-container-low);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--md-outline-variant);
+}
+
+ion-modal ion-item {
+  --background: var(--md-surface-container-lowest);
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────────────── */
+ion-input,
+ion-textarea {
+  --background: transparent;
+  --color: var(--md-on-surface);
+  --placeholder-color: var(--md-on-surface-variant);
+  --placeholder-opacity: 1;
+  font-size: var(--md-body-lg);
+  caret-color: var(--md-primary);
+}
+
+ion-label[position="stacked"] {
+  color: var(--md-on-surface-variant);
+  font-size: var(--md-label-lg);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+ion-item.item-has-focus ion-label[position="stacked"] {
+  color: var(--md-primary);
+  font-weight: 500;
+}
+
+/* ── Segment ─────────────────────────────────────────────────────────────── */
+ion-segment {
+  --background: var(--md-surface-variant);
+  border-radius: var(--md-shape-full);
+  padding: 4px;
+}
+
+ion-segment-button {
+  --background: transparent;
+  --background-checked: var(--md-surface-container-lowest);
+  --color: var(--md-on-surface-variant);
+  --color-checked: var(--md-on-surface);
+  --border-radius: var(--md-shape-full);
+  --indicator-box-shadow: 0 1px 4px color-mix(in srgb, var(--md-shadow) 15%, transparent);
+  --indicator-color: var(--md-surface-container-lowest);
+  min-height: 36px;
+  font-size: var(--md-label-lg);
+  font-weight: 500;
+  letter-spacing: .00625em;
+}
+
+/* ── Datetime ────────────────────────────────────────────────────────────── */
+ion-datetime {
+  --background: transparent;
+  --background-rgb: transparent;
+  --title-color: var(--md-on-surface-variant);
+  width: 100%;
+}
+
+/* ── Sliding items ───────────────────────────────────────────────────────── */
+ion-item-option {
+  font-size: var(--md-label-lg);
+  font-weight: 500;
+}
+
+/* ── Scrollbars ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--md-outline-variant);
+  border-radius: var(--md-shape-full);
+}

@@ -2,6 +2,10 @@ import React, { useRef, useState } from 'react';
 import {
   IonButton,
   IonButtons,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
   IonContent,
   IonDatetime,
   IonFab,
@@ -15,6 +19,7 @@ import {
   IonItemSliding,
   IonLabel,
   IonList,
+  IonListHeader,
   IonModal,
   IonNote,
   IonPage,
@@ -35,11 +40,9 @@ const today = (): string => new Date().toISOString().slice(0, 10);
 const Track: React.FC = () => {
   const { entries, loading, addEntry, deleteEntry } = useWeightLog();
 
-  // Modal state
   const modal = useRef<HTMLIonModalElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Form state
   const [value, setValue] = useState('');
   const [unit, setUnit] = useState<'kg' | 'lbs'>('kg');
   const [date, setDate] = useState<string>(today());
@@ -90,6 +93,8 @@ const Track: React.FC = () => {
     });
   }
 
+  const latest = entries[0];
+
   return (
     <IonPage>
       <IonHeader>
@@ -105,42 +110,71 @@ const Track: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
-        {/* Chart */}
-        <div style={{ padding: '16px 8px 8px' }}>
-          {!loading && <WeightChart entries={entries} />}
-        </div>
+        {/* Chart card */}
+        {!loading && (
+          <IonCard>
+            <IonCardHeader>
+              <IonCardTitle>
+                {latest
+                  ? `${latest.value} ${latest.unit} · ${formatDate(latest.date)}`
+                  : 'No entries yet'}
+              </IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent>
+              <WeightChart entries={entries} />
+            </IonCardContent>
+          </IonCard>
+        )}
 
-        {/* History list */}
+        {/* History */}
         {!loading && entries.length > 0 && (
-          <IonList>
-            {entries.map((entry: WeightEntry) => (
-              <IonItemSliding key={entry.id}>
-                <IonItem>
-                  <IonLabel>
-                    <h3>{entry.value} {entry.unit}</h3>
-                    {entry.note && <p>{entry.note}</p>}
-                  </IonLabel>
-                  <IonNote slot="end">{formatDate(entry.date)}</IonNote>
-                </IonItem>
-                <IonItemOptions side="end">
-                  <IonItemOption color="danger" onClick={() => handleDelete(entry.id)}>
-                    <IonIcon slot="icon-only" icon={trash} />
-                  </IonItemOption>
-                </IonItemOptions>
-              </IonItemSliding>
-            ))}
-          </IonList>
+          <>
+            <IonListHeader style={{ paddingInlineStart: 20, marginTop: 8 }}>
+              History
+            </IonListHeader>
+            <IonList>
+              {entries.map((entry: WeightEntry) => (
+                <IonItemSliding key={entry.id}>
+                  <IonItem>
+                    <IonLabel>
+                      <h3>{entry.value} {entry.unit}</h3>
+                      {entry.note && <p>{entry.note}</p>}
+                    </IonLabel>
+                    <IonNote slot="end">{formatDate(entry.date)}</IonNote>
+                  </IonItem>
+                  <IonItemOptions side="end">
+                    <IonItemOption color="danger" onClick={() => handleDelete(entry.id)}>
+                      <IonIcon slot="icon-only" icon={trash} />
+                    </IonItemOption>
+                  </IonItemOptions>
+                </IonItemSliding>
+              ))}
+            </IonList>
+          </>
         )}
 
         {!loading && entries.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '48px 24px', opacity: 0.5 }}>
-            <p>Tap + to log your first weight entry.</p>
+          <div style={{
+            textAlign: 'center',
+            padding: '48px 32px',
+            color: 'var(--md-on-surface-variant)',
+          }}>
+            <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>⚖️</div>
+            <p style={{ margin: 0, fontSize: 'var(--md-body-lg)', fontWeight: 500 }}>
+              No entries yet
+            </p>
+            <p style={{ margin: '8px 0 0', fontSize: 'var(--md-body-sm)' }}>
+              Tap + to log your first weight entry.
+            </p>
           </div>
         )}
 
+        {/* Add 80px bottom padding so last item isn't hidden behind FAB */}
+        <div style={{ height: 88 }} />
+
         {/* FAB */}
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton onClick={() => setModalOpen(true)} color="primary">
+          <IonFabButton onClick={() => setModalOpen(true)}>
             <IonIcon icon={add} />
           </IonFabButton>
         </IonFab>
@@ -168,7 +202,6 @@ const Track: React.FC = () => {
           </IonHeader>
 
           <IonContent className="ion-padding">
-            {/* Weight value + unit */}
             <IonItem>
               <IonLabel position="stacked">Weight</IonLabel>
               <IonInput
@@ -193,7 +226,6 @@ const Track: React.FC = () => {
               </IonSegmentButton>
             </IonSegment>
 
-            {/* Date */}
             <IonItem>
               <IonLabel position="stacked">Date</IonLabel>
               <IonDatetime
@@ -206,7 +238,6 @@ const Track: React.FC = () => {
               />
             </IonItem>
 
-            {/* Note */}
             <IonItem>
               <IonLabel position="stacked">Note (optional)</IonLabel>
               <IonTextarea

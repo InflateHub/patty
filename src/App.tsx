@@ -46,6 +46,7 @@ import '@ionic/react/css/palettes/dark.system.css';
 
 /* Patty theme */
 import './theme/variables.css';
+import './theme/md3.css';
 
 setupIonicReact();
 

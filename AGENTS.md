@@ -16,6 +16,67 @@ The guiding principle is: **reduce the gap between tracking and doing**.
 
 ---
 
+## Design System — Material Expressive 3
+
+Patty uses **Material Design 3 (Material Expressive 3 / Material You)** as its
+design language, implemented via CSS custom property overrides on top of Ionic.
+
+### Core files
+| File | Purpose |
+|---|---|
+| `src/theme/variables.css` | Full MD3 tonal palette tokens, Ionic token mapping, light + dark |
+| `src/theme/md3.css` | Component-level overrides: shape, typography, elevation, motion |
+
+### Rules for all UI work
+
+**1. Always use MD3 tokens — never hard-code colours or sizes.**
+```css
+/* ✓ */  color: var(--md-on-surface);
+/* ✗ */  color: #1A1C1B;
+```
+
+**2. Seed colour: `#5C7A6E` (Patty slate-green).**
+All palette values must derive from this seed. Do not introduce unrelated hues.
+
+**3. Shape scale — use the correct token for the component type.**
+| Token | Value | Used for |
+|---|---|---|
+| `--md-shape-xs` | 4px | Badges, small chips |
+| `--md-shape-sm` | 8px | Small buttons, small cards |
+| `--md-shape-md` | 12px | Cards, list containers |
+| `--md-shape-lg` | 16px | Large cards, nav rail |
+| `--md-shape-xl` | 28px | Dialogs, bottom sheets, FAB |
+| `--md-shape-full` | 9999px | Pill buttons, chips, tab indicator |
+
+**4. Typography — Roboto only, via MD3 type-scale tokens.**
+```css
+/* ✓ */  font-size: var(--md-title-lg);  font-family: var(--md-font);
+/* ✗ */  font-size: 20px;  font-family: Arial;
+```
+Type scale tokens: `--md-display-size`, `--md-headline-lg/md/sm`,
+`--md-title-lg/md/sm`, `--md-body-lg/md/sm`, `--md-label-lg/md/sm`.
+
+**5. Elevation — tonal, not shadow-based.**
+Use `color-mix(in srgb, var(--md-shadow) X%, transparent)` for subtle shadows only
+on FABs and modals. Cards use a border (`var(--md-outline-variant)`), not shadows.
+
+**6. Dark mode is automatic.**
+All tokens have dark-mode overrides in `variables.css` via
+`@media (prefers-color-scheme: dark)`. Never write separate dark-mode logic in
+component files.
+
+**7. New pages must follow this structure:**
+- `IonCard` for primary content sections (with `--md-shape-xl` radius)
+- `IonListHeader` for section labels (uppercase, `--md-primary` colour)
+- `IonFab` FAB for the primary action (uses `--md-primary-container`)
+- Empty states: centred, emoji illustration, two-line message, muted colour
+
+**8. No Ionic colour names in new code.**
+Prefer MD3 tokens directly over `color="primary"` / `color="danger"` props
+unless the Ionic prop maps correctly and you have verified the token mapping.
+
+---
+
 ## Current File Map
 
 ```
@@ -29,17 +90,28 @@ Patty/
 │   ├── vite-env.d.ts          # Vite environment types + ionicons ambient declaration
 │   │
 │   ├── pages/
-│   │   ├── Track.tsx          # Track tab — weight, water, sleep, food (stubs → 0.2–0.5)
+│   │   ├── Track.tsx          # Track tab — weight tracking (0.2.0 complete)
 │   │   ├── Recipes.tsx        # Recipes tab — recipe library (stub → 0.6)
 │   │   ├── Plan.tsx           # Plan tab — cooking + exercise planners (stub → 0.7–0.8)
 │   │   ├── Progress.tsx       # Progress tab — photos + trends (stub → 0.9)
 │   │   ├── Home.tsx           # Dashboard stub — full dashboard in 1.0.0
 │   │   └── Stub.css           # Shared empty-state styles for stub pages
 │   │
-│   └── theme/
-│       └── variables.css      # Patty palette: slate-green #5C7A6E, light + dark mode
+│   ├── components/
+│   │   └── WeightChart.tsx    # Recharts line chart for weight over time
+│   │
+│   ├── hooks/
+│   │   └── useWeightLog.ts    # SQLite-backed weight log: addEntry / deleteEntry / getAll
+│   │
+│   ├── db/
+│   │   ├── database.ts        # SQLite init (Capacitor native + jeep-sqlite WASM browser)
+│   │   └── migrations.ts      # Versioned SQL migrations (v1: weight_entries table)
+│       ├── variables.css      # MD3 tonal palette tokens + Ionic mapping, light + dark mode
+│       └── md3.css            # MD3 component overrides: shape, type, elevation, motion
 │
-├── public/                    # Static assets served as-is (icons, splash screens)
+├── public/
+│   └── assets/
+│       └── sql-wasm.wasm      # sql.js 1.11.0 WASM binary (served for jeep-sqlite browser)
 ├── cypress/                   # End-to-end test specs (Cypress 13)
 │
 ├── index.html                 # Vite HTML entry — loads src/main.tsx
