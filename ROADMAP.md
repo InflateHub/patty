@@ -46,6 +46,16 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
+## 0.4.1 — Daily Alignment + Analytics Foundation ✓
+*Goal: align all three trackers to a daily model and lay the data foundation for the Home dashboard.*
+
+- [x] Weight tab gains a "Today" stat card (most recent entry or "No entry today")
+- [x] Sleep restricted to one entry per bedtime date; FAB disabled when already logged
+- [x] Sleep tab stat card replaced with "Last Night" view (duration, quality stars, time range)
+- [x] `useDailySummary` hook aggregates weight / water / sleep for any given date
+
+---
+
 ## 0.5.0 — Food Log
 *Goal: photo-first meal capture across four categories.*
 

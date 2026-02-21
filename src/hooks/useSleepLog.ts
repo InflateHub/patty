@@ -49,6 +49,7 @@ export function useSleepLog() {
 
   /**
    * Add a new sleep entry.
+   * Throws Error('DUPLICATE_DATE') if an entry already exists for the same bedtime date.
    * @param bedtime  Full ISO timestamp string, e.g. "2026-02-21T22:30:00.000"
    * @param waketime Full ISO timestamp string, e.g. "2026-02-22T07:00:00.000"
    * @param quality  1–5
@@ -63,6 +64,14 @@ export function useSleepLog() {
       );
       try {
         const db = getDb();
+        // Enforce one entry per bedtime date
+        const existing = await db.query(
+          'SELECT id FROM sleep_entries WHERE date = ? LIMIT 1;',
+          [date]
+        );
+        if ((existing.values?.length ?? 0) > 0) {
+          throw new Error('DUPLICATE_DATE');
+        }
         await db.run(
           'INSERT INTO sleep_entries (id, date, bedtime, waketime, duration_min, quality, note) VALUES (?, ?, ?, ?, ?, ?, ?);',
           [id, date, bedtime, waketime, durationMin, quality, note ?? null]
@@ -95,5 +104,7 @@ export function useSleepLog() {
       ? Math.round(entries.reduce((sum, e) => sum + e.duration_min, 0) / entries.length)
       : null;
 
-  return { entries, loading, addEntry, deleteEntry, avgDurationMin };
+  const lastNightEntry = entries[0] ?? null;
+
+  return { entries, lastNightEntry, loading, addEntry, deleteEntry, avgDurationMin };
 }

@@ -2,6 +2,18 @@
 
 ---
 
+## [0.4.1] — Daily Alignment + Analytics Foundation
+*Goal: align all three trackers to a daily model and lay the data foundation for the Home dashboard.*
+
+- [x] `useWeightLog` — adds `todayEntries` (today-filtered list) and `latestEntry` to return value
+- [x] `useSleepLog` — adds `lastNightEntry`; `addEntry` enforces one entry per bedtime date (throws `DUPLICATE_DATE`)
+- [x] `src/hooks/useDailySummary.ts` — new hook: given a date, queries all three tables and returns `{ weight, waterTotalMl, waterGoalMl, sleep }`
+- [x] `WeightTab` — replaces combined chart card with a prominent "Today" stat card (big number or "No entry today") + separate chart card below
+- [x] `SleepTab` — stat card now shows "Last Night": duration, quality stars, bed→wake time range; FAB disabled when today/yesterday already logged; `DUPLICATE_DATE` error presented as a user-friendly alert
+- [x] TypeScript clean
+
+---
+
 ## [0.4.0] — Sleep Tracking
 *Goal: users can log sleep and see their patterns.*
 

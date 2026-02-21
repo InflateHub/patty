@@ -78,7 +78,7 @@ const starBtn = (active: boolean): React.CSSProperties => ({
 /* ── Component ───────────────────────────────────────────────────────── */
 
 export const SleepTab: React.FC = () => {
-  const { entries, loading, addEntry, deleteEntry, avgDurationMin } = useSleepLog();
+  const { entries, lastNightEntry, loading, addEntry, deleteEntry, avgDurationMin } = useSleepLog();
   const [modalOpen, setModalOpen] = useState(false);
   const [bedtimeInput, setBedtimeInput] = useState('22:00');
   const [waketimeInput, setWaketimeInput] = useState('07:00');
@@ -99,6 +99,17 @@ export const SleepTab: React.FC = () => {
     () => calcDuration(todayStr, bedtimeInput, wakeDate, waketimeInput),
     [todayStr, bedtimeInput, wakeDate, waketimeInput]
   );
+
+  const yesterday = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+  }, []);
+
+  /** FAB is hidden when today or last night already has a logged entry. */
+  const alreadyLogged =
+    lastNightEntry !== null &&
+    (lastNightEntry.date === todayStr || lastNightEntry.date === yesterday);
 
   function openModal() {
     setBedtimeInput('22:00');
@@ -123,8 +134,16 @@ export const SleepTab: React.FC = () => {
       const wakeTs = buildTs(wakeDate, waketimeInput);
       await addEntry(bedTs, wakeTs, quality, note.trim() || undefined);
       setModalOpen(false);
-    } catch {
-      await presentAlert({ header: 'Error', message: 'Could not save entry.', buttons: ['OK'] });
+    } catch (err) {
+      if (err instanceof Error && err.message === 'DUPLICATE_DATE') {
+        await presentAlert({
+          header: 'Already logged',
+          message: 'Sleep is already recorded for this date. Delete the existing entry to re-log.',
+          buttons: ['OK'],
+        });
+      } else {
+        await presentAlert({ header: 'Error', message: 'Could not save entry.', buttons: ['OK'] });
+      }
     } finally {
       setSaving(false);
     }
@@ -143,7 +162,7 @@ export const SleepTab: React.FC = () => {
 
   return (
     <>
-      {/* ── Summary stat card ──────────────────────────────────────── */}
+      {/* ── Last Night stat card ───────────────────────────────────── */}
       <IonCard>
         <IonCardContent>
           <div style={{ textAlign: 'center', padding: '20px 0 12px' }}>
@@ -151,24 +170,54 @@ export const SleepTab: React.FC = () => {
               fontSize: 56,
               fontWeight: 300,
               fontFamily: 'var(--md-font)',
-              color: entries.length > 0 ? 'var(--md-on-surface)' : 'var(--md-outline)',
+              color: lastNightEntry ? 'var(--md-on-surface)' : 'var(--md-outline)',
               lineHeight: 1.1,
               letterSpacing: '-0.5px',
             }}>
-              {avgDurationMin !== null ? formatDuration(avgDurationMin) : '—'}
+              {lastNightEntry ? formatDuration(lastNightEntry.duration_min) : '—'}
             </div>
-            <div style={{
-              marginTop: 6,
-              fontSize: 'var(--md-body-sm)',
-              fontFamily: 'var(--md-font)',
-              color: 'var(--md-on-surface-variant)',
-              textTransform: 'uppercase',
-              letterSpacing: '.08em',
-            }}>
-              {entries.length > 0
-                ? `average · ${entries.length} night${entries.length === 1 ? '' : 's'}`
-                : 'No entries yet'}
-            </div>
+            {lastNightEntry ? (
+              <>
+                <div style={{
+                  marginTop: 6,
+                  fontSize: 18,
+                  letterSpacing: 3,
+                  color: 'var(--md-primary)',
+                }}>
+                  {qualityStars(lastNightEntry.quality)}
+                </div>
+                <div style={{
+                  marginTop: 4,
+                  fontSize: 'var(--md-body-sm)',
+                  fontFamily: 'var(--md-font)',
+                  color: 'var(--md-on-surface-variant)',
+                }}>
+                  {formatTime(lastNightEntry.bedtime)} → {formatTime(lastNightEntry.waketime)}
+                  &nbsp;·&nbsp;{formatDate(lastNightEntry.date)}
+                </div>
+              </>
+            ) : (
+              <div style={{
+                marginTop: 6,
+                fontSize: 'var(--md-body-sm)',
+                fontFamily: 'var(--md-font)',
+                color: 'var(--md-on-surface-variant)',
+                textTransform: 'uppercase',
+                letterSpacing: '.08em',
+              }}>
+                No entry yet
+              </div>
+            )}
+            {entries.length > 1 && (
+              <div style={{
+                marginTop: 8,
+                fontSize: 'var(--md-label-sm)',
+                fontFamily: 'var(--md-font)',
+                color: 'var(--md-on-surface-variant)',
+              }}>
+                avg {avgDurationMin !== null ? formatDuration(avgDurationMin) : '—'} · {entries.length} nights
+              </div>
+            )}
           </div>
         </IonCardContent>
       </IonCard>
@@ -223,9 +272,9 @@ export const SleepTab: React.FC = () => {
         </div>
       )}
 
-      {/* ── FAB ────────────────────────────────────────────────────── */}
+      {/* ── FAB (disabled when today/last night already logged) ────────── */}
       <IonFab vertical="bottom" horizontal="end" slot="fixed">
-        <IonFabButton onClick={openModal}>
+        <IonFabButton onClick={openModal} disabled={alreadyLogged}>
           <IonIcon icon={add} />
         </IonFabButton>
       </IonFab>

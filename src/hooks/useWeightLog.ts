@@ -13,6 +13,10 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export function useWeightLog() {
   const [entries, setEntries] = useState<WeightEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,5 +78,5 @@ export function useWeightLog() {
     [load]
   );
 
-  return { entries, loading, addEntry, deleteEntry, reload: load };
+  return { entries, todayEntries: entries.filter(e => e.date === todayStr()), latestEntry: entries[0] ?? null, loading, addEntry, deleteEntry, reload: load };
 }

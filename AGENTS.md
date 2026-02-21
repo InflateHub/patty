@@ -99,18 +99,19 @@ Patty/
 │   │
 │   ├── track/
 │   │   ├── trackUtils.ts      # Shared utils: today/formatDate/formatTime/isToday/formatDuration + style tokens S
-│   │   ├── WeightTab.tsx      # Self-contained weight tab: state, chart, history, modals, FAB
+│   │   ├── WeightTab.tsx      # Self-contained weight tab: Today stat card, chart, history, modals, FAB
 │   │   ├── WaterTab.tsx       # Self-contained water tab: state, ring, chips, modals, FAB
-│   │   └── SleepTab.tsx       # Self-contained sleep tab: stat card, history, star-quality entry modal, FAB
+│   │   └── SleepTab.tsx       # Self-contained sleep tab: Last Night stat card, history, entry modal (1/day), FAB
 │   │
 │   ├── components/
 │   │   ├── WeightChart.tsx    # Recharts line chart for weight over time
 │   │   └── WaterRing.tsx      # Animated SVG progress ring for water daily goal
 │   │
 │   ├── hooks/
-│   │   ├── useWeightLog.ts    # SQLite-backed weight log: addEntry / deleteEntry / getAll
+│   │   ├── useWeightLog.ts    # SQLite-backed weight log: addEntry / deleteEntry / getAll; todayEntries / latestEntry
 │   │   ├── useWaterLog.ts     # SQLite-backed water log + localStorage daily goal
-│   │   └── useSleepLog.ts     # SQLite-backed sleep log: addEntry / deleteEntry / getAll / avgDurationMin
+│   │   ├── useSleepLog.ts     # SQLite-backed sleep log: addEntry (1/day enforced) / deleteEntry / getAll / lastNightEntry / avgDurationMin
+│   │   └── useDailySummary.ts # Per-day aggregate hook: weight + waterTotalMl + waterGoalMl + sleep for any date
 │   │
 │   ├── db/
 │   │   ├── database.ts        # SQLite init (Capacitor native + jeep-sqlite WASM browser)

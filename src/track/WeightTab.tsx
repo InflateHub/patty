@@ -30,7 +30,7 @@ import type { WeightEntry } from '../hooks/useWeightLog';
 import { S, today, formatDate, isToday } from './trackUtils';
 
 export const WeightTab: React.FC = () => {
-  const { entries, loading, addEntry, deleteEntry } = useWeightLog();
+  const { entries, todayEntries, loading, addEntry, deleteEntry } = useWeightLog();
   const modal = useRef<HTMLIonModalElement>(null);
   const dateModal = useRef<HTMLIonModalElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -77,29 +77,47 @@ export const WeightTab: React.FC = () => {
     });
   }
 
-  const latest = entries[0];
+  const todayLatest = todayEntries[0] ?? null;
 
   return (
     <>
+      {/* ── Today stat card ────────────────────────────────────────── */}
       {!loading && (
         <IonCard>
-          <IonCardContent style={{ paddingTop: 16 }}>
-            {latest && (
+          <IonCardContent>
+            <div style={{ textAlign: 'center', padding: '20px 0 12px' }}>
               <div style={{
-                fontSize: 'var(--md-title-sm)',
-                color: 'var(--md-on-surface-variant)',
-                marginBottom: 8,
+                fontSize: 56,
+                fontWeight: 300,
                 fontFamily: 'var(--md-font)',
+                color: todayLatest ? 'var(--md-on-surface)' : 'var(--md-outline)',
+                lineHeight: 1.1,
+                letterSpacing: '-0.5px',
               }}>
-                {latest.value} {latest.unit} · {formatDate(latest.date)}
+                {todayLatest ? `${todayLatest.value}` : '—'}
               </div>
-            )}
+              <div style={{
+                marginTop: 6,
+                fontSize: 'var(--md-body-sm)',
+                fontFamily: 'var(--md-font)',
+                color: 'var(--md-on-surface-variant)',
+                textTransform: 'uppercase',
+                letterSpacing: '.08em',
+              }}>
+                {todayLatest
+                  ? `${todayLatest.unit} · Today${todayEntries.length > 1 ? ` · ${todayEntries.length} entries` : ''}`
+                  : 'No entry today'}
+              </div>
+            </div>
+          </IonCardContent>
+        </IonCard>
+      )}
+
+      {/* ── Trend chart ────────────────────────────────────────────── */}
+      {!loading && entries.length > 0 && (
+        <IonCard>
+          <IonCardContent style={{ paddingTop: 16 }}>
             <WeightChart entries={entries} />
-            {!latest && (
-              <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--md-on-surface-variant)', fontSize: 'var(--md-body-md)', fontFamily: 'var(--md-font)' }}>
-                No entries yet
-              </div>
-            )}
           </IonCardContent>
         </IonCard>
       )}
