@@ -29,13 +29,7 @@ import {
   UserProfile,
   UserPrefs,
   ageFromDob,
-  computeBMI,
-  bmiCategory,
-  computeBMR,
-  computeTDEE,
-  kgToLb,
 } from '../hooks/useProfile';
-import { useWeightLog } from '../hooks/useWeightLog';
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
@@ -56,55 +50,10 @@ const sectionHeaderStyle: React.CSSProperties = {
   textTransform: 'uppercase',
 };
 
-const metricRowStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'baseline',
-  padding: '8px 0',
-  borderBottom: '1px solid var(--md-outline-variant)',
-};
-
-const metricLabelStyle: React.CSSProperties = {
-  fontFamily: 'var(--md-font)',
-  fontSize: 'var(--md-body-md)',
-  color: 'var(--md-on-surface-variant)',
-};
-
-const metricValueStyle: React.CSSProperties = {
-  fontFamily: 'var(--md-font)',
-  fontSize: 'var(--md-title-md)',
-  fontWeight: 600,
-  color: 'var(--md-on-surface)',
-};
-
-// ── BMI category pill colour ──────────────────────────────────────────────────
-
-function bmiPillStyle(category: string): React.CSSProperties {
-  const colours: Record<string, string> = {
-    Underweight: '#5bcaff',
-    Normal: 'var(--md-primary)',
-    Overweight: '#f5a623',
-    Obese: '#e74c3c',
-  };
-  return {
-    display: 'inline-block',
-    marginLeft: 8,
-    padding: '2px 10px',
-    borderRadius: 'var(--md-shape-full)',
-    background: colours[category] ?? 'var(--md-surface-variant)',
-    color: '#fff',
-    fontSize: 'var(--md-label-sm)',
-    fontFamily: 'var(--md-font)',
-    fontWeight: 600,
-    verticalAlign: 'middle',
-  };
-}
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const ProfilePage: React.FC = () => {
   const { profile, prefs, loading, saveProfile, savePrefs } = useProfile();
-  const { latestEntry } = useWeightLog();
 
   // Local form state — initialised from hook once loaded
   const [form, setForm] = useState<UserProfile>({
@@ -129,20 +78,8 @@ const ProfilePage: React.FC = () => {
     }
   }, [loading, profile, prefs]);
 
-  // ── Derived metrics ──────────────────────────────────────────────────────────
-  const weightKg = latestEntry
-    ? latestEntry.unit === 'lbs'
-      ? latestEntry.value / 2.20462
-      : latestEntry.value
-    : 0;
-  const age = ageFromDob(form.dob);
-  const bmi = computeBMI(weightKg, form.heightCm);
-  const category = bmiCategory(bmi);
-  const bmr = computeBMR(weightKg, form.heightCm, age, form.sex);
-  const tdee = computeTDEE(bmr, form.activity);
-  const hasMetrics = bmi > 0;
-
-  // ── Save ─────────────────────────────────────────────────────────────────────
+  // ── Save
+  const dobAge = ageFromDob(form.dob);
   const handleSave = async () => {
     await saveProfile(form);
     await savePrefs(prefForm);
@@ -217,9 +154,9 @@ const ProfilePage: React.FC = () => {
                   onIonInput={e => setForm(f => ({ ...f, dob: (e.detail.value ?? '') as string }))}
                   style={{ fontFamily: 'var(--md-font)' }}
                 />
-                {age > 0 && (
+                {dobAge > 0 && (
                   <IonNote slot="end" style={{ fontFamily: 'var(--md-font)', alignSelf: 'center' }}>
-                    {age} yrs
+                    {dobAge} yrs
                   </IonNote>
                 )}
               </IonItem>
@@ -355,61 +292,6 @@ const ProfilePage: React.FC = () => {
             </IonList>
           </IonCardContent>
         </IonCard>
-
-        {/* ── Derived Metrics ───────────────────────────────────────────── */}
-        {hasMetrics && (
-          <IonCard style={cardStyle}>
-            <IonListHeader style={sectionHeaderStyle}>Your Metrics</IonListHeader>
-            <IonCardContent style={{ padding: '8px 16px 16px' }}>
-              <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)', margin: '0 0 12px' }}>
-                Based on your latest logged weight
-                {latestEntry ? ` (${latestEntry.unit === 'lbs' ? `${latestEntry.value} lbs` : `${latestEntry.value} kg`})` : ''}.  
-              </p>
-
-              {/* BMI */}
-              <div style={metricRowStyle}>
-                <span style={metricLabelStyle}>BMI</span>
-                <span style={metricValueStyle}>
-                  {bmi.toFixed(1)}
-                  {category && <span style={bmiPillStyle(category)}>{category}</span>}
-                </span>
-              </div>
-
-              {/* BMR */}
-              {bmr > 0 && (
-                <div style={metricRowStyle}>
-                  <span style={metricLabelStyle}>BMR</span>
-                  <span style={metricValueStyle}>{bmr.toLocaleString()} kcal</span>
-                </div>
-              )}
-
-              {/* TDEE */}
-              {tdee > 0 && (
-                <div style={{ ...metricRowStyle, borderBottom: 'none' }}>
-                  <span style={metricLabelStyle}>TDEE</span>
-                  <span style={metricValueStyle}>{tdee.toLocaleString()} kcal</span>
-                </div>
-              )}
-
-              {(!bmr || !tdee) && (
-                <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)', margin: '8px 0 0' }}>
-                  Add date of birth, sex, and activity level to see BMR &amp; TDEE.
-                </p>
-              )}
-            </IonCardContent>
-          </IonCard>
-        )}
-
-        {!hasMetrics && (
-          <IonCard style={cardStyle}>
-            <IonListHeader style={sectionHeaderStyle}>Your Metrics</IonListHeader>
-            <IonCardContent>
-              <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)', color: 'var(--md-on-surface-variant)', margin: 0, textAlign: 'center', padding: '8px 0 8px' }}>
-                Log your weight and fill in height above to see BMI, BMR &amp; TDEE.
-              </p>
-            </IonCardContent>
-          </IonCard>
-        )}
 
         {/* ── App Info ──────────────────────────────────────────────────── */}
         <IonCard style={{ ...cardStyle, margin: '12px 16px 32px' }}>

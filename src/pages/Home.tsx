@@ -27,7 +27,7 @@ import { useWeightLog } from '../hooks/useWeightLog';
 import { useWaterLog } from '../hooks/useWaterLog';
 import { useSleepLog } from '../hooks/useSleepLog';
 import { useFoodLog } from '../hooks/useFoodLog';
-import { useProfile, computeBMI, bmiCategory } from '../hooks/useProfile';
+import { useProfile, computeBMI, bmiCategory, computeBMR, computeTDEE, ageFromDob } from '../hooks/useProfile';
 import { WaterRing } from '../components/WaterRing';
 import { WeightChart } from '../components/WeightChart';
 import { today, formatDuration } from '../track/trackUtils';
@@ -77,6 +77,10 @@ const Home: React.FC = () => {
     : 0;
   const bmi = computeBMI(weightKg, profile.heightCm);
   const bmiCat = bmiCategory(bmi);
+  const age = ageFromDob(profile.dob);
+  const bmr = computeBMR(weightKg, profile.heightCm, age, profile.sex);
+  const tdee = computeTDEE(bmr, profile.activity);
+  const hasMetrics = bmi > 0;
 
   const todayDate = today();
 
@@ -196,6 +200,46 @@ const Home: React.FC = () => {
           <IonListHeader style={sectionHeaderStyle}>Weight Trend</IonListHeader>
           <IonCardContent style={{ padding: '8px 8px 16px' }}>
             <WeightChart entries={miniChartEntries} />
+          </IonCardContent>
+        </IonCard>
+
+        {/* ── Your Metrics ────────────────────────────── */}
+        <IonCard style={cardStyle}>
+          <IonListHeader style={sectionHeaderStyle}>Your Metrics</IonListHeader>
+          <IonCardContent style={{ padding: '8px 16px 16px' }}>
+            {hasMetrics ? (
+              <>
+                {[{ label: 'BMI', value: (
+                  <span>
+                    {bmi.toFixed(1)}
+                    {bmiCat && (
+                      <span style={{
+                        display: 'inline-block', marginLeft: 8, padding: '2px 10px',
+                        borderRadius: 'var(--md-shape-full)',
+                        background: ({ Underweight: '#5bcaff', Normal: 'var(--md-primary)', Overweight: '#f5a623', Obese: '#e74c3c' } as Record<string,string>)[bmiCat] ?? 'var(--md-surface-variant)',
+                        color: '#fff', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', fontWeight: 600, verticalAlign: 'middle',
+                      }}>{bmiCat}</span>
+                    )}
+                  </span>
+                )}, ...(bmr > 0 ? [{ label: 'BMR', value: `${bmr.toLocaleString()} kcal` }] : []),
+                   ...(tdee > 0 ? [{ label: 'TDEE', value: `${tdee.toLocaleString()} kcal` }] : []),
+                ].map(({ label, value }, i, arr) => (
+                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--md-outline-variant)' : 'none' }}>
+                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)', color: 'var(--md-on-surface-variant)' }}>{label}</span>
+                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-md)', fontWeight: 600, color: 'var(--md-on-surface)' }}>{value}</span>
+                  </div>
+                ))}
+                {(!bmr || !tdee) && (
+                  <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)', margin: '8px 0 0' }}>
+                    Add date of birth, sex &amp; activity level in your profile to see BMR &amp; TDEE.
+                  </p>
+                )}
+              </>
+            ) : (
+              <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)', color: 'var(--md-on-surface-variant)', margin: 0, textAlign: 'center', padding: '8px 0' }}>
+                Log your weight and add height in your profile to see BMI, BMR &amp; TDEE.
+              </p>
+            )}
           </IonCardContent>
         </IonCard>
 
