@@ -25,5 +25,8 @@ declare module 'ionicons/icons' {
   export const chevronForwardOutline: string;
   export const imageOutline: string;
   export const swapHorizontalOutline: string;
+  export const homeOutline: string;
+  export const scaleOutline: string;
+  export const bedOutline: string;
   export default icons;
 }

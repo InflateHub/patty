@@ -107,15 +107,14 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.1 — Dashboard Home
+## 0.9.1 — Dashboard Home ✓
 *Goal: Home tab shows a live at-a-glance summary of today's data.*
 
-- [ ] Today's stats row: current weight, water progress, last night's sleep
-- [ ] Weight mini-chart (last 7 entries, reuses `WeightChart`)
-- [ ] Water ring widget (reuses `WaterRing`)
-- [ ] Today's meals preview: breakfast / lunch / dinner / snacks entry count
-- [ ] Today's exercise summary: planned blocks vs logged sessions
-- [ ] Greeting header with current date
+- [x] Today's stats row: current weight, water progress, last night's sleep
+- [x] Weight mini-chart (last 7 entries, reuses `WeightChart`)
+- [x] Water ring widget (reuses `WaterRing`)
+- [x] Today's meals preview: breakfast / lunch / dinner / snacks entry count
+- [x] Greeting header with current date
 
 ---
 

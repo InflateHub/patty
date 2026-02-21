@@ -12,11 +12,13 @@ import {
 import { IonReactRouter } from '@ionic/react-router';
 import {
   calendarOutline,
+  homeOutline,
   pulseOutline,
   restaurantOutline,
   trendingUpOutline,
 } from 'ionicons/icons';
 
+import Home from './pages/Home';
 import Track from './pages/Track';
 import Recipes from './pages/Recipes';
 import Plan from './pages/Plan';
@@ -55,6 +57,9 @@ const App: React.FC = () => (
     <IonReactRouter>
       <IonTabs>
         <IonRouterOutlet>
+          <Route exact path="/tabs/home">
+            <Home />
+          </Route>
           <Route exact path="/tabs/track">
             <Track />
           </Route>
@@ -68,14 +73,18 @@ const App: React.FC = () => (
             <Progress />
           </Route>
           <Route exact path="/tabs">
-            <Redirect to="/tabs/track" />
+            <Redirect to="/tabs/home" />
           </Route>
           <Route exact path="/">
-            <Redirect to="/tabs/track" />
+            <Redirect to="/tabs/home" />
           </Route>
         </IonRouterOutlet>
 
         <IonTabBar slot="bottom">
+          <IonTabButton tab="home" href="/tabs/home">
+            <IonIcon icon={homeOutline} />
+            <IonLabel>Home</IonLabel>
+          </IonTabButton>
           <IonTabButton tab="track" href="/tabs/track">
             <IonIcon icon={pulseOutline} />
             <IonLabel>Track</IonLabel>

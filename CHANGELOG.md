@@ -2,6 +2,22 @@
 
 ---
 
+## [0.9.1] — Dashboard Home
+*Goal: Home tab shows a live at-a-glance summary of today's data.*
+
+- [x] `src/pages/Home.tsx` — rewritten as a full live dashboard (replaces stub)
+- [x] Greeting header with time-of-day salutation and today's date
+- [x] Stats row card: latest weight, water % of goal, last night's sleep duration
+- [x] Water Today card: reuses `WaterRing` (size 160)
+- [x] Weight Trend card: reuses `WeightChart` with the most recent 7 entries
+- [x] Today's Meals card: per-meal-slot entry count (Breakfast / Lunch / Dinner / Snacks)
+- [x] Home tab added to `App.tsx` tab bar (first position, `homeOutline` icon)
+- [x] Default route redirected from `/tabs/track` to `/tabs/home`
+- [x] `vite-env.d.ts` — `homeOutline`, `scaleOutline`, `bedOutline` declared
+- [x] TypeScript clean
+
+---
+
 ## [0.9.0] — Progress Hub
 *Goal: visual history of body changes and trends.*
 
