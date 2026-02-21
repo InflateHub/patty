@@ -14,12 +14,8 @@ let _db: SQLiteDBConnection | null = null;
 export async function initDatabase(): Promise<void> {
   const platform = Capacitor.getPlatform();
 
-  // Web: jeep-sqlite must be in the DOM first
+  // Web: wait for jeep-sqlite custom element to be ready
   if (platform === 'web') {
-    const jeepEl = document.querySelector('jeep-sqlite');
-    if (!jeepEl) {
-      throw new Error('jeep-sqlite element not found in DOM');
-    }
     await customElements.whenDefined('jeep-sqlite');
     await sqlite.initWebStore();
   }
