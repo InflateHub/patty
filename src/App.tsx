@@ -1,7 +1,26 @@
 import { Redirect, Route } from 'react-router-dom';
-import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
+import {
+  IonApp,
+  IonIcon,
+  IonLabel,
+  IonRouterOutlet,
+  IonTabBar,
+  IonTabButton,
+  IonTabs,
+  setupIonicReact,
+} from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import Home from './pages/Home';
+import {
+  calendarOutline,
+  pulseOutline,
+  restaurantOutline,
+  trendingUpOutline,
+} from 'ionicons/icons';
+
+import Track from './pages/Track';
+import Recipes from './pages/Recipes';
+import Plan from './pages/Plan';
+import Progress from './pages/Progress';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -20,17 +39,12 @@ import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
 /**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
+ * Ionic Dark Mode — respects the OS preference via dark.system.css.
+ * For more info: https://ionicframework.com/docs/theming/dark-mode
  */
-
-/* import '@ionic/react/css/palettes/dark.always.css'; */
-/* import '@ionic/react/css/palettes/dark.class.css'; */
 import '@ionic/react/css/palettes/dark.system.css';
 
-/* Theme variables */
+/* Patty theme */
 import './theme/variables.css';
 
 setupIonicReact();
@@ -38,14 +52,47 @@ setupIonicReact();
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      <IonRouterOutlet>
-        <Route exact path="/home">
-          <Home />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/home" />
-        </Route>
-      </IonRouterOutlet>
+      <IonTabs>
+        <IonRouterOutlet>
+          <Route exact path="/tabs/track">
+            <Track />
+          </Route>
+          <Route exact path="/tabs/recipes">
+            <Recipes />
+          </Route>
+          <Route exact path="/tabs/plan">
+            <Plan />
+          </Route>
+          <Route exact path="/tabs/progress">
+            <Progress />
+          </Route>
+          <Route exact path="/tabs">
+            <Redirect to="/tabs/track" />
+          </Route>
+          <Route exact path="/">
+            <Redirect to="/tabs/track" />
+          </Route>
+        </IonRouterOutlet>
+
+        <IonTabBar slot="bottom">
+          <IonTabButton tab="track" href="/tabs/track">
+            <IonIcon icon={pulseOutline} />
+            <IonLabel>Track</IonLabel>
+          </IonTabButton>
+          <IonTabButton tab="recipes" href="/tabs/recipes">
+            <IonIcon icon={restaurantOutline} />
+            <IonLabel>Recipes</IonLabel>
+          </IonTabButton>
+          <IonTabButton tab="plan" href="/tabs/plan">
+            <IonIcon icon={calendarOutline} />
+            <IonLabel>Plan</IonLabel>
+          </IonTabButton>
+          <IonTabButton tab="progress" href="/tabs/progress">
+            <IonIcon icon={trendingUpOutline} />
+            <IonLabel>Progress</IonLabel>
+          </IonTabButton>
+        </IonTabBar>
+      </IonTabs>
     </IonReactRouter>
   </IonApp>
 );

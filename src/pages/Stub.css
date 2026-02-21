@@ -1,0 +1,25 @@
+/* Shared styles for stub / placeholder pages */
+
+.stub-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.stub-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--ion-color-primary);
+  margin: 0;
+}
+
+.stub-hint {
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+  margin: 0;
+}

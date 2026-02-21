@@ -1,28 +1,27 @@
-/* Dashboard — stub for 0.1.0, will be built out in 1.0.0 */
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import './Stub.css';
 
-const Home: React.FC = () => {
+const Recipes: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Patty</IonTitle>
+          <IonTitle>Recipes</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Patty</IonTitle>
+            <IonTitle size="large">Recipes</IonTitle>
           </IonToolbar>
         </IonHeader>
         <div className="stub-empty">
-          <p className="stub-label">Dashboard</p>
-          <p className="stub-hint">Daily summary coming in 1.0.0</p>
+          <p className="stub-label">Browse &amp; save recipes</p>
+          <p className="stub-hint">Coming in 0.6.0</p>
         </div>
       </IonContent>
     </IonPage>
   );
 };
 
-export default Home;
+export default Recipes;

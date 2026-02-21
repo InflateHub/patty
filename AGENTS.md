@@ -23,28 +23,28 @@ Patty/
 │
 ├── src/
 │   ├── main.tsx               # App entry point — mounts React root, imports Ionic CSS
-│   ├── App.tsx                # Root component — defines all routes via IonReactRouter
+│   ├── App.tsx                # Root component — IonTabs with four tab routes
 │   ├── App.test.tsx           # Smoke test for the root component
 │   ├── setupTests.ts          # Vitest/Testing Library global setup
-│   ├── vite-env.d.ts          # Vite environment type declarations
+│   ├── vite-env.d.ts          # Vite environment types + ionicons ambient declaration
 │   │
 │   ├── pages/
-│   │   ├── Home.tsx           # Default landing page (blank starter scaffold)
-│   │   └── Home.css           # Page-level styles for Home
-│   │
-│   ├── components/
-│   │   ├── ExploreContainer.tsx   # Placeholder component from blank starter
-│   │   └── ExploreContainer.css  # Styles for the placeholder
+│   │   ├── Track.tsx          # Track tab — weight, water, sleep, food (stubs → 0.2–0.5)
+│   │   ├── Recipes.tsx        # Recipes tab — recipe library (stub → 0.6)
+│   │   ├── Plan.tsx           # Plan tab — cooking + exercise planners (stub → 0.7–0.8)
+│   │   ├── Progress.tsx       # Progress tab — photos + trends (stub → 0.9)
+│   │   ├── Home.tsx           # Dashboard stub — full dashboard in 1.0.0
+│   │   └── Stub.css           # Shared empty-state styles for stub pages
 │   │
 │   └── theme/
-│       └── variables.css      # Ionic CSS custom properties (colors, fonts, spacing)
+│       └── variables.css      # Patty palette: slate-green #5C7A6E, light + dark mode
 │
 ├── public/                    # Static assets served as-is (icons, splash screens)
 ├── cypress/                   # End-to-end test specs (Cypress 13)
 │
 ├── index.html                 # Vite HTML entry — loads src/main.tsx
 ├── vite.config.ts             # Vite + Ionic plugin configuration
-├── tsconfig.json              # TypeScript project config
+├── tsconfig.json              # TypeScript project config (moduleResolution: Bundler)
 ├── tsconfig.node.json         # TypeScript config for Vite config file
 ├── eslint.config.js           # ESLint 9 flat config
 ├── cypress.config.ts          # Cypress base URL and spec config
@@ -53,6 +53,7 @@ Patty/
 ├── .browserslistrc            # Target browser list for legacy builds
 ├── .gitignore                 # Git ignore rules (node_modules, dist, etc.)
 │
+├── ROADMAP.md                 # Feature roadmap 0.1.0 → 1.0.0
 ├── README.md                  # Full project documentation
 └── AGENTS.md                  # This file — workflow protocol for agents
 ```
@@ -130,12 +131,24 @@ Ready to proceed?
 2. **Manual check** — if the change is visual or interactive, run the dev server
    (`npm run dev`) and verify the expected behaviour in the browser.
 
-3. **Report outcome** — state clearly:
+3. **Update Files**:
+   - ROADMAP.md — if the feature is complete and matches the description in the roadmap, check off the item.
+   - CHANGELOG.md — add a brief entry describing the change, following the format:
+     ```
+     ## [Version] — [Feature Name]
+     *Goal: one-sentence description of the feature.*
+
+     - [ ] Key point or sub-feature 1
+     - [ ] Key point or sub-feature 2
+     ```
+   - Make git commit with a clear message following the conventional commits format (e.g. `feat: add weight entry form`).
+
+4. **Report outcome** — state clearly:
    - Tests passed / failed (with details if failed)
    - Any visual discrepancies noticed
    - Whether the implementation matches the Phase 1 agreement
 
-4. **Iterate or close:**
+5. **Iterate or close:**
    - If verification passes → mark the step complete, commit, then return to
      Phase 1 for the next increment.
    - If verification fails → return to Phase 2 with a clear description of
