@@ -86,13 +86,14 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.7.0 — Cooking Planner
+## 0.7.0 — Cooking Planner ✓
 *Goal: plan meals for the week and get a grocery list.*
 
-- [ ] Weekly meal plan grid (7 days × 3 meal slots)
-- [ ] Assign recipes to slots by picking from the library
-- [ ] Auto-generated grocery list aggregated from the weekly plan
-- [ ] "Cook Today" suggestion (random recipe from plan or library)
+- [x] Weekly meal plan grid (7 days × 3 meal slots)
+- [x] Assign recipes to slots by picking from the library
+- [x] Auto-generated grocery list aggregated from the weekly plan
+- [x] Prev / next week navigation with «This week» badge
+- [x] Today's Meals card (shows today's three slots at a glance)
 
 ---
 

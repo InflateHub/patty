@@ -2,6 +2,20 @@
 
 ---
 
+## [0.7.0] — Cooking Planner
+*Goal: plan meals for the week and get a grocery list.*
+
+- [x] DB migration v6: `meal_plan` table (`id`, `date`, `slot`, `recipe_id`, `recipe_name`, `recipe_emoji`, `ingredients`, `created_at`) with `UNIQUE(date, slot)`
+- [x] `src/hooks/useMealPlan.ts` — `assignSlot` / `clearSlot` / `groceryList`; week helpers: `getMondayOf`, `weekStart`, `weekDates`, `formatWeekRange`
+- [x] `src/plan/RecipePickerModal.tsx` — searchable full-screen modal listing all recipes (seed + user); tap to assign
+- [x] `src/plan/MealPlanGrid.tsx` — Mon–Sun × Breakfast/Lunch/Dinner table; filled cells show emoji + name + remove button; empty cells are tappable dashed buttons
+- [x] `src/plan/GroceryList.tsx` — flat deduplicated ingredient list from the viewed week; native checkboxes with strikethrough (local state)
+- [x] `src/pages/Plan.tsx` — rewritten: `< week >` navigation bar, «Today's Meals» card (current week only), week plan grid card, grocery list card
+- [x] `vite-env.d.ts` — `chevronBackOutline`, `chevronForwardOutline` declared
+- [x] TypeScript clean
+
+---
+
 ## [0.6.1] — User-Created Recipes
 *Goal: users can add, view, and delete their own custom recipes.*
 

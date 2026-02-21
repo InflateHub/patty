@@ -109,6 +109,11 @@ Patty/
 │   │   ├── RecipeDetailModal.tsx # Full-screen modal: hero emoji, time chips, tag badges, ingredients list, numbered steps
 │   │   └── RecipeFormModal.tsx   # Create-recipe modal: name, emoji picker, times, tags, dynamic ingredient + step rows
 │   │
+│   ├── plan/
+│   │   ├── RecipePickerModal.tsx # Searchable full-screen modal to assign a recipe to a meal slot
+│   │   ├── MealPlanGrid.tsx      # Mon–Sun × Breakfast/Lunch/Dinner table; tappable empty slots, removable filled slots
+│   │   └── GroceryList.tsx       # Flat deduplicated ingredient list with native checkboxes (local state)
+│   │
 │   ├── components/
 │   │   ├── WeightChart.tsx    # Recharts line chart for weight over time
 │   │   └── WaterRing.tsx      # Animated SVG progress ring for water daily goal
@@ -119,11 +124,12 @@ Patty/
 │   │   ├── useSleepLog.ts     # SQLite-backed sleep log: addEntry (1/day enforced) / deleteEntry / getAll / lastNightEntry / avgDurationMin
 │   │   ├── useFoodLog.ts      # SQLite-backed food log: addEntry / deleteEntry / entriesForDate / todayEntries (grouped by MealType)
 │   │   ├── useRecipes.ts      # SQLite-backed user recipes: addRecipe / deleteRecipe; allRecipes merges seed + user recipes
+│   │   ├── useMealPlan.ts     # SQLite-backed meal plan: assignSlot / clearSlot / weekPlan / groceryList; week helpers
 │   │   └── useDailySummary.ts # Per-day aggregate hook: weight + waterTotalMl + waterGoalMl + sleep for any date
 │   │
 │   ├── db/
 │   │   ├── database.ts        # SQLite init (Capacitor native + jeep-sqlite WASM browser)
-│   │   └── migrations.ts      # Versioned SQL migrations (v1: weight_entries, v2: water_entries, v3: sleep_entries)
+│   │   └── migrations.ts      # Versioned SQL migrations (v1–v6: weight, water, sleep, food, recipes, meal_plan)
 │       ├── variables.css      # MD3 tonal palette tokens + Ionic mapping, light + dark mode
 │       └── md3.css            # MD3 component overrides: shape, type, elevation, motion
 │

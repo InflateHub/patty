@@ -80,4 +80,21 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
+  {
+    version: 6,
+    // 0.7.0 — cooking planner (weekly meal plan)
+    statements: [
+      `CREATE TABLE IF NOT EXISTS meal_plan (
+        id           TEXT    PRIMARY KEY NOT NULL,
+        date         TEXT    NOT NULL,
+        slot         TEXT    NOT NULL,
+        recipe_id    TEXT    NOT NULL,
+        recipe_name  TEXT    NOT NULL,
+        recipe_emoji TEXT    NOT NULL DEFAULT '🍴',
+        ingredients  TEXT    NOT NULL DEFAULT '[]',
+        created_at   TEXT    NOT NULL,
+        UNIQUE(date, slot)
+      );`,
+    ],
+  },
 ];
