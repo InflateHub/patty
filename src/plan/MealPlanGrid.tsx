@@ -3,9 +3,9 @@ import { SLOTS, type SlotType, type WeekPlan } from '../hooks/useMealPlan';
 
 const DAY_ABBR  = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const SLOT_META: Record<SlotType, { label: string; emoji: string }> = {
-  breakfast: { label: 'Breakfast', emoji: 'â˜€ï¸' },
-  lunch:     { label: 'Lunch',     emoji: 'ðŸŒ¤ï¸' },
-  dinner:    { label: 'Dinner',    emoji: 'ðŸŒ™' },
+  breakfast: { label: 'Breakfast', emoji: '\u2600\uFE0F' },   // ☀️
+  lunch:     { label: 'Lunch',     emoji: '\uD83C\uDF24\uFE0F' }, // 🌤️
+  dinner:    { label: 'Dinner',    emoji: '\uD83C\uDF19' },   // 🌙
 };
 
 interface Props {
@@ -178,7 +178,7 @@ const MealPlanGrid: React.FC<Props> = ({ dates, weekPlan, onAddSlot, onClearSlot
                   flexShrink: 0,
                 }}
               >
-                Ã—
+                ×
               </button>
             </div>
           ) : (
@@ -212,7 +212,7 @@ const MealPlanGrid: React.FC<Props> = ({ dates, weekPlan, onAddSlot, onClearSlot
                   color: 'var(--md-on-surface-variant)',
                 }}
               >
-                {meta.label} â€” tap to add
+                {meta.label} — tap to add
               </span>
               <span
                 style={{
