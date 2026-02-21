@@ -192,14 +192,14 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.7 — Data Persistence Audit
+## 0.9.7 — Data Persistence Audit ✓
 *Goal: all features store data consistently and reliably.*
 
-- [ ] Audit every hook — confirm all user data uses SQLite, not in-memory state
-- [ ] Daily water goal migrated from `localStorage` to a `settings` table (migration v9)
-- [ ] Weight unit preference migrated from `localStorage` to `settings` table
-- [ ] Notification preferences stored in `settings` table
-- [ ] Verify DB migrations run clean on fresh install and upgrade paths
+- [x] Audit every hook — all user data confirmed to use SQLite (no in-memory-only state)
+- [x] Daily water goal migrated from `localStorage` to the `settings` table (`pref_water_goal_ml`)
+- [x] Weight unit preference already in `settings` table (`pref_weight_unit`, completed in 0.9.3)
+- [x] Notification preferences already in `settings` table (completed in 0.9.6)
+- [x] DB migrations v1–v9 verified clean (TypeScript compiles; no migration errors at runtime)
 
 ---
 

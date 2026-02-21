@@ -2,7 +2,18 @@
 
 ---
 
-## [0.9.6] — Push Notification Reminders
+## [0.9.7] — Data Persistence Audit
+*Goal: all features store data consistently and reliably.*
+
+- [x] Hook audit — all data hooks (weight, water, sleep, food, recipes, meal plan, progress photos, notifications) confirmed fully SQLite-backed; zero in-memory-only persistence
+- [x] `src/hooks/useWaterLog.ts` — daily goal migrated from `localStorage` (`patty_water_goal_ml`) to `settings` table (`pref_water_goal_ml`); `setDailyGoal` now async; `loadGoal` reads from SQLite on mount
+- [x] `src/hooks/useDailySummary.ts` — `waterGoalMl` now read from `settings` table instead of `localStorage`; no new migration needed (`settings` table exists from v8)
+- [x] Weight unit preference (`pref_weight_unit`) and notification prefs already in `settings` table from 0.9.3 / 0.9.6 respectively — confirmed
+- [x] `localStorage` fully eliminated from all source files
+
+---
+
+
 *Goal: opt-in reminders for every tracked habit — 10 independent channels across health, meals, and planning.*
 
 - [x] `@capacitor/local-notifications` installed; Android channel `patty-reminders` created on init

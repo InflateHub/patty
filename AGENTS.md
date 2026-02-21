@@ -122,7 +122,7 @@ Patty/
 │   │
 │   ├── hooks/
 │   │   ├── useWeightLog.ts       # SQLite-backed weight log: addEntry / deleteEntry / getAll; todayEntries / latestEntry
-│   │   ├── useWaterLog.ts        # SQLite-backed water log + localStorage daily goal
+│   │   ├── useWaterLog.ts        # SQLite-backed water log + SQLite daily goal (settings table)
 │   │   ├── useSleepLog.ts        # SQLite-backed sleep log: addEntry (1/day enforced) / deleteEntry / getAll / lastNightEntry / avgDurationMin
 │   │   ├── useFoodLog.ts         # SQLite-backed food log: addEntry / deleteEntry / entriesForDate / todayEntries (grouped by MealType)
 │   │   ├── useRecipes.ts         # SQLite-backed user recipes: addRecipe / deleteRecipe; allRecipes merges seed + user recipes

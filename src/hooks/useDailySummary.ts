@@ -9,13 +9,13 @@ export interface DailySummary {
   weight: WeightEntry | null;
   /** Total water intake in ml for this date. */
   waterTotalMl: number;
-  /** User's daily water goal in ml (from localStorage). */
+  /** User's daily water goal in ml (from settings table). */
   waterGoalMl: number;
   /** Sleep entry whose bedtime date matches, or null. */
   sleep: SleepEntry | null;
 }
 
-const GOAL_KEY = 'patty_water_goal_ml';
+const SETTINGS_GOAL_KEY = 'pref_water_goal_ml';
 const DEFAULT_GOAL = 2000;
 
 /**
@@ -55,10 +55,14 @@ export function useDailySummary(date: string) {
         [date]
       );
       const waterTotalMl = (watRes.values?.[0]?.total as number) ?? 0;
-      const waterGoalMl = parseInt(
-        localStorage.getItem(GOAL_KEY) ?? String(DEFAULT_GOAL),
-        10
+      const goalRes = await db.query(
+        'SELECT value FROM settings WHERE key = ?;',
+        [SETTINGS_GOAL_KEY]
       );
+      const goalVal = goalRes.values?.[0]?.value;
+      const waterGoalMl = goalVal !== undefined && goalVal !== null
+        ? parseInt(String(goalVal), 10)
+        : DEFAULT_GOAL;
 
       // Sleep: entry where bedtime date matches
       const sRes = await db.query(
