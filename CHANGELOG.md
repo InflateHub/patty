@@ -2,6 +2,15 @@
 
 ---
 
+## [0.9.5] — Recipe → Food Log Link
+*Goal: users can log a recipe directly as a meal entry.*
+
+- [x] `src/recipes/RecipeDetailModal.tsx` — `onLogMeal?: (meal, kcal?) => Promise<void>` prop; `IonFooter` with "Log as meal" button; inline meal-slot chip picker (Breakfast/Lunch/Dinner/Snack); `IonToast` on success; `nutritionOutline` icon; resets on modal dismiss
+- [x] `src/pages/Recipes.tsx` — imports `useFoodLog` + `today`; `handleLogMeal` calls `addEntry(today(), meal, undefined, '\u{emoji} {name}', kcal)`; `onLogMeal` wired to `RecipeDetailModal`
+- [x] `src/vite-env.d.ts` — `nutritionOutline` declared
+
+---
+
 ## [0.9.4] — Calorie Estimation + Nutrition on Recipes
 *Goal: basic nutritional awareness in food log and recipe detail.*
 

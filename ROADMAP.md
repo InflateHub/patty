@@ -155,13 +155,14 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.5 — Recipe → Food Log Link
+## 0.9.5 — Recipe → Food Log Link ✓
 *Goal: users can log a recipe directly as a meal entry.*
 
-- [ ] "Log as meal" button in `RecipeDetailModal` footer
-- [ ] Tapping it opens the food log entry modal pre-filled with the recipe name and emoji
-- [ ] Meal slot (Breakfast/Lunch/Dinner/Snacks) selectable before confirming
-- [ ] Entry saved to today's food log; toast confirmation shown
+- [x] "Log as meal" button in `RecipeDetailModal` footer
+- [x] Tapping it opens an inline meal-slot picker (Breakfast / Lunch / Dinner / Snack chips)
+- [x] Meal slot selectable before confirming; entry saved to today's food log
+- [x] Note pre-filled with `{emoji} {recipe name}`; kcal pre-filled from recipe if set
+- [x] Toast confirmation shown on success
 
 ---
 

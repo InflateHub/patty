@@ -16,6 +16,9 @@ import {
 import { add, timeOutline } from 'ionicons/icons';
 import type { Recipe } from '../recipes/recipeData';
 import { useRecipes } from '../hooks/useRecipes';
+import { useFoodLog } from '../hooks/useFoodLog';
+import type { MealType } from '../hooks/useFoodLog';
+import { today } from '../track/trackUtils';
 import RecipeDetailModal from '../recipes/RecipeDetailModal';
 import RecipeFormModal from '../recipes/RecipeFormModal';
 
@@ -23,6 +26,7 @@ type AnyRecipe = Recipe & { custom?: true };
 
 const Recipes: React.FC = () => {
   const { allRecipes, addRecipe, deleteRecipe } = useRecipes();
+  const { addEntry } = useFoodLog();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<AnyRecipe | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -41,6 +45,17 @@ const Recipes: React.FC = () => {
     if (!selected?.custom) return;
     await deleteRecipe(selected.id);
     setSelected(null);
+  }
+
+  async function handleLogMeal(meal: MealType, kcal?: number) {
+    if (!selected) return;
+    await addEntry(
+      today(),
+      meal,
+      undefined,
+      `${selected.emoji}\u00A0${selected.name}`,
+      kcal
+    );
   }
 
   return (
@@ -109,6 +124,7 @@ const Recipes: React.FC = () => {
         recipe={selected}
         onClose={() => setSelected(null)}
         onDelete={selected?.custom ? handleDelete : undefined}
+        onLogMeal={handleLogMeal}
       />
 
       <RecipeFormModal
