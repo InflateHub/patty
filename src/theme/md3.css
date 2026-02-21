@@ -3,6 +3,43 @@
  * Follow MD3 shape, elevation, motion, and typography guidelines.            *
  * ─────────────────────────────────────────────────────────────────────────── */
 
+/* ── Motion system ───────────────────────────────────────────────────────── */
+:root {
+  /* Easing curves */
+  --md-easing-standard:   cubic-bezier(0.2, 0, 0, 1);
+  --md-easing-decelerate: cubic-bezier(0, 0, 0, 1);
+  --md-easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --md-easing-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Duration tokens */
+  --md-duration-xs:   80ms;
+  --md-duration-sm:  150ms;
+  --md-duration-md:  300ms;
+  --md-duration-lg:  420ms;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────────── */
+
+@keyframes md-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes md-scale-in {
+  from { opacity: 0; transform: scale(0.86); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes md-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes md-shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+
 /* ── Typography ─────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   font-family: var(--md-font);
@@ -25,13 +62,14 @@ ion-toolbar {
 ion-title {
   font-size: var(--md-title-lg);
   font-weight: 500;
-  letter-spacing: 0;
+  letter-spacing: -0.2px;
 }
 
 ion-title[size="large"] {
   font-size: var(--md-headline-sm);
   font-weight: 500;
   padding-inline: 20px;
+  letter-spacing: -0.4px;
 }
 
 /* ── Tab Bar ─────────────────────────────────────────────────────────────── */
@@ -39,14 +77,14 @@ ion-tab-bar {
   --background: var(--md-surface-container);
   --border: none;
   padding: 0 8px;
-  height: 64px;
+  height: 60px;
   border-top: 1px solid var(--md-outline-variant);
 }
 
 ion-tab-button {
   --color: var(--md-on-surface-variant);
   --color-selected: var(--md-primary);
-  --ripple-color: var(--md-primary);
+  --ripple-color: color-mix(in srgb, var(--md-primary) 20%, transparent);
   border-radius: var(--md-shape-full);
   position: relative;
 }
@@ -69,11 +107,12 @@ ion-tab-button ion-icon,
 ion-tab-button ion-label {
   position: relative;
   z-index: 1;
+  transition: color var(--md-duration-sm) var(--md-easing-standard);
 }
 
 ion-tab-button ion-label {
   font-size: var(--md-label-md);
-  font-weight: 500;
+  font-weight: 600;
   margin-top: 4px;
 }
 
@@ -91,7 +130,17 @@ ion-card {
   box-shadow: none;
   border: 1px solid var(--md-outline-variant);
   margin: 12px 16px;
+  animation: md-fade-up var(--md-duration-md) var(--md-easing-decelerate) both;
+  will-change: opacity, transform;
 }
+
+ion-card:nth-child(1)   { animation-delay:   0ms; }
+ion-card:nth-child(2)   { animation-delay:  55ms; }
+ion-card:nth-child(3)   { animation-delay: 110ms; }
+ion-card:nth-child(4)   { animation-delay: 165ms; }
+ion-card:nth-child(5)   { animation-delay: 220ms; }
+ion-card:nth-child(6)   { animation-delay: 275ms; }
+ion-card:nth-child(n+7) { animation-delay: 330ms; }
 
 ion-card-header {
   padding: 20px 20px 8px;
@@ -135,7 +184,18 @@ ion-item {
   --min-height: 56px;
   border-radius: 0;
   font-size: var(--md-body-lg);
+  animation: md-fade-in var(--md-duration-md) var(--md-easing-decelerate) both;
 }
+
+ion-item:nth-child(1)   { animation-delay:   0ms; }
+ion-item:nth-child(2)   { animation-delay:  35ms; }
+ion-item:nth-child(3)   { animation-delay:  70ms; }
+ion-item:nth-child(4)   { animation-delay: 105ms; }
+ion-item:nth-child(5)   { animation-delay: 140ms; }
+ion-item:nth-child(6)   { animation-delay: 175ms; }
+ion-item:nth-child(7)   { animation-delay: 210ms; }
+ion-item:nth-child(8)   { animation-delay: 245ms; }
+ion-item:nth-child(n+9) { animation-delay: 280ms; }
 
 ion-item:first-child {
   border-radius: var(--md-shape-md) var(--md-shape-md) 0 0;
@@ -178,6 +238,11 @@ ion-button {
   height: 40px;
   --padding-start: 24px;
   --padding-end: 24px;
+  transition: transform var(--md-duration-xs) var(--md-easing-standard);
+}
+
+ion-button:active {
+  transform: scale(0.97);
 }
 
 ion-button[fill="solid"] {
@@ -201,10 +266,24 @@ ion-fab-button {
   --background-hover: color-mix(in srgb, var(--md-on-primary-container) 8%, var(--md-primary-container));
   --background-activated: color-mix(in srgb, var(--md-on-primary-container) 12%, var(--md-primary-container));
   --border-radius: var(--md-shape-lg);
-  --box-shadow: 0 3px 8px color-mix(in srgb, var(--md-shadow) 15%, transparent),
-                0 1px 3px color-mix(in srgb, var(--md-shadow) 10%, transparent);
+  --box-shadow: 0 3px 8px  color-mix(in srgb, var(--md-shadow) 15%, transparent),
+                0 1px 3px  color-mix(in srgb, var(--md-shadow) 10%, transparent);
   width: 56px;
   height: 56px;
+  animation: md-scale-in var(--md-duration-md) var(--md-easing-spring) both;
+  animation-delay: 220ms;
+  transition: transform var(--md-duration-sm) var(--md-easing-spring),
+              box-shadow var(--md-duration-sm) var(--md-easing-standard);
+}
+
+ion-fab-button:not([disabled]):hover {
+  transform: scale(1.07);
+  --box-shadow: 0 6px 18px color-mix(in srgb, var(--md-shadow) 22%, transparent),
+                0 2px 6px  color-mix(in srgb, var(--md-shadow) 14%, transparent);
+}
+
+ion-fab-button:not([disabled]):active {
+  transform: scale(0.94);
 }
 
 ion-fab-button ion-icon {
@@ -215,14 +294,14 @@ ion-fab-button ion-icon {
 ion-modal {
   --border-radius: var(--md-shape-xl) var(--md-shape-xl) 0 0;
   --background: var(--md-surface-container-low);
-  --box-shadow: 0 -2px 16px color-mix(in srgb, var(--md-shadow) 12%, transparent);
+  --box-shadow: 0 -2px 20px color-mix(in srgb, var(--md-shadow) 14%, transparent);
 }
 
 /* Drag handle for bottom sheets */
 ion-modal ion-content::before {
   content: '';
   display: block;
-  width: 32px;
+  width: 36px;
   height: 4px;
   background: var(--md-outline-variant);
   border-radius: var(--md-shape-full);
@@ -279,10 +358,12 @@ ion-segment-button {
   --indicator-color: var(--md-surface-container-lowest);
   --indicator-height: 100%;
   --indicator-border-radius: var(--md-shape-full);
+  --indicator-transition: transform var(--md-duration-md) var(--md-easing-spring);
   min-height: 36px;
   font-size: var(--md-label-lg);
   font-weight: 500;
   letter-spacing: .00625em;
+  transition: color var(--md-duration-sm) var(--md-easing-standard);
 }
 
 /* ── Datetime ────────────────────────────────────────────────────────────── */
@@ -319,4 +400,143 @@ input[type="number"] {
 ::-webkit-scrollbar-thumb {
   background: var(--md-outline-variant);
   border-radius: var(--md-shape-full);
+}
+
+/* ── Utility: Skeleton loader ────────────────────────────────────────────── */
+.md-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--md-surface-container-high)    25%,
+    var(--md-surface-container-highest) 50%,
+    var(--md-surface-container-high)    75%
+  );
+  background-size: 800px 100%;
+  animation: md-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--md-shape-sm);
+  color: transparent !important;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Utility: Greeting block ────────────────────────────────────────────── */
+.md-greeting {
+  padding: 16px 20px 4px;
+  animation: md-fade-up var(--md-duration-md) var(--md-easing-decelerate) both;
+}
+
+.md-greeting__title {
+  margin: 0;
+  font-size: var(--md-title-lg);
+  font-weight: 500;
+  font-family: var(--md-font);
+  color: var(--md-on-surface);
+}
+
+.md-greeting__sub {
+  margin: 2px 0 0;
+  font-size: var(--md-body-sm);
+  font-family: var(--md-font);
+  color: var(--md-on-surface-variant);
+}
+
+/* ── Utility: Stat cells (at-a-glance rows) ─────────────────────────────── */
+.md-stat-value {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  font-family: var(--md-font);
+  color: var(--md-on-surface);
+  line-height: 1.2;
+}
+
+.md-stat-label {
+  margin: 2px 0 0;
+  font-size: var(--md-label-sm);
+  font-family: var(--md-font);
+  color: var(--md-on-surface-variant);
+}
+
+.md-stat-accent {
+  margin: 3px 0 0;
+  font-size: var(--md-label-sm);
+  font-family: var(--md-font);
+  color: var(--md-primary);
+  font-weight: 600;
+}
+
+.md-stat-tiny {
+  margin: 1px 0 0;
+  font-size: 10px;
+  font-family: var(--md-font);
+  color: var(--md-on-surface-variant);
+}
+
+/* ── Utility: Metric rows (BMI / BMR / TDEE) ────────────────────────────── */
+.md-metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--md-outline-variant);
+}
+
+.md-metric-row:last-child {
+  border-bottom: none;
+}
+
+.md-metric-label {
+  font-family: var(--md-font);
+  font-size: var(--md-body-md);
+  color: var(--md-on-surface-variant);
+}
+
+.md-metric-value {
+  font-family: var(--md-font);
+  font-size: var(--md-title-md);
+  font-weight: 600;
+  color: var(--md-on-surface);
+}
+
+/* ── Utility: Empty state ────────────────────────────────────────────────── */
+.md-empty-state {
+  text-align: center;
+  padding: 48px 32px;
+  color: var(--md-on-surface-variant);
+  animation: md-fade-in var(--md-duration-lg) var(--md-easing-decelerate) both;
+  animation-delay: 150ms;
+}
+
+.md-empty-state__emoji {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+  display: block;
+}
+
+.md-empty-state__title {
+  margin: 0;
+  font-size: var(--md-body-lg);
+  font-weight: 500;
+  font-family: var(--md-font);
+  color: var(--md-on-surface-variant);
+}
+
+.md-empty-state__body {
+  margin: 8px 0 0;
+  font-size: var(--md-body-sm);
+  font-family: var(--md-font);
+  color: var(--md-on-surface-variant);
+}
+
+/* ── Utility: Section header (outside IonListHeader) ────────────────────── */
+.md-section-header {
+  padding-top: 20px;
+  padding-bottom: 4px;
+  padding-inline-start: 20px;
+  color: var(--md-primary);
+  font-family: var(--md-font);
+  font-size: var(--md-label-lg);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }

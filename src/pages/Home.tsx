@@ -45,22 +45,7 @@ const MEAL_LABELS: Record<string, string> = {
   snack: 'Snacks',
 };
 
-const cardStyle: React.CSSProperties = {
-  margin: '12px 16px',
-  borderRadius: 'var(--md-shape-xl)',
-  border: '1px solid var(--md-outline-variant)',
-  boxShadow: 'none',
-};
-
-const sectionHeaderStyle: React.CSSProperties = {
-  paddingTop: 16,
-  paddingBottom: 4,
-  color: 'var(--md-primary)',
-  fontFamily: 'var(--md-font)',
-  fontSize: 'var(--md-label-lg)',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-};
+const secHdr: React.CSSProperties = { paddingTop: 16, paddingBottom: 4 };
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -123,67 +108,42 @@ const Home: React.FC = () => {
         </IonHeader>
 
         {/* ── Greeting ────────────────────────────────── */}
-        <div style={{ padding: '16px 20px 4px' }}>
-          <p style={{
-            margin: 0,
-            fontSize: 'var(--md-title-lg)',
-            fontWeight: 500,
-            fontFamily: 'var(--md-font)',
-            color: 'var(--md-on-surface)',
-          }}>
-            {salutation(profile.name)}
-          </p>
-          <p style={{
-            margin: '2px 0 0',
-            fontSize: 'var(--md-body-sm)',
-            fontFamily: 'var(--md-font)',
-            color: 'var(--md-on-surface-variant)',
-          }}>
+        <div className="md-greeting">
+          <p className="md-greeting__title">{salutation(profile.name)}</p>
+          <p className="md-greeting__sub">
             {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
 
         {/* ── At-a-glance stats row ───────────────────── */}
-        <IonCard style={cardStyle}>
+        <IonCard>
           <IonCardContent style={{ padding: '16px 4px' }}>
             <IonGrid style={{ padding: 0 }}>
               <IonRow style={{ textAlign: 'center' }}>
                 {/* Weight + BMI */}
                 <IonCol>
-                  <p style={{ margin: 0, fontSize: 22, fontWeight: 600, fontFamily: 'var(--md-font)', color: 'var(--md-on-surface)' }}>
+                  <p className="md-stat-value">
                     {latestEntry ? `${latestEntry.value} ${latestEntry.unit}` : '\u2014'}
                   </p>
-                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>
-                    Weight
-                  </p>
+                  <p className="md-stat-label">Weight</p>
                   {bmi > 0 && (
-                    <p style={{ margin: '3px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-primary)', fontWeight: 600 }}>
-                      BMI {bmi.toFixed(1)}
-                    </p>
+                    <p className="md-stat-accent">BMI {bmi.toFixed(1)}</p>
                   )}
                   {bmiCat && (
-                    <p style={{ margin: '1px 0 0', fontSize: 10, fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>
-                      {bmiCat}
-                    </p>
+                    <p className="md-stat-tiny">{bmiCat}</p>
                   )}
                 </IonCol>
                 {/* Divider */}
                 <IonCol style={{ borderLeft: '1px solid var(--md-outline-variant)', borderRight: '1px solid var(--md-outline-variant)' }}>
-                  <p style={{ margin: 0, fontSize: 22, fontWeight: 600, fontFamily: 'var(--md-font)', color: 'var(--md-on-surface)' }}>
-                    {waterLoading ? '\u2026' : `${waterPct}%`}
-                  </p>
-                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>
-                    Water
-                  </p>
+                  <p className="md-stat-value">{waterLoading ? '\u2026' : `${waterPct}%`}</p>
+                  <p className="md-stat-label">Water</p>
                 </IonCol>
                 {/* Sleep */}
                 <IonCol>
-                  <p style={{ margin: 0, fontSize: 22, fontWeight: 600, fontFamily: 'var(--md-font)', color: 'var(--md-on-surface)' }}>
+                  <p className="md-stat-value">
                     {lastNightEntry ? formatDuration(lastNightEntry.duration_min) : '\u2014'}
                   </p>
-                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>
-                    Sleep
-                  </p>
+                  <p className="md-stat-label">Sleep</p>
                 </IonCol>
               </IonRow>
             </IonGrid>
@@ -191,24 +151,24 @@ const Home: React.FC = () => {
         </IonCard>
 
         {/* ── Water ring ──────────────────────────────── */}
-        <IonCard style={cardStyle}>
-          <IonListHeader style={sectionHeaderStyle}>Water Today</IonListHeader>
+        <IonCard>
+          <IonListHeader style={secHdr}>Water Today</IonListHeader>
           <IonCardContent style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 16px 20px' }}>
             <WaterRing total={todayTotal} goal={dailyGoal} size={160} />
           </IonCardContent>
         </IonCard>
 
         {/* ── Weight mini-chart ───────────────────────── */}
-        <IonCard style={cardStyle}>
-          <IonListHeader style={sectionHeaderStyle}>Weight Trend</IonListHeader>
+        <IonCard>
+          <IonListHeader style={secHdr}>Weight Trend</IonListHeader>
           <IonCardContent style={{ padding: '8px 8px 16px' }}>
             <WeightChart entries={miniChartEntries} />
           </IonCardContent>
         </IonCard>
 
         {/* ── Your Metrics ────────────────────────────── */}
-        <IonCard style={cardStyle}>
-          <IonListHeader style={sectionHeaderStyle}>Your Metrics</IonListHeader>
+        <IonCard>
+          <IonListHeader style={secHdr}>Your Metrics</IonListHeader>
           <IonCardContent style={{ padding: '8px 16px 16px' }}>
             {hasMetrics ? (
               <>
@@ -226,10 +186,10 @@ const Home: React.FC = () => {
                   </span>
                 )}, ...(bmr > 0 ? [{ label: 'BMR', value: `${bmr.toLocaleString()} kcal` }] : []),
                    ...(tdee > 0 ? [{ label: 'TDEE', value: `${tdee.toLocaleString()} kcal` }] : []),
-                ].map(({ label, value }, i, arr) => (
-                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--md-outline-variant)' : 'none' }}>
-                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)', color: 'var(--md-on-surface-variant)' }}>{label}</span>
-                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-md)', fontWeight: 600, color: 'var(--md-on-surface)' }}>{value}</span>
+                ].map(({ label, value }) => (
+                  <div key={label} className="md-metric-row">
+                    <span className="md-metric-label">{label}</span>
+                    <span className="md-metric-value">{value}</span>
                   </div>
                 ))}
                 {(!bmr || !tdee) && (
@@ -247,8 +207,8 @@ const Home: React.FC = () => {
         </IonCard>
 
         {/* ── Today's meals ───────────────────────────── */}
-        <IonCard style={{ ...cardStyle, margin: '12px 16px 32px' }}>
-          <IonListHeader style={sectionHeaderStyle}>Today&apos;s Meals</IonListHeader>
+        <IonCard style={{ margin: '12px 16px 32px' }}>
+          <IonListHeader style={secHdr}>Today&apos;s Meals</IonListHeader>
           <IonCardContent style={{ padding: '0 0 8px' }}>
             <IonList lines="inset" style={{ background: 'transparent' }}>
               {(['breakfast', 'lunch', 'dinner', 'snack'] as const).map(meal => {
