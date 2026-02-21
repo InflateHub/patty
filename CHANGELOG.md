@@ -2,6 +2,17 @@
 
 ---
 
+## [0.9.8-pass-a] — UI Polish: Skeletons, Empty States & Error Toasts
+*Goal: eliminate blank flash on load, improve empty-state copy, and surface DB errors as dismissible toasts.*
+
+- [x] `src/track/WeightTab.tsx` — skeleton stat card + history rows while `loading`; `IonToast` on save/delete failure
+- [x] `src/track/WaterTab.tsx` — skeleton history rows while `waterLoading`; `IonToast` on add/delete failure; quick-add error no longer silently swallowed
+- [x] `src/track/SleepTab.tsx` — skeleton stat card while `loading`; two-line empty state; `IonToast` on delete failure
+- [x] `src/track/FoodTab.tsx` — skeleton summary + grouped meal sections while `loading`; `IonToast` on save/delete failure
+- [x] `src/pages/Progress.tsx` — skeleton photo strip (3 placeholder tiles) while `photosLoading`; `IonToast` on photo save failure
+
+---
+
 ## [0.9.7] — Data Persistence Audit
 *Goal: all features store data consistently and reliably.*
 

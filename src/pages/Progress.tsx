@@ -14,7 +14,9 @@ import {
   IonListHeader,
   IonModal,
   IonPage,
+  IonSkeletonText,
   IonTitle,
+  IonToast,
   IonToolbar,
 } from '@ionic/react';
 import { closeOutline, imageOutline, swapHorizontalOutline, trash } from 'ionicons/icons';
@@ -65,7 +67,7 @@ const StatItem: React.FC<{ label: string; value: string }> = ({ label, value }) 
 
 /* ── main component ───────────────────────────────────────────────── */
 const Progress: React.FC = () => {
-  const { photos, addPhoto, deletePhoto } = useProgressPhotos();
+  const { photos, loading: photosLoading, addPhoto, deletePhoto } = useProgressPhotos();
   const { trendDays, stats } = useTrends(30);
 
   /* Add-photo modal */
@@ -74,6 +76,7 @@ const Progress: React.FC = () => {
   const [addUri, setAddUri] = useState<string | null>(null);
   const addSaving = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -86,8 +89,13 @@ const Progress: React.FC = () => {
   const savePhoto = async () => {
     if (!addUri || addSaving.current) return;
     addSaving.current = true;
-    await addPhoto(addDate, addUri);
-    addSaving.current = false;
+    try {
+      await addPhoto(addDate, addUri);
+    } catch {
+      setErrorMsg('Could not save photo.');
+    } finally {
+      addSaving.current = false;
+    }
     setShowAdd(false);
     setAddUri(null);
     setAddDate(today());
@@ -205,7 +213,24 @@ const Progress: React.FC = () => {
             )}
           </div>
 
-          {photos.length === 0 ? (
+          {photosLoading ? (
+            <div
+              style={{
+                display: 'flex',
+                gap: 10,
+                padding: '4px 16px 8px',
+                overflowX: 'hidden',
+              }}
+            >
+              {[1, 2, 3].map((i) => (
+                <IonSkeletonText
+                  key={i}
+                  animated
+                  style={{ width: 140, height: 160, borderRadius: 'var(--md-shape-lg)', flexShrink: 0 }}
+                />
+              ))}
+            </div>
+          ) : photos.length === 0 ? (
             <div
               style={{
                 textAlign: 'center',
@@ -370,6 +395,14 @@ const Progress: React.FC = () => {
             <IonIcon icon={imageOutline} />
           </IonFabButton>
         </IonFab>
+
+        <IonToast
+          isOpen={!!errorMsg}
+          message={errorMsg ?? ''}
+          duration={3000}
+          color="danger"
+          onDidDismiss={() => setErrorMsg(null)}
+        />
 
         {/* Add-photo modal */}
         <IonModal

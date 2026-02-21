@@ -18,7 +18,9 @@ import {
   IonListHeader,
   IonModal,
   IonNote,
+  IonSkeletonText,
   IonTitle,
+  IonToast,
   IonToolbar,
   useIonAlert,
 } from '@ionic/react';
@@ -43,11 +45,12 @@ export const WaterTab: React.FC = () => {
   const [customAmount, setCustomAmount] = useState('');
   const [goalInput, setGoalInput] = useState('');
   const [waterSaving, setWaterSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [presentAlert] = useIonAlert();
 
   async function handleQuickAdd(ml: number) {
-    try { await addWater(ml); } catch { /* ignore */ }
+    try { await addWater(ml); } catch { setErrorMsg('Could not log water.'); }
   }
 
   async function handleCustomSave() {
@@ -61,6 +64,8 @@ export const WaterTab: React.FC = () => {
       await addWater(ml);
       setCustomAmount('');
       setCustomModalOpen(false);
+    } catch {
+      setErrorMsg('Could not log water.');
     } finally {
       setWaterSaving(false);
     }
@@ -83,7 +88,14 @@ export const WaterTab: React.FC = () => {
       message: 'Remove this water entry?',
       buttons: [
         { text: 'Cancel', role: 'cancel' },
-        { text: 'Delete', role: 'destructive', handler: () => deleteWater(id) },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: async () => {
+            try { await deleteWater(id); }
+            catch { setErrorMsg('Could not delete entry.'); }
+          },
+        },
       ],
     });
   }
@@ -118,6 +130,17 @@ export const WaterTab: React.FC = () => {
           </div>
         </IonCardContent>
       </IonCard>
+
+      {waterLoading && (
+        <IonList style={{ marginTop: 8 }}>
+          {[1, 2, 3].map((i) => (
+            <IonItem key={i}>
+              <IonLabel><IonSkeletonText animated style={{ width: '30%' }} /></IonLabel>
+              <IonNote slot="end"><IonSkeletonText animated style={{ width: 50 }} /></IonNote>
+            </IonItem>
+          ))}
+        </IonList>
+      )}
 
       {!waterLoading && waterEntries.length > 0 && (
         <>
@@ -156,6 +179,14 @@ export const WaterTab: React.FC = () => {
           <IonIcon icon={add} />
         </IonFabButton>
       </IonFab>
+
+      <IonToast
+        isOpen={!!errorMsg}
+        message={errorMsg ?? ''}
+        duration={3000}
+        color="danger"
+        onDidDismiss={() => setErrorMsg(null)}
+      />
 
       {/* ── Water custom amount modal ───────────────────────────────────── */}
       <IonModal

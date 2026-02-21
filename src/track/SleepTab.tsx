@@ -18,7 +18,9 @@ import {
   IonListHeader,
   IonModal,
   IonNote,
+  IonSkeletonText,
   IonTitle,
+  IonToast,
   IonToolbar,
   useIonAlert,
 } from '@ionic/react';
@@ -85,6 +87,7 @@ export const SleepTab: React.FC = () => {
   const [quality, setQuality] = useState(3);
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [presentAlert] = useIonAlert();
 
@@ -155,14 +158,35 @@ export const SleepTab: React.FC = () => {
       message: 'Remove this sleep record?',
       buttons: [
         { text: 'Cancel', role: 'cancel' },
-        { text: 'Delete', role: 'destructive', handler: () => deleteEntry(id) },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: async () => {
+            try { await deleteEntry(id); }
+            catch { setErrorMsg('Could not delete entry.'); }
+          },
+        },
       ],
     });
   }
 
   return (
     <>
+      {/* ── Loading skeleton ───────────────────────────────────────── */}
+      {loading && (
+        <IonCard>
+          <IonCardContent>
+            <div style={{ textAlign: 'center', padding: '20px 0 12px' }}>
+              <IonSkeletonText animated style={{ width: 100, height: 52, margin: '0 auto 12px', borderRadius: 8 }} />
+              <IonSkeletonText animated style={{ width: 80, height: 14, margin: '4px auto' }} />
+              <IonSkeletonText animated style={{ width: 140, height: 12, margin: '4px auto' }} />
+            </div>
+          </IonCardContent>
+        </IonCard>
+      )}
+
       {/* ── Last Night stat card ───────────────────────────────────── */}
+      {!loading && (
       <IonCard>
         <IonCardContent>
           <div style={{ textAlign: 'center', padding: '20px 0 12px' }}>
@@ -221,6 +245,7 @@ export const SleepTab: React.FC = () => {
           </div>
         </IonCardContent>
       </IonCard>
+      )}
 
       {/* ── History list ───────────────────────────────────────────── */}
       {!loading && entries.length > 0 && (
@@ -266,18 +291,25 @@ export const SleepTab: React.FC = () => {
       {!loading && entries.length === 0 && (
         <div style={{ textAlign: 'center', padding: '32px 32px', color: 'var(--md-on-surface-variant)' }}>
           <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.4 }}>🌙</div>
-          <p style={{ margin: 0, fontSize: 'var(--md-body-md)', fontFamily: 'var(--md-font)' }}>
-            Tap + to log last night's sleep.
-          </p>
+          <p style={{ margin: 0, fontSize: 'var(--md-body-lg)', fontWeight: 500, fontFamily: 'var(--md-font)' }}>No sleep logged yet</p>
+          <p style={{ margin: '8px 0 0', fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)' }}>Tap + to log last night’s sleep.</p>
         </div>
       )}
 
-      {/* ── FAB (disabled when today/last night already logged) ────────── */}
+      {/* ── FAB (disabled when today/last night already logged) ──────────── */}
       <IonFab vertical="bottom" horizontal="end" slot="fixed">
         <IonFabButton onClick={openModal} disabled={alreadyLogged}>
           <IonIcon icon={add} />
         </IonFabButton>
       </IonFab>
+
+      <IonToast
+        isOpen={!!errorMsg}
+        message={errorMsg ?? ''}
+        duration={3000}
+        color="danger"
+        onDidDismiss={() => setErrorMsg(null)}
+      />
 
       {/* ── Entry modal ────────────────────────────────────────────── */}
       <IonModal

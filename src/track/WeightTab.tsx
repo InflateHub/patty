@@ -19,7 +19,9 @@ import {
   IonListHeader,
   IonModal,
   IonNote,
+  IonSkeletonText,
   IonTitle,
+  IonToast,
   IonToolbar,
   useIonAlert,
 } from '@ionic/react';
@@ -40,6 +42,7 @@ export const WeightTab: React.FC = () => {
   const [date, setDate] = useState<string>(today());
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [presentAlert] = useIonAlert();
 
@@ -61,6 +64,8 @@ export const WeightTab: React.FC = () => {
       await addEntry({ date, value: num, unit, note: note.trim() || undefined });
       resetWeightForm();
       setModalOpen(false);
+    } catch {
+      setErrorMsg('Could not save entry. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -72,7 +77,14 @@ export const WeightTab: React.FC = () => {
       message: 'Remove this weight entry?',
       buttons: [
         { text: 'Cancel', role: 'cancel' },
-        { text: 'Delete', role: 'destructive', handler: () => deleteEntry(id) },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: async () => {
+            try { await deleteEntry(id); }
+            catch { setErrorMsg('Could not delete entry.'); }
+          },
+        },
       ],
     });
   }
@@ -81,6 +93,30 @@ export const WeightTab: React.FC = () => {
 
   return (
     <>
+      {/* ── Loading skeleton ───────────────────────────────────────── */}
+      {loading && (
+        <IonCard>
+          <IonCardContent>
+            <div style={{ textAlign: 'center', padding: '20px 0 12px' }}>
+              <IonSkeletonText animated style={{ width: 120, height: 52, margin: '0 auto 12px', borderRadius: 8 }} />
+              <IonSkeletonText animated style={{ width: 80, height: 14, margin: '0 auto' }} />
+            </div>
+          </IonCardContent>
+        </IonCard>
+      )}
+      {loading && (
+        <IonList>
+          {[1, 2, 3].map((i) => (
+            <IonItem key={i}>
+              <IonLabel>
+                <IonSkeletonText animated style={{ width: '35%' }} />
+              </IonLabel>
+              <IonNote slot="end"><IonSkeletonText animated style={{ width: 60 }} /></IonNote>
+            </IonItem>
+          ))}
+        </IonList>
+      )}
+
       {/* ── Today stat card ────────────────────────────────────────── */}
       {!loading && (
         <IonCard>
@@ -160,6 +196,14 @@ export const WeightTab: React.FC = () => {
           <IonIcon icon={add} />
         </IonFabButton>
       </IonFab>
+
+      <IonToast
+        isOpen={!!errorMsg}
+        message={errorMsg ?? ''}
+        duration={3000}
+        color="danger"
+        onDidDismiss={() => setErrorMsg(null)}
+      />
 
       {/* ── Weight entry modal ──────────────────────────────────────────── */}
       <IonModal

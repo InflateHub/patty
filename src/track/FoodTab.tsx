@@ -19,8 +19,10 @@ import {
   IonListHeader,
   IonModal,
   IonNote,
+  IonSkeletonText,
   IonTextarea,
   IonTitle,
+  IonToast,
   IonToolbar,
 } from '@ionic/react';
 import { add, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
@@ -104,6 +106,7 @@ export const FoodTab: React.FC = () => {
   const [note, setNote] = useState('');
   const [kcal, setKcal] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const todayStr = today();
@@ -138,6 +141,7 @@ export const FoodTab: React.FC = () => {
       await addEntry(todayStr, selectedMeal, photoUri, note.trim() || undefined, Number.isFinite(kcalNum) ? kcalNum : undefined);
       setModalOpen(false);
     } catch {
+      setErrorMsg('Could not save entry. Please try again.');
       setSaving(false);
     }
   }
@@ -171,7 +175,7 @@ export const FoodTab: React.FC = () => {
         <IonItemOptions side="end">
           <IonItemOption
             color="danger"
-            onClick={() => deleteEntry(entry.id)}
+            onClick={() => deleteEntry(entry.id).catch(() => setErrorMsg('Could not delete entry.'))}
             style={{ borderRadius: 'var(--md-shape-md)' }}
           >
             <IonIcon slot="icon-only" icon={trash} />
@@ -214,7 +218,10 @@ export const FoodTab: React.FC = () => {
             Today
           </div>
           {loading ? (
-            <div style={{ fontSize: 'var(--md-title-lg)', color: 'var(--md-on-surface-variant)' }}>—</div>
+            <div>
+              <IonSkeletonText animated style={{ width: 80, height: 40, borderRadius: 6 }} />
+              <IonSkeletonText animated style={{ width: 120, height: 14, marginTop: 8 }} />
+            </div>
           ) : totalToday === 0 ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <IonIcon icon={fastFoodOutline} style={{ fontSize: 28, color: 'var(--md-on-surface-variant)' }} />
@@ -241,7 +248,22 @@ export const FoodTab: React.FC = () => {
       {/* ── Grouped meal log ────────────────────────────────────────── */}
       <IonCard style={{ borderRadius: 'var(--md-shape-xl)', margin: '8px 16px 16px' }}>
         <IonCardContent style={{ padding: '8px 0 12px' }}>
-          {MEALS.map(renderCategory)}
+          {loading ? (
+            <>
+              {[1, 2, 3, 4].map((i) => (
+                <React.Fragment key={i}>
+                  <IonListHeader style={{ '--color': 'var(--md-primary)', fontSize: 'var(--md-label-lg)' } as React.CSSProperties}>
+                    <IonSkeletonText animated style={{ width: 80 }} />
+                  </IonListHeader>
+                  <IonItem lines="none" style={{ '--padding-start': '20px' } as React.CSSProperties}>
+                    <IonLabel><IonSkeletonText animated style={{ width: '60%' }} /></IonLabel>
+                  </IonItem>
+                </React.Fragment>
+              ))}
+            </>
+          ) : (
+            MEALS.map(renderCategory)
+          )}
         </IonCardContent>
       </IonCard>
 
@@ -251,7 +273,13 @@ export const FoodTab: React.FC = () => {
           <IonIcon icon={add} />
         </IonFabButton>
       </IonFab>
-
+      <IonToast
+        isOpen={!!errorMsg}
+        message={errorMsg ?? ''}
+        duration={3000}
+        color="danger"
+        onDidDismiss={() => setErrorMsg(null)}
+      />
       {/* ── Add entry modal ──────────────────────────────────────────── */}
       <IonModal
         isOpen={modalOpen}
