@@ -2,6 +2,18 @@
 
 ---
 
+## [0.9.6] — Push Notification Reminders
+*Goal: opt-in reminders for every tracked habit — 10 independent channels across health, meals, and planning.*
+
+- [x] `@capacitor/local-notifications` installed; Android channel `patty-reminders` created on init
+- [x] `src/hooks/useNotifications.ts` — 10 `NotifChannel` definitions (5 health, 3 meals, 2 weekly planning); per-channel `enabled` + `time` persisted to SQLite `settings` table; `toggleChannel` / `setChannelTime` / `enableAll` / `disableAll` / `requestPermission`; `scheduleOne` / `cancelOne` helpers
+- [x] `src/pages/NotificationsPage.tsx` — full-screen page; permission banner; master toggle with active count; three `IonCard` sections (Health Tracking, Meal Logging, Planning); per-channel `IonToggle` + collapsible `<input type="time">` when enabled
+- [x] `src/pages/ProfilePage.tsx` — "Notifications" nav row with `notificationsOutline` icon pushes `/tabs/notifications`
+- [x] `src/App.tsx` — `/tabs/notifications` route added
+- [x] `src/vite-env.d.ts` — `notificationsOutline`, `alarmOutline` declared
+
+---
+
 ## [0.9.5] — Recipe → Food Log Link
 *Goal: users can log a recipe directly as a meal entry.*
 

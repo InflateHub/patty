@@ -30,5 +30,7 @@ declare module 'ionicons/icons' {
   export const bedOutline: string;
   export const personCircleOutline: string;
   export const nutritionOutline: string;
+  export const notificationsOutline: string;
+  export const alarmOutline: string;
   export default icons;
 }

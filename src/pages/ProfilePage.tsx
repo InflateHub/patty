@@ -8,6 +8,7 @@ import {
   IonCardContent,
   IonContent,
   IonHeader,
+  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
@@ -23,6 +24,7 @@ import {
   IonToolbar,
   IonToast,
 } from '@ionic/react';
+import { notificationsOutline, chevronForwardOutline } from 'ionicons/icons';
 
 import {
   useProfile,

@@ -166,15 +166,29 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.6 — Push Notification Reminders
-*Goal: opt-in reminders to keep daily habits consistent.*
+## 0.9.6 — Push Notification Reminders ✓
+*Goal: opt-in reminders to keep daily habits consistent — 10 channels across health, meals, and planning.*
 
-- [ ] Capacitor `@capacitor/local-notifications` installed and configured
-- [ ] Water reminder: configurable daily time (default 14:00)
-- [ ] Sleep log reminder: configurable nightly time (default 22:00)
-- [ ] Weigh-in reminder: configurable morning time (default 07:30)
-- [ ] Notifications respect the per-category toggles set in Settings (0.9.3)
-- [ ] Permissions requested on first enable
+- [x] `@capacitor/local-notifications` installed and Android notification channel created (`patty-reminders`)
+- [x] `src/hooks/useNotifications.ts` — 10 `NotifChannel` definitions; prefs persisted to SQLite `settings` table; `toggleChannel` / `setChannelTime` / `enableAll` / `disableAll`; `requestPermission`; `checkPermissions` on load
+- [x] `src/pages/NotificationsPage.tsx` — dedicated full-screen page; permission banner; master enable-all toggle; three sections (Health Tracking, Meal Logging, Planning); per-channel toggle + time picker shown when enabled
+- [x] `src/pages/ProfilePage.tsx` — "Notifications" nav row (with `notificationsOutline` icon + chevron) pushes `NotificationsPage`
+- [x] `src/App.tsx` — `/tabs/notifications` route added
+- [x] `vite-env.d.ts` — `notificationsOutline`, `alarmOutline` declared
+
+**10 channels:**
+| Channel | Default | Cadence |
+|---|---|---|
+| ⚖️ Weigh-in | 07:30 | Daily |
+| 💧 Hydration check (morning) | 10:00 | Daily |
+| 💧 Hydration check (afternoon) | 14:00 | Daily |
+| 💧 Hydration check (evening) | 17:00 | Daily |
+| 😴 Sleep log reminder | 22:00 | Daily |
+| 🍳 Breakfast log | 08:30 | Daily |
+| 🥗 Lunch log | 13:00 | Daily |
+| 🍽️ Dinner log | 19:00 | Daily |
+| 📸 Weekly progress photo | 09:00 | Sundays |
+| 📅 Weekly meal plan | 18:00 | Sundays |
 
 ---
 

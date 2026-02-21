@@ -24,6 +24,7 @@ import Recipes from './pages/Recipes';
 import Plan from './pages/Plan';
 import Progress from './pages/Progress';
 import ProfilePage from './pages/ProfilePage';
+import NotificationsPage from './pages/NotificationsPage';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -75,6 +76,9 @@ const App: React.FC = () => (
           </Route>
           <Route exact path="/tabs/profile">
             <ProfilePage />
+          </Route>
+          <Route exact path="/tabs/notifications">
+            <NotificationsPage />
           </Route>
           <Route exact path="/tabs">
             <Redirect to="/tabs/home" />
