@@ -97,6 +97,16 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
+## 0.8.0 — Exercise Planner & Logger ~~DEPRECATED~~
+*Shipped in commit 8910d83 but subsequently removed from scope. Exercise tracking added complexity without sufficient user value at this stage. All exercise_plan / exercise_log DB tables and associated files are considered inactive.*
+
+- [x] DB migration v7: `exercise_plan` + `exercise_log` tables (committed)
+- [x] `useExerciseLog.ts`, `ExerciseTab.tsx`, `ExerciseLogModal.tsx` (committed then deprecated)
+- [x] `ExercisePlanWeek.tsx`, `ExercisePlanModal.tsx` (committed then deprecated)
+- **Status: deprecated. Files not wired into active UI. Will not be carried forward.**
+
+---
+
 ## 0.9.0 — Progress Hub ✓
 *Goal: visual history of body changes and trends.*
 
@@ -118,14 +128,8 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.2 — Quick-Action Shortcuts
-*Goal: one-tap actions directly from the dashboard.*
-
-- [ ] "Log Weight" button → opens weight entry modal (inline, no tab switch)
-- [ ] "Add Water" button → opens quick-add water sheet (+150/250/500/custom)
-- [ ] "Add Meal" button → opens food log entry modal for today
-- [ ] "Log Exercise" button → opens exercise log modal for today
-- [ ] Buttons arranged as a 2×2 action grid card on the dashboard
+## 0.9.2 — Quick-Action Shortcuts ~~SKIPPED~~
+*Descoped. The dashboard already links directly to the Track tab; a duplicate action grid adds UI noise without meaningful value. Skipped to keep scope lean for 1.0.0.*
 
 ---
 

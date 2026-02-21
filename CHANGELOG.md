@@ -18,6 +18,23 @@
 
 ---
 
+## [0.9.2] — Quick-Action Shortcuts *(SKIPPED)*
+*Descoped. Dashboard already surfaces all key data; a duplicate action grid would add UI noise without meaningful value. Removed from scope to keep the 1.0.0 increment lean.*
+
+---
+
+## [0.8.0] — Exercise Planner & Logger *(DEPRECATED)*
+*Shipped in commit `8910d83` but subsequently deprecated. Exercise tracking introduced significant complexity (two new DB tables, five new source files, a new Track segment) without sufficient user value at this stage of the product. The feature is inactive — files are committed but not wired into current navigation.*
+
+- [x] DB migration v7: `exercise_plan` (time-block schedule) + `exercise_log` (completed sessions) tables
+- [x] `src/hooks/useExerciseLog.ts` — `addPlan` / `removePlan` / `addSession` / `removeSession`; `useExerciseWeekPlans` for weekly counts
+- [x] `src/track/ExerciseTab.tsx` — day navigator, planned blocks, logged sessions, FAB
+- [x] `src/track/ExerciseLogModal.tsx` — log a session against a planned block
+- [x] `src/plan/ExercisePlanWeek.tsx` + `ExercisePlanModal.tsx` — week grid and block creation modal
+- **All above deprecated. Will not be carried forward into 1.0.0.**
+
+---
+
 ## [0.9.0] — Progress Hub
 *Goal: visual history of body changes and trends.*
 
