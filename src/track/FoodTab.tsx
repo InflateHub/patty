@@ -213,7 +213,7 @@ export const FoodTab: React.FC = () => {
     <>
       {/* ── Today summary card ──────────────────────────────────────── */}
       <IonCard style={{ borderRadius: 'var(--md-shape-xl)', margin: '16px 16px 8px' }}>
-        <IonCardContent style={{ padding: '20px 24px' }}>
+        <IonCardContent style={{ padding: '16px 24px' }}>
           <div style={{ fontSize: 'var(--md-label-md)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
             Today
           </div>

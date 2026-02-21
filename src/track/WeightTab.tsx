@@ -10,6 +10,8 @@ import {
   IonFabButton,
   IonHeader,
   IonIcon,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
   IonItem,
   IonItemOption,
   IonItemOptions,
@@ -43,6 +45,7 @@ export const WeightTab: React.FC = () => {
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(30);
 
   const [presentAlert] = useIonAlert();
 
@@ -121,7 +124,7 @@ export const WeightTab: React.FC = () => {
       {!loading && (
         <IonCard>
           <IonCardContent>
-            <div style={{ textAlign: 'center', padding: '20px 0 12px' }}>
+            <div style={{ textAlign: 'center', padding: '24px 0 16px' }}>
               <div style={{
                 fontSize: 56,
                 fontWeight: 300,
@@ -133,7 +136,7 @@ export const WeightTab: React.FC = () => {
                 {todayLatest ? `${todayLatest.value}` : '—'}
               </div>
               <div style={{
-                marginTop: 6,
+                marginTop: 8,
                 fontSize: 'var(--md-body-sm)',
                 fontFamily: 'var(--md-font)',
                 color: 'var(--md-on-surface-variant)',
@@ -162,7 +165,7 @@ export const WeightTab: React.FC = () => {
         <>
           <IonListHeader style={{ paddingInlineStart: 20, marginTop: 8 }}>History</IonListHeader>
           <IonList>
-            {entries.map((entry: WeightEntry) => (
+            {entries.slice(0, visibleCount).map((entry: WeightEntry) => (
               <IonItemSliding key={entry.id}>
                 <IonItem>
                   <IonLabel>
@@ -179,6 +182,15 @@ export const WeightTab: React.FC = () => {
               </IonItemSliding>
             ))}
           </IonList>
+          <IonInfiniteScroll
+            disabled={visibleCount >= entries.length}
+            onIonInfinite={(ev) => {
+              setVisibleCount((c) => c + 30);
+              setTimeout(() => (ev.target as HTMLIonInfiniteScrollElement).complete(), 300);
+            }}
+          >
+            <IonInfiniteScrollContent loadingText="Loading more…" />
+          </IonInfiniteScroll>
         </>
       )}
 

@@ -189,7 +189,7 @@ export const SleepTab: React.FC = () => {
       {!loading && (
       <IonCard>
         <IonCardContent>
-          <div style={{ textAlign: 'center', padding: '20px 0 12px' }}>
+            <div style={{ textAlign: 'center', padding: '24px 0 16px' }}>
             <div style={{
               fontSize: 56,
               fontWeight: 300,
@@ -203,7 +203,7 @@ export const SleepTab: React.FC = () => {
             {lastNightEntry ? (
               <>
                 <div style={{
-                  marginTop: 6,
+                  marginTop: 8,
                   fontSize: 18,
                   letterSpacing: 3,
                   color: 'var(--md-primary)',
@@ -222,7 +222,7 @@ export const SleepTab: React.FC = () => {
               </>
             ) : (
               <div style={{
-                marginTop: 6,
+                marginTop: 8,
                 fontSize: 'var(--md-body-sm)',
                 fontFamily: 'var(--md-font)',
                 color: 'var(--md-on-surface-variant)',

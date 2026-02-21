@@ -117,6 +117,13 @@ ion-tab-button ion-label {
 }
 
 /* ── Content area ────────────────────────────────────────────────────────── */
+
+/* Subtle fade-in when a tab page mounts into the router outlet.
+   Cards and list items layer their own staggered md-fade-up on top.        */
+ion-router-outlet > .ion-page {
+  animation: md-fade-in var(--md-duration-sm) var(--md-easing-decelerate) both;
+}
+
 ion-content {
   --background: var(--md-background);
   --padding-start: 0;
@@ -129,7 +136,7 @@ ion-card {
   border-radius: var(--md-shape-xl) !important;
   box-shadow: none;
   border: 1px solid var(--md-outline-variant);
-  margin: 12px 16px;
+  margin: 8px 16px;
   animation: md-fade-up var(--md-duration-md) var(--md-easing-decelerate) both;
   will-change: opacity, transform;
 }
@@ -542,7 +549,7 @@ input[type="number"] {
 
 /* ── Utility: Section header (outside IonListHeader) ────────────────────── */
 .md-section-header {
-  padding-top: 20px;
+  padding-top: 16px;
   padding-bottom: 4px;
   padding-inline-start: 20px;
   color: var(--md-primary);

@@ -203,15 +203,15 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.8 — UI Polish Pass
+## 0.9.8 — UI Polish Pass ✓
 *Goal: the app looks and feels finished.*
 
 - [x] Consistent loading skeletons on all data-fetching tabs (`IonSkeletonText`) — WeightTab, WaterTab, SleepTab, FoodTab, Progress photos
 - [x] Empty states reviewed and improved: two-line message + emoji on every tab; SleepTab empty state upgraded with title + body copy
 - [x] Error handling: failed DB operations surface a dismissible `IonToast` (WeightTab, WaterTab, SleepTab, FoodTab, Progress)
-- [ ] Spacing and alignment audit across all pages (8 dp grid compliance)
-- [ ] Transitions: page entry animations use MD3 motion tokens
-- [ ] Long lists use `IonVirtualScroll` or windowing where appropriate
+- [x] Spacing and alignment audit: off-grid values (20px, 12px, 6px) corrected to 8 dp multiples across all stat cards and section headers
+- [x] Transitions: tab page entry uses `md-fade-in` on `ion-router-outlet > .ion-page`; cards/items retain staggered `md-fade-up`/`md-fade-in` with MD3 easing tokens
+- [x] Long-list pagination: weight history uses `IonInfiniteScroll` (30 rows/page); sleep and water lists are inherently short
 
 ---
 

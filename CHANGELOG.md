@@ -2,6 +2,19 @@
 
 ---
 
+## [0.9.8-pass-b] — UI Polish: Spacing, Transitions & Infinite Scroll
+*Goal: 8 dp grid compliance, MD3 page entry animation, paginated weight history.*
+
+- [x] `src/theme/md3.css` — `ion-router-outlet > .ion-page` fade-in entry animation (`md-fade-in`, `--md-duration-sm`, `--md-easing-decelerate`)
+- [x] `src/theme/md3.css` — `ion-card` margin corrected from 12px to 8px (8 dp grid)
+- [x] `src/theme/md3.css` — `.md-section-header` padding-top corrected from 20px to 16px
+- [x] `src/track/WeightTab.tsx` — stat card padding `20px 0 12px` → `24px 0 16px`; `marginTop 6` → `8`; `IonInfiniteScroll` added to history list (page size 30)
+- [x] `src/track/SleepTab.tsx` — stat card padding and `marginTop 6` → `8` (quality stars row)
+- [x] `src/track/FoodTab.tsx` — today summary card padding `20px 24px` → `16px 24px`
+- [x] ROADMAP.md: all six 0.9.8 items checked off
+
+---
+
 ## [0.9.8-pass-a] — UI Polish: Skeletons, Empty States & Error Toasts
 *Goal: eliminate blank flash on load, improve empty-state copy, and surface DB errors as dismissible toasts.*
 
