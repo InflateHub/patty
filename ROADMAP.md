@@ -215,16 +215,16 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.9 — Capacitor Native Build Prep
+## 0.9.9 — Capacitor Native Build Prep ✓
 *Goal: app is ready to compile as a native Android (and iOS) binary.*
 
-- [ ] App icon designed and exported at all required densities (mipmap-*)
-- [ ] Splash screen configured via `@capacitor/splash-screen`
-- [ ] `AndroidManifest.xml` permissions audited (camera, notifications, storage)
-- [ ] `capacitor.config.ts` finalised: appId `com.patty.app`, appName `Patty`, webDir `dist`
-- [ ] `npx cap sync android` runs clean with no warnings
-- [ ] App launches correctly on Android emulator (API 34 target)
-- [ ] iOS scheme verified (`npx cap sync ios`; no build errors in Xcode)
+- [x] App icon designed and exported at all required densities (mipmap-*)
+- [x] Splash screen configured via `@capacitor/splash-screen`
+- [x] `AndroidManifest.xml` permissions audited (camera, notifications, storage)
+- [x] `capacitor.config.ts` finalised: appId `com.patty.app`, appName `Patty`, webDir `dist`
+- [x] `npx cap sync android` runs clean with no warnings
+- [x] App launches correctly on Android emulator (API 34 target)
+- [ ] iOS scheme verified (`npx cap sync ios`; no build errors in Xcode) — **deferred: requires macOS/Xcode**
 
 ---
 

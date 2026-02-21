@@ -2,6 +2,20 @@
 
 ---
 
+## [0.9.9] — Capacitor Native Build Prep
+*Goal: app is ready to compile as a native Android binary.*
+
+- [x] `capacitor.config.ts` created: `appId: com.patty.app`, `appName: Patty`, `webDir: dist`; `SplashScreen` plugin config (2 s launch, `#5C7A6E` background, immersive)
+- [x] `@capacitor/android`, `@capacitor/ios`, `@capacitor/splash-screen` installed
+- [x] `@capacitor/assets` installed (dev); `resources/icon.png` + `resources/splash.png` populated from 1024×1024 source image
+- [x] `npx @capacitor/assets generate --android` — all mipmap densities (ldpi → xxxhdpi) + adaptive-icon XMLs + splash all densities generated
+- [x] `android/app/src/main/AndroidManifest.xml` — added `CAMERA`, `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `VIBRATE`; `READ_EXTERNAL_STORAGE` gated to `maxSdkVersion="32"`, `WRITE_EXTERNAL_STORAGE` gated to `maxSdkVersion="28"`
+- [x] `npx cap add android` — Android project scaffolded; 3 Capacitor plugins detected
+- [x] `npx cap sync android` — clean sync, no warnings
+- [ ] iOS deferred — requires macOS/Xcode; will run `npx cap sync ios` on build machine
+
+---
+
 ## [0.9.8-pass-b] — UI Polish: Spacing, Transitions & Infinite Scroll
 *Goal: 8 dp grid compliance, MD3 page entry animation, paginated weight history.*
 
