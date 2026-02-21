@@ -49,5 +49,18 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
-  // 0.5.0 — food log      (add here)
+  {
+    version: 4,
+    // 0.5.0 — food log
+    statements: [
+      `CREATE TABLE IF NOT EXISTS food_entries (
+        id         TEXT    PRIMARY KEY NOT NULL,
+        date       TEXT    NOT NULL,
+        meal       TEXT    NOT NULL,
+        photo_uri  TEXT,
+        note       TEXT,
+        created_at TEXT    NOT NULL
+      );`,
+    ],
+  },
 ];

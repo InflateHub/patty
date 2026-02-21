@@ -16,5 +16,7 @@ declare module 'ionicons/icons' {
   export const settingsOutline: string;
   export const moonOutline: string;
   export const timeOutline: string;
+  export const cameraOutline: string;
+  export const fastFoodOutline: string;
   export default icons;
 }

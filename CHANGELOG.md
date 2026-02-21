@@ -2,6 +2,19 @@
 
 ---
 
+## [0.5.0] — Food Log
+*Goal: photo-first meal capture across four categories.*
+
+- [x] DB migration v4: `food_entries` table (`id`, `date`, `meal`, `photo_uri`, `note`, `created_at`)
+- [x] `src/hooks/useFoodLog.ts` — `addEntry` / `deleteEntry` / `entriesForDate` / `todayEntries` (grouped by meal)
+- [x] `src/track/FoodTab.tsx` — self-contained tab: today summary card, four grouped category sections, swipe-to-delete, FAB
+- [x] Entry modal: meal type chip picker, photo upload (file input → data URI), optional note textarea
+- [x] `src/pages/Track.tsx` — fourth segment "Food" added; segment max-width widened to 520 px
+- [x] `vite-env.d.ts` — `cameraOutline`, `fastFoodOutline` declared
+- [x] TypeScript clean
+
+---
+
 ## [0.4.1] — Daily Alignment + Analytics Foundation
 *Goal: align all three trackers to a daily model and lay the data foundation for the Home dashboard.*
 

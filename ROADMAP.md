@@ -56,13 +56,13 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.5.0 — Food Log
+## 0.5.0 — Food Log ✓
 *Goal: photo-first meal capture across four categories.*
 
-- [ ] Meal categories: Breakfast, Lunch, Dinner, Snacks
-- [ ] Photo capture / upload per meal entry
-- [ ] Optional text note per entry
-- [ ] Daily food log view grouped by category
+- [x] Meal categories: Breakfast, Lunch, Dinner, Snacks
+- [x] Photo capture / upload per meal entry
+- [x] Optional text note per entry
+- [x] Daily food log view grouped by category
 
 ---
 

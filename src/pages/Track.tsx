@@ -12,8 +12,9 @@ import {
 import { WeightTab } from '../track/WeightTab';
 import { WaterTab } from '../track/WaterTab';
 import { SleepTab } from '../track/SleepTab';
+import { FoodTab } from '../track/FoodTab';
 
-type TabId = 'weight' | 'water' | 'sleep';
+type TabId = 'weight' | 'water' | 'sleep' | 'food';
 
 const Track: React.FC = () => {
   const [tab, setTab] = useState<TabId>('weight');
@@ -28,7 +29,7 @@ const Track: React.FC = () => {
           <IonSegment
             value={tab}
             onIonChange={(e) => setTab(e.detail.value as TabId)}
-            style={{ maxWidth: 400, margin: '0 auto', '--background': 'transparent' } as React.CSSProperties}
+            style={{ maxWidth: 520, margin: '0 auto', '--background': 'transparent' } as React.CSSProperties}
           >
             <IonSegmentButton value="weight">
               <IonLabel>Weight</IonLabel>
@@ -39,6 +40,9 @@ const Track: React.FC = () => {
             <IonSegmentButton value="sleep">
               <IonLabel>Sleep</IonLabel>
             </IonSegmentButton>
+            <IonSegmentButton value="food">
+              <IonLabel>Food</IonLabel>
+            </IonSegmentButton>
           </IonSegment>
         </IonToolbar>
       </IonHeader>
@@ -47,6 +51,7 @@ const Track: React.FC = () => {
         {tab === 'weight' && <WeightTab />}
         {tab === 'water' && <WaterTab />}
         {tab === 'sleep' && <SleepTab />}
+        {tab === 'food' && <FoodTab />}
         <div style={{ height: 88 }} />
       </IonContent>
     </IonPage>

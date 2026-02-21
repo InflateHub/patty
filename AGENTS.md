@@ -90,7 +90,7 @@ Patty/
 │   ├── vite-env.d.ts          # Vite environment types + ionicons ambient declaration
 │   │
 │   ├── pages/
-│   │   ├── Track.tsx          # Track tab shell — 51-line host: header + segment + active tab (0.3.1)
+│   │   ├── Track.tsx          # Track tab shell — 51-line host: header + segment + active tab (0.5.0)
 │   │   ├── Recipes.tsx        # Recipes tab — recipe library (stub → 0.6)
 │   │   ├── Plan.tsx           # Plan tab — cooking + exercise planners (stub → 0.7–0.8)
 │   │   ├── Progress.tsx       # Progress tab — photos + trends (stub → 0.9)
@@ -101,7 +101,8 @@ Patty/
 │   │   ├── trackUtils.ts      # Shared utils: today/formatDate/formatTime/isToday/formatDuration + style tokens S
 │   │   ├── WeightTab.tsx      # Self-contained weight tab: Today stat card, chart, history, modals, FAB
 │   │   ├── WaterTab.tsx       # Self-contained water tab: state, ring, chips, modals, FAB
-│   │   └── SleepTab.tsx       # Self-contained sleep tab: Last Night stat card, history, entry modal (1/day), FAB
+│   │   ├── SleepTab.tsx       # Self-contained sleep tab: Last Night stat card, history, entry modal (1/day), FAB
+│   │   └── FoodTab.tsx        # Self-contained food tab: today summary, grouped meal sections, photo+note modal, FAB
 │   │
 │   ├── components/
 │   │   ├── WeightChart.tsx    # Recharts line chart for weight over time
@@ -111,6 +112,7 @@ Patty/
 │   │   ├── useWeightLog.ts    # SQLite-backed weight log: addEntry / deleteEntry / getAll; todayEntries / latestEntry
 │   │   ├── useWaterLog.ts     # SQLite-backed water log + localStorage daily goal
 │   │   ├── useSleepLog.ts     # SQLite-backed sleep log: addEntry (1/day enforced) / deleteEntry / getAll / lastNightEntry / avgDurationMin
+│   │   ├── useFoodLog.ts      # SQLite-backed food log: addEntry / deleteEntry / entriesForDate / todayEntries (grouped by MealType)
 │   │   └── useDailySummary.ts # Per-day aggregate hook: weight + waterTotalMl + waterGoalMl + sleep for any date
 │   │
 │   ├── db/
