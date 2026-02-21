@@ -97,4 +97,16 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
+  {
+    version: 7,
+    // 0.9.0 — progress photos
+    statements: [
+      `CREATE TABLE IF NOT EXISTS progress_photos (
+        id         TEXT    PRIMARY KEY NOT NULL,
+        date       TEXT    NOT NULL,
+        photo_uri  TEXT    NOT NULL,
+        created_at TEXT    NOT NULL
+      );`,
+    ],
+  },
 ];

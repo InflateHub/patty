@@ -2,6 +2,19 @@
 
 ---
 
+## [0.9.0] — Progress Hub
+*Goal: visual history of body changes and trends.*
+
+- [x] DB migration v7: `progress_photos` table (`id`, `date`, `photo_uri`, `created_at`)
+- [x] `src/hooks/useProgressPhotos.ts` — `addPhoto` / `deletePhoto` / `allPhotos` (sorted date desc)
+- [x] `src/hooks/useTrends.ts` — last-N-days aggregation of weight, water, sleep; 7-day stats (current weight, avg sleep, avg water)
+- [x] `src/components/TrendCharts.tsx` — three stacked Recharts line charts (weight, daily water in L, sleep in hours)
+- [x] `src/pages/Progress.tsx` — rewritten: stats summary card, date-stamped photo gallery, FAB to add photo, side-by-side comparison modal, trend charts
+- [x] `vite-env.d.ts` — `imageOutline`, `swapHorizontalOutline` declared
+- [x] TypeScript clean
+
+---
+
 ## [0.7.0] — Cooking Planner
 *Goal: plan meals for the week and get a grocery list.*
 

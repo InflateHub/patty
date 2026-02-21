@@ -93,7 +93,7 @@ Patty/
 │   │   ├── Track.tsx          # Track tab shell — 51-line host: header + segment + active tab (0.5.0)
 │   │   ├── Recipes.tsx        # Recipes tab — recipe library (stub → 0.6)
 │   │   ├── Plan.tsx           # Plan tab — cooking + exercise planners (stub → 0.7–0.8)
-│   │   ├── Progress.tsx       # Progress tab — photos + trends (stub → 0.9)
+│   │   ├── Progress.tsx       # Progress tab — stats card, photo gallery, compare modal, trend charts (0.9.0)
 │   │   ├── Home.tsx           # Dashboard stub — full dashboard in 1.0.0
 │   │   └── Stub.css           # Shared empty-state styles for stub pages
 │   │
@@ -116,16 +116,19 @@ Patty/
 │   │
 │   ├── components/
 │   │   ├── WeightChart.tsx    # Recharts line chart for weight over time
-│   │   └── WaterRing.tsx      # Animated SVG progress ring for water daily goal
+│   │   ├── WaterRing.tsx      # Animated SVG progress ring for water daily goal
+│   │   └── TrendCharts.tsx    # Three stacked Recharts charts: weight / water / sleep (30-day window)
 │   │
 │   ├── hooks/
-│   │   ├── useWeightLog.ts    # SQLite-backed weight log: addEntry / deleteEntry / getAll; todayEntries / latestEntry
-│   │   ├── useWaterLog.ts     # SQLite-backed water log + localStorage daily goal
-│   │   ├── useSleepLog.ts     # SQLite-backed sleep log: addEntry (1/day enforced) / deleteEntry / getAll / lastNightEntry / avgDurationMin
-│   │   ├── useFoodLog.ts      # SQLite-backed food log: addEntry / deleteEntry / entriesForDate / todayEntries (grouped by MealType)
-│   │   ├── useRecipes.ts      # SQLite-backed user recipes: addRecipe / deleteRecipe; allRecipes merges seed + user recipes
-│   │   ├── useMealPlan.ts     # SQLite-backed meal plan: assignSlot / clearSlot / weekPlan / groceryList; week helpers
-│   │   └── useDailySummary.ts # Per-day aggregate hook: weight + waterTotalMl + waterGoalMl + sleep for any date
+│   │   ├── useWeightLog.ts       # SQLite-backed weight log: addEntry / deleteEntry / getAll; todayEntries / latestEntry
+│   │   ├── useWaterLog.ts        # SQLite-backed water log + localStorage daily goal
+│   │   ├── useSleepLog.ts        # SQLite-backed sleep log: addEntry (1/day enforced) / deleteEntry / getAll / lastNightEntry / avgDurationMin
+│   │   ├── useFoodLog.ts         # SQLite-backed food log: addEntry / deleteEntry / entriesForDate / todayEntries (grouped by MealType)
+│   │   ├── useRecipes.ts         # SQLite-backed user recipes: addRecipe / deleteRecipe; allRecipes merges seed + user recipes
+│   │   ├── useMealPlan.ts        # SQLite-backed meal plan: assignSlot / clearSlot / weekPlan / groceryList; week helpers
+│   │   ├── useDailySummary.ts    # Per-day aggregate hook: weight + waterTotalMl + waterGoalMl + sleep for any date
+│   │   ├── useProgressPhotos.ts  # SQLite-backed progress photos: addPhoto / deletePhoto / allPhotos (date desc)
+│   │   └── useTrends.ts          # Last-30-day aggregation of weight/water/sleep; 7-day stats for Progress Hub
 │   │
 │   ├── db/
 │   │   ├── database.ts        # SQLite init (Capacitor native + jeep-sqlite WASM browser)

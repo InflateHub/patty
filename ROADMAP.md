@@ -97,13 +97,13 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 0.9.0 — Progress Hub
+## 0.9.0 — Progress Hub ✓
 *Goal: visual history of body changes and trends.*
 
-- [ ] Progress photo upload (date-stamped)
-- [ ] Side-by-side photo comparison (pick two dates)
-- [ ] Trend charts: weight, average sleep, daily water — all on one screen
-- [ ] Basic stats summary (current weight, 7-day avg sleep, weekly water avg)
+- [x] Progress photo upload (date-stamped)
+- [x] Side-by-side photo comparison (pick two dates)
+- [x] Trend charts: weight, average sleep, daily water — all on one screen
+- [x] Basic stats summary (current weight, 7-day avg sleep, weekly water avg)
 
 ---
 

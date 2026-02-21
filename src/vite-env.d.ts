@@ -23,5 +23,7 @@ declare module 'ionicons/icons' {
   export const removeCircleOutline: string;
   export const chevronBackOutline: string;
   export const chevronForwardOutline: string;
+  export const imageOutline: string;
+  export const swapHorizontalOutline: string;
   export default icons;
 }
