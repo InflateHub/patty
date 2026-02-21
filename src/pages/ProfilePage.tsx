@@ -8,7 +8,6 @@ import {
   IonCardContent,
   IonContent,
   IonHeader,
-  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
@@ -24,7 +23,6 @@ import {
   IonToolbar,
   IonToast,
 } from '@ionic/react';
-import { notificationsOutline, chevronForwardOutline } from 'ionicons/icons';
 
 import {
   useProfile,
@@ -33,24 +31,9 @@ import {
   ageFromDob,
 } from '../hooks/useProfile';
 
-// ── Styles ────────────────────────────────────────────────────────────────────
-
-const cardStyle: React.CSSProperties = {
-  margin: '12px 16px',
-  borderRadius: 'var(--md-shape-xl)',
-  border: '1px solid var(--md-outline-variant)',
-  boxShadow: 'none',
-};
-
-const sectionHeaderStyle: React.CSSProperties = {
-  paddingTop: 16,
-  paddingBottom: 4,
-  color: 'var(--md-primary)',
-  fontFamily: 'var(--md-font)',
-  fontSize: 'var(--md-label-lg)',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-};
+// ── Shared minor styles ───────────────────────────────────────────────────────
+const hdr: React.CSSProperties = { paddingTop: 20, paddingBottom: 4 };
+const transparentItem = { '--background': 'transparent' } as React.CSSProperties;
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -113,13 +96,7 @@ const ProfilePage: React.FC = () => {
           </IonButtons>
           <IonTitle>Profile</IonTitle>
           <IonButtons slot="end">
-            <IonButton
-              strong
-              onClick={handleSave}
-              style={{ color: 'var(--md-primary)', fontFamily: 'var(--md-font)' }}
-            >
-              Save
-            </IonButton>
+            <IonButton strong onClick={handleSave}>Save</IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
@@ -127,69 +104,70 @@ const ProfilePage: React.FC = () => {
       <IonContent fullscreen>
 
         {/* ── About Me ──────────────────────────────────────────────────── */}
-        <IonCard style={cardStyle}>
-          <IonListHeader style={sectionHeaderStyle}>About Me</IonListHeader>
-          <IonCardContent style={{ padding: '0 0 8px' }}>
+        <IonCard>
+          <IonListHeader style={hdr}>About Me</IonListHeader>
+          <IonCardContent style={{ padding: '4px 0 12px' }}>
             <IonList lines="inset" style={{ background: 'transparent' }}>
 
               {/* Name */}
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
-                <IonLabel position="stacked" style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-md)', color: 'var(--md-on-surface-variant)', marginBottom: 4 }}>
-                  Display name
-                </IonLabel>
+              <IonItem style={transparentItem}>
+                <IonLabel position="stacked">Display name</IonLabel>
                 <IonInput
                   value={form.name}
                   placeholder="Your name"
                   onIonInput={e => setForm(f => ({ ...f, name: (e.detail.value ?? '') as string }))}
-                  style={{ fontFamily: 'var(--md-font)' }}
                 />
               </IonItem>
 
               {/* Date of birth */}
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
-                <IonLabel position="stacked" style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-md)', color: 'var(--md-on-surface-variant)', marginBottom: 4 }}>
-                  Date of birth
-                </IonLabel>
+              <IonItem style={transparentItem}>
+                <IonLabel position="stacked">Date of birth</IonLabel>
                 <IonInput
                   type="date"
                   value={form.dob}
                   onIonInput={e => setForm(f => ({ ...f, dob: (e.detail.value ?? '') as string }))}
-                  style={{ fontFamily: 'var(--md-font)' }}
                 />
                 {dobAge > 0 && (
-                  <IonNote slot="end" style={{ fontFamily: 'var(--md-font)', alignSelf: 'center' }}>
-                    {dobAge} yrs
-                  </IonNote>
+                  <IonNote slot="end" style={{ alignSelf: 'center' }}>{dobAge} yrs</IonNote>
                 )}
               </IonItem>
 
-              {/* Sex */}
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
-                <IonLabel style={{ fontFamily: 'var(--md-font)', marginBottom: 8 }}>Biological sex</IonLabel>
-              </IonItem>
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties} lines="none">
-                <IonSegment
-                  value={form.sex || ''}
-                  onIonChange={e => setForm(f => ({ ...f, sex: (e.detail.value ?? '') as UserProfile['sex'] }))}
-                  style={{ width: '100%', paddingBottom: 8 }}
-                >
-                  <IonSegmentButton value="male">
-                    <IonLabel style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-md)' }}>Male</IonLabel>
-                  </IonSegmentButton>
-                  <IonSegmentButton value="female">
-                    <IonLabel style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-md)' }}>Female</IonLabel>
-                  </IonSegmentButton>
-                  <IonSegmentButton value="other">
-                    <IonLabel style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-md)' }}>Other</IonLabel>
-                  </IonSegmentButton>
-                </IonSegment>
+              {/* Biological sex */}
+              <IonItem style={transparentItem} lines="none">
+                <div style={{ width: '100%', padding: '10px 0 4px' }}>
+                  <p style={{
+                    margin: '0 0 10px',
+                    fontSize: 'var(--md-label-lg)',
+                    color: 'var(--md-on-surface-variant)',
+                    fontWeight: 500,
+                  }}>
+                    Biological sex
+                  </p>
+                  <IonSegment
+                    value={form.sex || ''}
+                    onIonChange={e => setForm(f => ({ ...f, sex: (e.detail.value ?? '') as UserProfile['sex'] }))}
+                    style={{ width: '100%' }}
+                  >
+                    <IonSegmentButton value="male"><IonLabel>Male</IonLabel></IonSegmentButton>
+                    <IonSegmentButton value="female"><IonLabel>Female</IonLabel></IonSegmentButton>
+                    <IonSegmentButton value="other"><IonLabel>Other</IonLabel></IonSegmentButton>
+                  </IonSegment>
+                </div>
               </IonItem>
 
+            </IonList>
+          </IonCardContent>
+        </IonCard>
+
+        {/* ── Body Metrics ──────────────────────────────────────────────── */}
+        <IonCard>
+          <IonListHeader style={hdr}>Body Metrics</IonListHeader>
+          <IonCardContent style={{ padding: '4px 0 12px' }}>
+            <IonList lines="inset" style={{ background: 'transparent' }}>
+
               {/* Height */}
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
-                <IonLabel position="stacked" style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-md)', color: 'var(--md-on-surface-variant)', marginBottom: 4 }}>
-                  Height (cm)
-                </IonLabel>
+              <IonItem style={transparentItem}>
+                <IonLabel position="stacked">Height (cm)</IonLabel>
                 <IonInput
                   type="number"
                   value={form.heightCm || ''}
@@ -197,23 +175,21 @@ const ProfilePage: React.FC = () => {
                   min={100}
                   max={250}
                   onIonInput={e => setForm(f => ({ ...f, heightCm: Number(e.detail.value ?? 0) }))}
-                  style={{ fontFamily: 'var(--md-font)' }}
                 />
                 {form.heightCm > 0 && (
-                  <IonNote slot="end" style={{ fontFamily: 'var(--md-font)', alignSelf: 'center' }}>
+                  <IonNote slot="end" style={{ alignSelf: 'center' }}>
                     {(form.heightCm / 30.48).toFixed(1)} ft
                   </IonNote>
                 )}
               </IonItem>
 
               {/* Activity level */}
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
-                <IonLabel style={{ fontFamily: 'var(--md-font)' }}>Activity level</IonLabel>
+              <IonItem style={transparentItem}>
+                <IonLabel>Activity level</IonLabel>
                 <IonSelect
                   value={form.activity || ''}
                   placeholder="Select"
                   onIonChange={e => setForm(f => ({ ...f, activity: e.detail.value as UserProfile['activity'] }))}
-                  style={{ fontFamily: 'var(--md-font)' }}
                 >
                   <IonSelectOption value="sedentary">Sedentary (desk job)</IonSelectOption>
                   <IonSelectOption value="light">Lightly active (1–3 days/wk)</IonSelectOption>
@@ -223,13 +199,12 @@ const ProfilePage: React.FC = () => {
               </IonItem>
 
               {/* Goal */}
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties} lines="none">
-                <IonLabel style={{ fontFamily: 'var(--md-font)' }}>Primary goal</IonLabel>
+              <IonItem style={transparentItem} lines="none">
+                <IonLabel>Primary goal</IonLabel>
                 <IonSelect
                   value={form.goal || ''}
                   placeholder="Select"
                   onIonChange={e => setForm(f => ({ ...f, goal: e.detail.value as UserProfile['goal'] }))}
-                  style={{ fontFamily: 'var(--md-font)' }}
                 >
                   <IonSelectOption value="lose_weight">Lose weight</IonSelectOption>
                   <IonSelectOption value="maintain">Maintain weight</IonSelectOption>
@@ -244,37 +219,38 @@ const ProfilePage: React.FC = () => {
         </IonCard>
 
         {/* ── Preferences ───────────────────────────────────────────────── */}
-        <IonCard style={cardStyle}>
-          <IonListHeader style={sectionHeaderStyle}>Preferences</IonListHeader>
-          <IonCardContent style={{ padding: '0 0 8px' }}>
+        <IonCard>
+          <IonListHeader style={hdr}>Preferences</IonListHeader>
+          <IonCardContent style={{ padding: '4px 0 12px' }}>
             <IonList lines="inset" style={{ background: 'transparent' }}>
 
               {/* Weight unit */}
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
-                <IonLabel style={{ fontFamily: 'var(--md-font)' }}>Weight unit</IonLabel>
-              </IonItem>
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
-                <IonSegment
-                  value={prefForm.weightUnit}
-                  onIonChange={e =>
-                    setPrefForm(p => ({ ...p, weightUnit: e.detail.value as 'kg' | 'lb' }))
-                  }
-                  style={{ width: '100%', maxWidth: 200, paddingBottom: 8 }}
-                >
-                  <IonSegmentButton value="kg">
-                    <IonLabel style={{ fontFamily: 'var(--md-font)' }}>kg</IonLabel>
-                  </IonSegmentButton>
-                  <IonSegmentButton value="lb">
-                    <IonLabel style={{ fontFamily: 'var(--md-font)' }}>lb</IonLabel>
-                  </IonSegmentButton>
-                </IonSegment>
+              <IonItem style={transparentItem} lines="none">
+                <div style={{ width: '100%', padding: '10px 0 4px' }}>
+                  <p style={{
+                    margin: '0 0 10px',
+                    fontSize: 'var(--md-label-lg)',
+                    color: 'var(--md-on-surface-variant)',
+                    fontWeight: 500,
+                  }}>
+                    Weight unit
+                  </p>
+                  <IonSegment
+                    value={prefForm.weightUnit}
+                    onIonChange={e =>
+                      setPrefForm(p => ({ ...p, weightUnit: e.detail.value as 'kg' | 'lb' }))
+                    }
+                    style={{ width: '100%', maxWidth: 220 }}
+                  >
+                    <IonSegmentButton value="kg"><IonLabel>kg</IonLabel></IonSegmentButton>
+                    <IonSegmentButton value="lb"><IonLabel>lb</IonLabel></IonSegmentButton>
+                  </IonSegment>
+                </div>
               </IonItem>
 
               {/* Daily water goal */}
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties} lines="none">
-                <IonLabel position="stacked" style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-md)', color: 'var(--md-on-surface-variant)', marginBottom: 4 }}>
-                  Daily water goal (ml)
-                </IonLabel>
+              <IonItem style={transparentItem} lines="none">
+                <IonLabel position="stacked">Daily water goal (ml)</IonLabel>
                 <IonInput
                   type="number"
                   value={prefForm.waterGoalMl}
@@ -284,9 +260,8 @@ const ProfilePage: React.FC = () => {
                   onIonInput={e =>
                     setPrefForm(p => ({ ...p, waterGoalMl: Number(e.detail.value ?? 2000) }))
                   }
-                  style={{ fontFamily: 'var(--md-font)' }}
                 />
-                <IonNote slot="end" style={{ fontFamily: 'var(--md-font)', alignSelf: 'center' }}>
+                <IonNote slot="end" style={{ alignSelf: 'center' }}>
                   {(prefForm.waterGoalMl / 1000).toFixed(1)} L
                 </IonNote>
               </IonItem>
@@ -296,17 +271,17 @@ const ProfilePage: React.FC = () => {
         </IonCard>
 
         {/* ── App Info ──────────────────────────────────────────────────── */}
-        <IonCard style={{ ...cardStyle, margin: '12px 16px 32px' }}>
-          <IonListHeader style={sectionHeaderStyle}>App Info</IonListHeader>
-          <IonCardContent style={{ padding: '0 0 8px' }}>
+        <IonCard style={{ margin: '12px 16px 32px' }}>
+          <IonListHeader style={hdr}>App Info</IonListHeader>
+          <IonCardContent style={{ padding: '4px 0 12px' }}>
             <IonList lines="none" style={{ background: 'transparent' }}>
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
-                <IonLabel style={{ fontFamily: 'var(--md-font)' }}>Version</IonLabel>
-                <IonNote slot="end" style={{ fontFamily: 'var(--md-font)' }}>0.9.3</IonNote>
+              <IonItem style={transparentItem}>
+                <IonLabel>Version</IonLabel>
+                <IonNote slot="end">0.9.3</IonNote>
               </IonItem>
-              <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
-                <IonLabel style={{ fontFamily: 'var(--md-font)' }}>Built with</IonLabel>
-                <IonNote slot="end" style={{ fontFamily: 'var(--md-font)' }}>Ionic + React + SQLite</IonNote>
+              <IonItem style={transparentItem}>
+                <IonLabel>Built with</IonLabel>
+                <IonNote slot="end">Ionic + React + SQLite</IonNote>
               </IonItem>
             </IonList>
           </IonCardContent>

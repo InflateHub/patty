@@ -163,6 +163,18 @@ ion-list {
   padding: 0 16px;
 }
 
+/* Lists inside cards must not re-apply side padding — the card handles margins */
+ion-card ion-list {
+  padding: 0;
+}
+
+/* List headers inside cards need explicit start padding since the list's own
+   side padding is zeroed above. Covers: IonCard > IonListHeader (direct),
+   IonCard > IonList > IonListHeader, and IonCard > IonCardContent > IonListHeader */
+ion-card ion-list-header {
+  padding-inline-start: 16px;
+}
+
 ion-list-header {
   font-size: var(--md-label-lg);
   font-weight: 500;
