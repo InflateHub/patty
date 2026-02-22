@@ -1,4 +1,4 @@
-/* Dashboard — 0.9.3 */
+/* Dashboard — 1.0.1 */
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -20,6 +20,7 @@ import {
   IonRow,
   IonTitle,
   IonToolbar,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import { personCircleOutline, notificationsOutline } from 'ionicons/icons';
 
@@ -49,10 +50,17 @@ const secHdr: React.CSSProperties = { paddingTop: 16, paddingBottom: 4 };
 
 const Home: React.FC = () => {
   const history = useHistory();
-  const { entries: weightEntries, latestEntry } = useWeightLog();
-  const { todayTotal, dailyGoal, loading: waterLoading } = useWaterLog();
-  const { lastNightEntry } = useSleepLog();
-  const { entries: foodEntries } = useFoodLog();
+  const { entries: weightEntries, latestEntry, reload: reloadWeight } = useWeightLog();
+  const { todayTotal, dailyGoal, loading: waterLoading, reload: reloadWater } = useWaterLog();
+  const { lastNightEntry, reload: reloadSleep } = useSleepLog();
+  const { entries: foodEntries, reload: reloadFood } = useFoodLog();
+
+  useIonViewWillEnter(() => {
+    reloadWeight();
+    reloadWater();
+    reloadSleep();
+    reloadFood();
+  });
   const { profile } = useProfile();
 
   const weightKg = latestEntry

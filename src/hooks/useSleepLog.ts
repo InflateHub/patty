@@ -106,5 +106,5 @@ export function useSleepLog() {
 
   const lastNightEntry = entries[0] ?? null;
 
-  return { entries, lastNightEntry, loading, addEntry, deleteEntry, avgDurationMin };
+  return { entries, lastNightEntry, loading, addEntry, deleteEntry, avgDurationMin, reload: loadAll };
 }

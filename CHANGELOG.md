@@ -2,6 +2,15 @@
 
 ---
 
+## [1.0.1] — Live Home Refresh
+*Goal: Home dashboard reflects the latest data immediately when switching back to the tab — no restart required.*
+
+- [x] `useSleepLog.ts`: expose `reload` in return value
+- [x] `useFoodLog.ts`: expose `reload` in return value
+- [x] `Home.tsx`: import `useIonViewWillEnter`; call `reloadWeight`, `reloadWater`, `reloadSleep`, `reloadFood` on every tab entry
+
+---
+
 ## [1.0.0] — Release Build
 *Goal: signed, shippable APK produced from a clean build.*
 

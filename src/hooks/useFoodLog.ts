@@ -111,5 +111,5 @@ export function useFoodLog() {
     [entriesForDate]
   );
 
-  return { entries, loading, addEntry, deleteEntry, entriesForDate, todayEntries };
+  return { entries, loading, addEntry, deleteEntry, entriesForDate, todayEntries, reload: loadAll };
 }
