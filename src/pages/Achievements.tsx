@@ -1,5 +1,5 @@
 /**
- * Achievements — the redesigned Progress tab (v1.4.0)
+ * Achievements — the redesigned Progress tab (v2.0.0)
  *
  * Sections:
  *  1. Weight Photo Marquee   — horizontal hero, newest→oldest, delta chips
@@ -18,7 +18,6 @@ import {
   IonCardContent,
   IonListHeader,
   IonLabel,
-  IonChip,
   IonSpinner,
   IonToast,
   IonModal,
@@ -31,7 +30,6 @@ import {
   shareOutline,
   trophyOutline,
   flameOutline,
-  ellipseOutline,
   checkmarkCircle,
 } from 'ionicons/icons';
 import { toPng } from 'html-to-image';
@@ -406,7 +404,7 @@ const GamificationSection: React.FC<{ gam: ReturnType<typeof useGamification> }>
   const openBadgeDetail = useCallback((badge: typeof gam.badges[0]) => {
     setSelectedBadge(badge);
     setBadgeDetailOpen(true);
-  }, []);
+  }, [gam]);
 
   const closeBadgeDetail = useCallback(() => {
     setBadgeDetailOpen(false);
@@ -448,7 +446,6 @@ const GamificationSection: React.FC<{ gam: ReturnType<typeof useGamification> }>
       }
     } catch { setBadgeToast('Could not generate badge image'); }
     finally { setSharingOne(false); }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedBadge]);
 
   if (gam.loading) {

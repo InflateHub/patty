@@ -77,7 +77,7 @@ export function useFoodLog() {
       try {
         const db = getDb();
         // If a photo was provided, save it to the filesystem and store only its path.
-        let storedPhotoUri: string | null = null;
+        const storedPhotoUri: string | null = null;
         let storedPhotoPath: string | null = null;
         if (photo_uri) {
           storedPhotoPath = await savePhotoFile('food_photos', id, photo_uri);

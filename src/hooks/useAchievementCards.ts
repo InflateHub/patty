@@ -295,7 +295,7 @@ export function useAchievementCards(): AchievementCardsData & { reload: () => vo
       const todayWaterMl = waterByDate.get(today) ?? 0;
       const waterGoalDays7 = last7.filter(d => (waterByDate.get(d) ?? 0) >= waterGoalMl).length;
 
-      const waterMonthRes = await db.query(
+      await db.query(
         `SELECT SUM(amount_ml) as total FROM water_entries WHERE date >= ?;`,
         [monthStart]
       );

@@ -2,6 +2,18 @@
 
 ---
 
+## [2.0.0] — Stable Release & Codebase Cleanup
+*Goal: mark the app as stable 2.0.0, eliminate all lint errors/warnings, and bump all version strings.*
+
+- [x] **ESLint clean** — 8 errors and 5 warnings resolved across `useAchievementCards`, `useFoodLog`, `useNotifications`, `Achievements`, `MealPlanGrid`, `FoodTab`
+- [x] **Unused imports removed** — `IonChip`, `ellipseOutline` in `Achievements.tsx`; `S` import in `FoodTab.tsx`
+- [x] **Dead code removed** — unused `mealLabel` function in `FoodTab.tsx`; unread `waterMonthRes` variable in `useAchievementCards.ts`
+- [x] **Type fixes** — `let` → `const` for `storedPhotoUri` in `useFoodLog.ts`; `eslint-disable` comments moved to the correct lines in `useNotifications.ts`
+- [x] **Hook deps corrected** — `dates` added to `useEffect` deps in `MealPlanGrid.tsx`; `gam` added to `openBadgeDetail` useCallback deps
+- [x] **Version bumped to 2.0.0** — `package.json`, `android/app/build.gradle` (versionCode 3, versionName 2.0.0), `ProfilePage.tsx` App Info card, all page-level version comments
+
+---
+
 ## [1.8.1] — Achievements Reorder, Badge Modal & Week Plan Fix
 *Goal: rearrange the Achievements page for a better flow, give badges their own shareable modal, and remove the visible scrollbar in the Week Plan.*
 

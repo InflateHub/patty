@@ -28,7 +28,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { albumsOutline, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
 import { useFoodLog } from '../hooks/useFoodLog';
 import type { FoodEntry, MealType } from '../hooks/useFoodLog';
-import { S, formatTime, today } from './trackUtils';
+import { formatTime, today } from './trackUtils';
 
 /* ── Constants ───────────────────────────────────────────────────────── */
 
@@ -40,10 +40,6 @@ const MEALS: { id: MealType; label: string; emoji: string }[] = [
 ];
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
-
-function mealLabel(meal: MealType): string {
-  return MEALS.find((m) => m.id === meal)?.label ?? meal;
-}
 
 function mealEmoji(meal: MealType): string {
   return MEALS.find((m) => m.id === meal)?.emoji ?? '🍴';

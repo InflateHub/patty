@@ -254,7 +254,6 @@ function parseTime(t: string): { hour: number; minute: number } {
 
 async function scheduleOne(ch: NotifChannel, time: string): Promise<void> {
   const { hour, minute } = parseTime(time);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const on: Record<string, number> = { hour, minute };
   if (ch.weekday !== undefined) on.weekday = ch.weekday;
   try {
@@ -264,6 +263,7 @@ async function scheduleOne(ch: NotifChannel, time: string): Promise<void> {
           id: ch.notifId,
           title: `${ch.emoji} ${ch.label}`,
           body: ch.body,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           schedule: { on: on as any, allowWhileIdle: true },
           channelId: ch.channelId,
         },
@@ -302,6 +302,7 @@ async function scheduleWaterSlot(index: number, time: string): Promise<void> {
           id: WATER_NOTIF_IDS[index]!,
           title: '\uD83D\uDCA7 Hydration check',
           body: WATER_BODIES[index % WATER_BODIES.length]!,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           schedule: { on: { hour, minute } as any, allowWhileIdle: true },
           channelId: 'patty-water',
         },
@@ -447,7 +448,7 @@ export function useNotifications() {
         setLoaded(true);
       }
     })();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Permission ────────────────────────────────────────────────────────
   const requestPermission = useCallback(async (): Promise<boolean> => {

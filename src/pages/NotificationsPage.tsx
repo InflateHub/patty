@@ -1,4 +1,4 @@
-/* NotificationsPage — 1.3.0
+/* NotificationsPage — 2.0.0
  * Redesigned notification centre: water frequency system, morning sleep log,
  * weekly check-in, and engagement nudge channels.
  */

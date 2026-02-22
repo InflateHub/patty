@@ -34,7 +34,7 @@ const MealPlanGrid: React.FC<Props> = ({ dates, weekPlan, onAddSlot, onClearSlot
     const idx = dates.indexOf(selected);
     const pill = strip.children[idx] as HTMLElement | undefined;
     pill?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
-  }, [selected]);
+  }, [selected, dates]);
 
   const slotEntries = SLOTS.map(slot => ({
     slot,

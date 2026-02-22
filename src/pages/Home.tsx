@@ -1,4 +1,4 @@
-/* Dashboard — 1.0.1 */
+/* Dashboard — 2.0.0 */
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
