@@ -8,8 +8,10 @@ import {
   IonTabBar,
   IonTabButton,
   IonTabs,
+  useIonRouter,
   setupIonicReact,
 } from '@ionic/react';
+import { App as CapApp } from '@capacitor/app';
 import { IonReactRouter } from '@ionic/react-router';
 import {
   calendarOutline,
@@ -59,6 +61,33 @@ import './theme/variables.css';
 import './theme/md3.css';
 
 setupIonicReact();
+
+/**
+ * BackButtonHandler — intercepts the Android hardware back button.
+ * If the router can go back it navigates back; otherwise it exits the app.
+ * Must live inside IonReactRouter to access useIonRouter.
+ */
+const BackButtonHandler: React.FC = () => {
+  const ionRouter = useIonRouter();
+
+  useEffect(() => {
+    let listenerHandle: Awaited<ReturnType<typeof CapApp.addListener>> | null = null;
+
+    CapApp.addListener('backButton', () => {
+      if (ionRouter.canGoBack()) {
+        ionRouter.goBack();
+      } else {
+        CapApp.exitApp();
+      }
+    }).then(h => { listenerHandle = h; });
+
+    return () => {
+      listenerHandle?.remove();
+    };
+  }, [ionRouter]);
+
+  return null;
+};
 
 /**
  * StartupGate — rendered at the root `/` path.
@@ -169,6 +198,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <IonReactRouter>
+        <BackButtonHandler />
         <IonRouterOutlet id="main-outlet">
           {/* Onboarding — no tab bar */}
           <Route exact path="/onboarding">

@@ -13,8 +13,10 @@
 
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IonPage, IonContent, IonButton, IonSpinner } from '@ionic/react';
+import { IonPage, IonContent, IonButton, IonSpinner, IonActionSheet } from '@ionic/react';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { getDb } from '../db/database';
+import { savePhotoFile } from '../utils/photoStorage';
 import type { Goal, ActivityLevel, Sex } from '../hooks/useProfile';
 import './OnboardingPage.css';
 
@@ -109,11 +111,42 @@ const OnboardingPage: React.FC = () => {
   const [sex,      setSex]      = useState<Sex | ''>('');
   // Step 3
   const [goal,     setGoal]     = useState<Goal | ''>('');
+  // Step 2 — starting photo (optional)
+  const [obPhoto, setObPhoto]           = useState<string | null>(null);
+  const [showPhotoSheet, setShowPhotoSheet] = useState(false);
   // Step 4
   const [activity, setActivity] = useState<ActivityLevel | ''>('');
   const [waterGoal, setWaterGoal] = useState(2000);
 
   const [saving, setSaving] = useState(false);
+
+  // ── Photo capture ───────────────────────────────────────────────────────
+
+  const captureObPhoto = async (source: CameraSource) => {
+    try {
+      if (source === CameraSource.Camera) {
+        const perms = await Camera.checkPermissions();
+        if (perms.camera !== 'granted') {
+          const req = await Camera.requestPermissions({ permissions: ['camera'] });
+          if (req.camera !== 'granted') return;
+        }
+      } else {
+        const perms = await Camera.checkPermissions();
+        if (perms.photos !== 'granted') {
+          const req = await Camera.requestPermissions({ permissions: ['photos'] });
+          if (req.photos !== 'granted') return;
+        }
+      }
+      const photo = await Camera.getPhoto({
+        resultType: CameraResultType.DataUrl,
+        source,
+        quality: 80,
+      });
+      if (photo.dataUrl) setObPhoto(photo.dataUrl);
+    } catch {
+      // user cancelled — no-op
+    }
+  };
 
   // ── Validation ──────────────────────────────────────────────────────────
 
@@ -156,14 +189,31 @@ const OnboardingPage: React.FC = () => {
         );
       }
 
-      // Persist starting weight entry
-      const wVal  = parseFloat(weight);
+      // Persist starting weight entry (with optional photo)
+      const wVal    = parseFloat(weight);
       const entryId = `onb-${Date.now()}`;
       const today   = new Date().toISOString().slice(0, 10);
+      let weightPhotoPath: string | null = null;
+      if (obPhoto) {
+        try { weightPhotoPath = await savePhotoFile('weight_photos', entryId, obPhoto); } catch { /* ignore */ }
+      }
       await db.run(
-        'INSERT OR IGNORE INTO weight_entries (id, date, value, unit) VALUES (?, ?, ?, ?);',
-        [entryId, today, wVal, unit],
+        'INSERT OR IGNORE INTO weight_entries (id, date, value, unit, photo_path) VALUES (?, ?, ?, ?, ?);',
+        [entryId, today, wVal, unit, weightPhotoPath],
       );
+
+      // Also log as a progress / before photo so gallery + achievements are consistent
+      if (obPhoto) {
+        try {
+          const ppId   = `pp_onb_${Date.now()}`;
+          const ppNow  = new Date().toISOString();
+          const ppPath = await savePhotoFile('progress_photos', ppId, obPhoto);
+          await db.run(
+            'INSERT INTO progress_photos (id, date, photo_path, created_at) VALUES (?, ?, ?, ?);',
+            [ppId, today, ppPath, ppNow],
+          );
+        } catch { /* ignore */ }
+      }
     } finally {
       setSaving(false);
     }
@@ -436,12 +486,81 @@ const OnboardingPage: React.FC = () => {
           fontFamily: 'var(--md-font)',
           fontSize: 'var(--md-body-md)',
           color: 'var(--md-on-surface-variant)',
-          marginBottom: 24,
+          marginBottom: 20,
           marginTop: 0,
         }}
       >
         Used to calculate BMI, BMR and your daily calorie target.
       </p>
+
+      {/* Starting photo */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 20 }}>
+        <div
+          onClick={() => setShowPhotoSheet(true)}
+          style={{
+            width: 96,
+            height: 96,
+            borderRadius: '50%',
+            border: obPhoto ? 'none' : '2px dashed var(--md-outline)',
+            background: obPhoto ? 'transparent' : 'var(--md-surface-container)',
+            cursor: 'pointer',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            flexShrink: 0,
+          }}
+        >
+          {obPhoto ? (
+            <img
+              src={obPhoto}
+              alt="before"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <>
+              <span style={{ fontSize: 28, lineHeight: 1 }}>📷</span>
+              <span
+                style={{
+                  fontFamily: 'var(--md-font)',
+                  fontSize: 9,
+                  color: 'var(--md-on-surface-variant)',
+                  marginTop: 4,
+                  textAlign: 'center',
+                  lineHeight: 1.2,
+                  paddingInline: 4,
+                }}
+              >
+                Before photo
+              </span>
+            </>
+          )}
+          {obPhoto && (
+            <div
+              style={{
+                position: 'absolute', inset: 0,
+                background: 'rgba(0,0,0,0.28)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <span style={{ fontSize: 22 }}>✎</span>
+            </div>
+          )}
+        </div>
+        <p
+          style={{
+            fontFamily: 'var(--md-font)',
+            fontSize: 'var(--md-label-sm)',
+            color: 'var(--md-on-surface-variant)',
+            margin: '6px 0 0',
+            textAlign: 'center',
+          }}
+        >
+          Optional — tap to add your starting photo
+        </p>
+      </div>
 
       {/* Height */}
       <div style={sectionLabel}>Height</div>
@@ -515,6 +634,27 @@ const OnboardingPage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Photo action sheet */}
+      <IonActionSheet
+        isOpen={showPhotoSheet}
+        onDidDismiss={() => setShowPhotoSheet(false)}
+        header="Starting Photo"
+        buttons={[
+          {
+            text: 'Take Photo',
+            handler: () => { captureObPhoto(CameraSource.Camera); },
+          },
+          {
+            text: 'Choose from Gallery',
+            handler: () => { captureObPhoto(CameraSource.Photos); },
+          },
+          ...(obPhoto
+            ? [{ text: 'Remove Photo', role: 'destructive', handler: () => { setObPhoto(null); } }]
+            : []),
+          { text: 'Cancel', role: 'cancel' },
+        ]}
+      />
     </div>
   );
 
