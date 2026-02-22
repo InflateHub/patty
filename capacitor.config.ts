@@ -16,9 +16,9 @@ const config: CapacitorConfig = {
       splashImmersive: true,
     },
     LocalNotifications: {
-      smallIcon: 'ic_stat_icon_config_sample',
+      // smallIcon: must reference an existing res/drawable — omit to use plugin default
       iconColor: '#5C7A6E',
-      sound: 'beep.wav',
+      // sound: omit — 'beep.wav' does not exist in res/raw; system default is used
     },
   },
 };

@@ -47,6 +47,9 @@
     <!-- Notification vibration -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- Battery optimisation: lets the user exempt Patty so background alarms fire reliably -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <!-- Storage: only needed below API 33; scoped storage used on API 29+ -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"

@@ -28,6 +28,7 @@ export interface NotifChannel {
   defaultTime: string; // 'HH:MM' 24-hour
   body: string;
   section: NotifSection;
+  channelId: string;   // Android notification channel (one per sound group)
   weekday?: number;    // 1 = Sunday … 7 = Saturday; undefined = every day
 }
 
@@ -41,6 +42,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '07:30',
     body: 'Time to step on the scale \u2014 log your weight in Patty.',
     section: 'health',
+    channelId: 'patty-weighin',
   },
   {
     key: 'water_morning',
@@ -50,6 +52,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '10:00',
     body: "Don\u2019t forget to drink water this morning!",
     section: 'health',
+    channelId: 'patty-water',
   },
   {
     key: 'water_afternoon',
@@ -59,6 +62,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '14:00',
     body: 'Feeling good? Top up your water intake.',
     section: 'health',
+    channelId: 'patty-water',
   },
   {
     key: 'water_evening',
@@ -68,6 +72,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '17:00',
     body: 'Evening water check \u2014 nearly at your daily goal?',
     section: 'health',
+    channelId: 'patty-water',
   },
   {
     key: 'sleep_log',
@@ -77,6 +82,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '22:00',
     body: 'Time for bed soon \u2014 log last night\u2019s sleep first.',
     section: 'health',
+    channelId: 'patty-sleep',
   },
   // ── Meal Logging ─────────────────────────────────────────────────────
   {
@@ -87,6 +93,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '08:30',
     body: 'Log your breakfast in Patty.',
     section: 'meals',
+    channelId: 'patty-food',
   },
   {
     key: 'lunch_log',
@@ -96,6 +103,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '13:00',
     body: "Don\u2019t forget to log your lunch!",
     section: 'meals',
+    channelId: 'patty-food',
   },
   {
     key: 'dinner_log',
@@ -105,6 +113,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '19:00',
     body: 'Time to log dinner \u2014 what did you eat tonight?',
     section: 'meals',
+    channelId: 'patty-food',
   },
   // ── Planning (weekly, Sundays) ────────────────────────────────────────
   {
@@ -115,6 +124,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '09:00',
     body: 'Take your weekly progress photo in Patty.',
     section: 'planning',
+    channelId: 'patty-plan',
     weekday: 1, // Sunday
   },
   {
@@ -125,6 +135,7 @@ export const CHANNELS: NotifChannel[] = [
     defaultTime: '18:00',
     body: 'Plan your meals for the week ahead.',
     section: 'planning',
+    channelId: 'patty-plan',
     weekday: 1, // Sunday
   },
 ];
@@ -174,8 +185,11 @@ async function scheduleOne(ch: NotifChannel, time: string): Promise<void> {
           id: ch.notifId,
           title: `${ch.emoji} ${ch.label}`,
           body: ch.body,
-          schedule: { on: on as any },
-          channelId: 'patty-reminders',
+          schedule: {
+            on: on as any,
+            allowWhileIdle: true, // deliver even during Android Doze mode
+          },
+          channelId: ch.channelId,
         },
       ],
     });
@@ -192,17 +206,29 @@ async function cancelOne(notifId: number): Promise<void> {
   }
 }
 
-async function ensureChannel(): Promise<void> {
+// Each entry: [channelId, name, description, soundFile]
+// soundFile must exist in android/app/src/main/res/raw/ as a .wav
+const ANDROID_CHANNELS: [string, string, string, string][] = [
+  ['patty-weighin', 'Weigh-in',    'Daily weigh-in reminder',        'patty_weighin'],
+  ['patty-water',   'Hydration',   'Daily water intake reminders',   'patty_water'],
+  ['patty-sleep',   'Sleep',       'Daily sleep log reminder',       'patty_sleep'],
+  ['patty-food',    'Meals',       'Meal logging reminders',         'patty_food'],
+  ['patty-plan',    'Planning',    'Weekly planning reminders',      'patty_plan'],
+];
+
+async function ensureChannels(): Promise<void> {
   try {
-    await LocalNotifications.createChannel({
-      id: 'patty-reminders',
-      name: 'Patty Reminders',
-      description: 'Daily and weekly habit reminders from Patty',
-      importance: 3, // IMPORTANCE_DEFAULT
-      visibility: 1,
-      sound: 'default',
-      vibration: true,
-    });
+    for (const [id, name, description, sound] of ANDROID_CHANNELS) {
+      await LocalNotifications.createChannel({
+        id,
+        name,
+        description,
+        importance: 3, // IMPORTANCE_DEFAULT
+        visibility: 1,
+        sound,         // references res/raw/<sound>.wav on Android
+        vibration: true,
+      });
+    }
   } catch {
     // Only available on Android; ignore on other platforms
   }
@@ -217,24 +243,46 @@ export function useNotifications() {
   const [permStatus, setPermStatus] = useState<PermStatus>('unknown');
   const [loaded, setLoaded] = useState(false);
 
-  // ── Load prefs from DB on mount ───────────────────────────────────────
+  // ── Load prefs from DB on mount and re-schedule enabled channels ────
+  //
+  // Re-scheduling on every app open is intentional: Android clears all
+  // AlarmManager alarms on device reboot and after some OEM battery-
+  // optimisation events.  The DB is the source of truth; we always push
+  // the current set of enabled reminders back into the OS alarm manager
+  // so the user never silently loses their notifications.
   useEffect(() => {
     (async () => {
       try {
-        await ensureChannel();
+        await ensureChannels();
         const settings = await readNotifSettings();
-        setStates(
-          CHANNELS.map((ch) => ({
-            key: ch.key,
-            enabled: settings[`notif_${ch.key}_enabled`] === 'true',
-            time: settings[`notif_${ch.key}_time`] ?? ch.defaultTime,
-          }))
-        );
+        const channelStates = CHANNELS.map((ch) => ({
+          key: ch.key,
+          enabled: settings[`notif_${ch.key}_enabled`] === 'true',
+          time: settings[`notif_${ch.key}_time`] ?? ch.defaultTime,
+        }));
+        setStates(channelStates);
+
+        // Only re-schedule if permission is already granted — avoid
+        // triggering a permission prompt on every app launch.
+        let granted = false;
         try {
           const perm = await LocalNotifications.checkPermissions();
           setPermStatus(perm.display as PermStatus);
+          granted = perm.display === 'granted';
         } catch {
           setPermStatus('unknown');
+        }
+
+        if (granted) {
+          // Cancel then re-schedule all enabled channels so the OS alarm
+          // manager always has the latest times, even after a reboot.
+          for (const ch of CHANNELS) {
+            const st = channelStates.find((s) => s.key === ch.key);
+            if (st?.enabled) {
+              await cancelOne(ch.notifId);           // clear any stale entry
+              await scheduleOne(ch, st.time);        // register fresh alarm
+            }
+          }
         }
       } catch (err) {
         console.error('useNotifications: load error', err);
