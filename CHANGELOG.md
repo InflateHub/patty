@@ -2,6 +2,23 @@
 
 ---
 
+## [1.4.0] — Achievements Page Redesign
+*Goal: transform the Progress tab into a social-ready achievements screen.*
+
+- [x] Tab renamed Progress → Achievements
+- [x] Weight Photo Marquee: mandatory photo on weigh-in (two-step modal in WeightTab), horizontal hero scroll (newest first), delta chips (green = lost, amber = gained), fullscreen tap to expand
+- [x] Shareable Cards: four 400×600 gradient cards (Daily / Weekly / Monthly / Yearly); page-snap horizontal scroll; per-card share button captures image via `html-to-image`, writes to cache, shares via `@capacitor/share`; web fallback: `navigator.share` or download
+- [x] Gamification Card: XP bar (earns XP for each habit logged), 5 levels (Seedling→Legend), current/best streak counters, 6 milestone dots, badge shelf (8 badges)
+- [x] Habit Rings: 7-day × 4-habit dot grid (Weight / Water / Sleep / Food); today highlighted
+- [x] Trend Charts removed
+- [x] DB migration v12: `ALTER TABLE weight_entries ADD COLUMN photo_path TEXT`
+- [x] `useWeightLog`: two-step photo save (FS) + `startingEntry` exposed; `useGamification` and `useAchievementCards` hooks created
+- [x] `src/progress/ShareCard.tsx`: `DailyShareCard`, `WeeklyShareCard`, `MonthlyShareCard`, `YearlyShareCard` (all `React.forwardRef`)
+- [x] `src/pages/Achievements.tsx` created; `Progress.tsx` retained but no longer routed
+- [x] `html-to-image` + `@capacitor/share` installed
+
+---
+
 ## [1.3.0] — Notification System Redesigned
 *Goal: smarter, more actionable notification experience that spans the whole day without being annoying.*
 

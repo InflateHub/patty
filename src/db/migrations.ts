@@ -152,4 +152,11 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
+  {
+    version: 12,
+    // 1.4.0 — mandatory progress photo on weight entries
+    statements: [
+      `ALTER TABLE weight_entries ADD COLUMN photo_path TEXT;`,
+    ],
+  },
 ];

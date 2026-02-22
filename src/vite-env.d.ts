@@ -34,5 +34,12 @@ declare module 'ionicons/icons' {
   export const notificationsOutline: string;
   export const alarmOutline: string;
   export const refreshOutline: string;
+  export const trophyOutline: string;
+  export const shareOutline: string;
+  export const starOutline: string;
+  export const flameOutline: string;
+  export const ribbonOutline: string;
+  export const checkmarkCircle: string;
+  export const ellipseOutline: string;
   export default icons;
 }

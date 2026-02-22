@@ -43,12 +43,12 @@ Current production version: **1.1.0**. This document plans the path to **2.0.0**
 ## 1.4.0 â€” Progress Page Complete Redesign
 *Goal: the Progress tab becomes the most visually compelling screen in the app.*
 
-- [ ] Hero stats banner at the top: current weight, total water streaks, average sleep â€” large, typographic
-- [ ] Streak tracker: consecutive days of logging (overall + per-category); streak cards with fire emoji milestone badges
-- [ ] Progress photos redesigned: full-width card carousel with pinch-to-zoom; month separators in the gallery
-- [ ] Side-by-side comparison upgraded: swipe gesture between the two photos (not a modal); draggable divider
-- [ ] Trend charts upgraded: interactive (tap a point to see exact value); 7d / 30d / 90d time window toggle
-- [ ] Weekly report card (auto-generated Sunday evening): avg weight, water adherence %, sleep quality score, meals logged
+- [x] **Tab renamed** Progress → Achievements; route stays `/tabs/progress`
+- [x] **Weight Photo Marquee** (hero): mandatory photo on weigh-in, horizontal scroll newest→oldest, delta chips, fullscreen tap
+- [x] **Shareable Cards**: Daily / Weekly / Monthly / Yearly 400×600 branded cards; captured via `html-to-image`, shared via `@capacitor/share`
+- [x] **Gamification Card**: XP bar + 5 levels (Seedling→Legend), current/best streak, 8 badge shelf
+- [x] **Habit Rings**: 7-day × 4-habit (Weight/Water/Sleep/Food) dot grid; today highlighted
+- [x] **Trend Charts removed**
 
 ---
 

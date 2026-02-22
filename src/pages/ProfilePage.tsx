@@ -277,7 +277,7 @@ const ProfilePage: React.FC = () => {
             <IonList lines="none" style={{ background: 'transparent' }}>
               <IonItem style={transparentItem}>
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">1.3.0</IonNote>
+                <IonNote slot="end">1.4.0</IonNote>
               </IonItem>
               <IonItem style={transparentItem}>
                 <IonLabel>Built by</IonLabel>

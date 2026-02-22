@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import {
   IonButton,
   IonButtons,
@@ -25,7 +25,8 @@ import {
   IonToolbar,
   useIonAlert,
 } from '@ionic/react';
-import { calendarOutline, createOutline, trash } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { calendarOutline, cameraOutline, createOutline, imageOutline, trash } from 'ionicons/icons';
 import { WeightChart } from '../components/WeightChart';
 import { useWeightLog } from '../hooks/useWeightLog';
 import type { WeightEntry } from '../hooks/useWeightLog';
@@ -48,6 +49,9 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(30);
+  /** Two-step modal: 'entry' â†’ fill weight; 'photo' â†’ take / pick photo */
+  const [step, setStep] = useState<'entry' | 'photo'>('entry');
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
 
   const [presentAlert] = useIonAlert();
 
@@ -62,17 +66,70 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
     setUnit('kg');
     setDate(today());
     setNote('');
+    setStep('entry');
+    setPhotoUri(null);
   }
 
-  async function handleWeightSave() {
+  /** Step 1 validate â†’ advance to photo step */
+  async function handleAdvanceToPhoto() {
     const num = parseFloat(value);
     if (!value || isNaN(num) || num <= 0) {
       await presentAlert({ header: 'Invalid value', message: 'Please enter a positive number.', buttons: ['OK'] });
       return;
     }
+    setStep('photo');
+  }
+
+  /** Capture photo from camera or gallery */
+  async function capturePhoto(source: CameraSource) {
+    try {
+      if (source === CameraSource.Camera) {
+        const perms = await Camera.checkPermissions();
+        if (perms.camera === 'denied') {
+          setErrorMsg('Camera permission denied. Please enable it in device settings.');
+          return;
+        }
+        if (perms.camera !== 'granted') {
+          const req = await Camera.requestPermissions({ permissions: ['camera'] });
+          if (req.camera !== 'granted') { setErrorMsg('Camera permission not granted.'); return; }
+        }
+      } else {
+        const perms = await Camera.checkPermissions();
+        if (perms.photos === 'denied') {
+          setErrorMsg('Photo library permission denied. Please enable it in device settings.');
+          return;
+        }
+        if (perms.photos !== 'granted') {
+          const req = await Camera.requestPermissions({ permissions: ['photos'] });
+          if (req.photos !== 'granted') { setErrorMsg('Photo library permission not granted.'); return; }
+        }
+      }
+      const photo = await Camera.getPhoto({ resultType: CameraResultType.DataUrl, source, quality: 80 });
+      if (photo.dataUrl) setPhotoUri(photo.dataUrl);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!msg.toLowerCase().includes('cancel') && !msg.toLowerCase().includes('no image')) {
+        setErrorMsg('Could not capture photo.');
+      }
+    }
+  }
+
+  /** Step 2: save with photo */
+  async function handleWeightSave() {
+    if (!photoUri) {
+      setErrorMsg('Please take or choose a photo to complete your weigh-in.');
+      return;
+    }
+    const num = parseFloat(value);
     setSaving(true);
     try {
-      await addEntry({ date, value: num, unit, note: note.trim() || undefined });
+      await addEntry({
+        date,
+        value: num,
+        unit,
+        note: note.trim() || undefined,
+        photo_path: photoUri, // addEntry saves to FS and replaces with real path
+      });
       resetWeightForm();
       setModalOpen(false);
     } catch {
@@ -104,7 +161,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
 
   return (
     <>
-      {/* ── Loading skeleton ───────────────────────────────────────── */}
+      {/* â”€â”€ Loading skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {loading && (
         <IonCard>
           <IonCardContent>
@@ -128,7 +185,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
         </IonList>
       )}
 
-      {/* ── Today stat card ────────────────────────────────────────── */}
+      {/* â”€â”€ Today stat card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {!loading && (
         <IonCard>
           <IonCardContent>
@@ -141,7 +198,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
                 lineHeight: 1.1,
                 letterSpacing: '-0.5px',
               }}>
-                {todayLatest ? `${todayLatest.value}` : '—'}
+                {todayLatest ? `${todayLatest.value}` : 'â€”'}
               </div>
               <div style={{
                 marginTop: 8,
@@ -152,7 +209,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
                 letterSpacing: '.08em',
               }}>
                 {todayLatest
-                  ? `${todayLatest.unit} · Today${todayEntries.length > 1 ? ` · ${todayEntries.length} entries` : ''}`
+                  ? `${todayLatest.unit} Â· Today${todayEntries.length > 1 ? ` Â· ${todayEntries.length} entries` : ''}`
                   : 'No entry today'}
               </div>
             </div>
@@ -160,7 +217,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
         </IonCard>
       )}
 
-      {/* ── Trend chart ────────────────────────────────────────────── */}
+      {/* â”€â”€ Trend chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {!loading && entries.length > 0 && (
         <IonCard>
           <IonCardContent style={{ paddingTop: 16 }}>
@@ -176,6 +233,14 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
             {entries.slice(0, visibleCount).map((entry: WeightEntry) => (
               <IonItemSliding key={entry.id}>
                 <IonItem>
+                  {entry.photo_uri && (
+                    <img
+                      slot="start"
+                      src={entry.photo_uri}
+                      alt=""
+                      style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }}
+                    />
+                  )}
                   <IonLabel>
                     <h3>{entry.value} {entry.unit}</h3>
                     {entry.note && <p>{entry.note}</p>}
@@ -197,14 +262,14 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
               setTimeout(() => (ev.target as HTMLIonInfiniteScrollElement).complete(), 300);
             }}
           >
-            <IonInfiniteScrollContent loadingText="Loading more…" />
+            <IonInfiniteScrollContent loadingText="Loading moreâ€¦" />
           </IonInfiniteScroll>
         </>
       )}
 
       {!loading && entries.length === 0 && (
         <div style={{ textAlign: 'center', padding: '48px 32px', color: 'var(--md-on-surface-variant)' }}>
-          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>⚖️</div>
+          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>âš–ï¸</div>
           <p style={{ margin: 0, fontSize: 'var(--md-body-lg)', fontWeight: 500, fontFamily: 'var(--md-font)' }}>No entries yet</p>
           <p style={{ margin: '8px 0 0', fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)' }}>Tap + to log your first weight entry.</p>
         </div>
@@ -213,80 +278,157 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
       <IonToast
         isOpen={!!errorMsg}
         message={errorMsg ?? ''}
-        duration={3000}
+        duration={3500}
         color="danger"
         onDidDismiss={() => setErrorMsg(null)}
       />
 
-      {/* ── Weight entry modal ──────────────────────────────────────────── */}
+      {/* â”€â”€ Weight entry modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <IonModal
         ref={modal}
         isOpen={modalOpen}
         onDidDismiss={() => { setModalOpen(false); resetWeightForm(); }}
-        initialBreakpoint={0.72}
-        breakpoints={[0, 0.72, 1]}
+        initialBreakpoint={step === 'photo' ? 0.65 : 0.72}
+        breakpoints={[0, 0.65, 0.72, 1]}
       >
         <IonHeader>
           <IonToolbar>
             <IonButtons slot="start">
-              <IonButton onClick={() => setModalOpen(false)}>Cancel</IonButton>
+              {step === 'photo'
+                ? <IonButton onClick={() => setStep('entry')}>Back</IonButton>
+                : <IonButton onClick={() => setModalOpen(false)}>Cancel</IonButton>
+              }
             </IonButtons>
-            <IonTitle>Log Weight</IonTitle>
+            <IonTitle>{step === 'photo' ? 'Add Photo' : 'Log Weight'}</IonTitle>
             <IonButtons slot="end">
-              <IonButton strong onClick={handleWeightSave} disabled={saving}>Save</IonButton>
+              {step === 'entry'
+                ? <IonButton strong onClick={handleAdvanceToPhoto}>Next</IonButton>
+                : <IonButton strong onClick={handleWeightSave} disabled={saving || !photoUri}>Save</IonButton>
+              }
             </IonButtons>
           </IonToolbar>
         </IonHeader>
+
         <IonContent>
-          <div style={S.valueArea}>
-            <input
-              autoFocus
-              type="number"
-              inputMode="decimal"
-              placeholder="0.0"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              style={S.valueInput}
-            />
-            <div style={S.unitRow}>
-              {(['kg', 'lbs'] as const).map((u) => (
-                <button key={u} style={S.unitChip(unit === u)} onClick={() => setUnit(u)}>
-                  {u}
-                </button>
-              ))}
+          {step === 'entry' && (
+            <>
+              <div style={S.valueArea}>
+                <input
+                  autoFocus
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="0.0"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  style={S.valueInput}
+                />
+                <div style={S.unitRow}>
+                  {(['kg', 'lbs'] as const).map((u) => (
+                    <button key={u} style={S.unitChip(unit === u)} onClick={() => setUnit(u)}>
+                      {u}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={S.divider} />
+
+              <div style={S.row} onClick={() => setDateModalOpen(true)}>
+                <IonIcon icon={calendarOutline} style={S.rowIcon} />
+                <span style={S.rowText}>{isToday(date) ? 'Today' : formatDate(date)}</span>
+                <span style={S.rowHint}>{isToday(date) ? formatDate(date) : ''}</span>
+              </div>
+
+              <div style={S.divider} />
+
+              <div style={{ ...S.row, cursor: 'text', alignItems: 'flex-start' }}>
+                <IonIcon icon={createOutline} style={{ ...S.rowIcon, marginTop: 2 }} />
+                <textarea
+                  rows={1}
+                  placeholder="Add a noteâ€¦"
+                  value={note}
+                  onChange={(e) => {
+                    setNote(e.target.value);
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
+                  style={S.noteInput}
+                />
+              </div>
+
+              <div style={S.divider} />
+            </>
+          )}
+
+          {step === 'photo' && (
+            <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+              <p style={{
+                margin: 0,
+                fontSize: 'var(--md-body-md)',
+                fontFamily: 'var(--md-font)',
+                color: 'var(--md-on-surface-variant)',
+                textAlign: 'center',
+              }}>
+                A photo is required with every weigh-in. It powers your timeline in Achievements.
+              </p>
+
+              {photoUri ? (
+                <div style={{ position: 'relative', width: '100%' }}>
+                  <img
+                    src={photoUri}
+                    alt="Preview"
+                    style={{ width: '100%', borderRadius: 16, objectFit: 'cover', maxHeight: 240, display: 'block' }}
+                  />
+                  <button
+                    onClick={() => setPhotoUri(null)}
+                    style={{
+                      position: 'absolute', top: 8, right: 8,
+                      background: 'rgba(0,0,0,0.55)', color: '#fff',
+                      border: 'none', borderRadius: 20, padding: '4px 10px',
+                      fontSize: 12, cursor: 'pointer',
+                    }}
+                  >
+                    Retake
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: 12, width: '100%' }}>
+                  <button
+                    style={{
+                      flex: 1, padding: '16px 0', borderRadius: 'var(--md-shape-lg)',
+                      background: 'var(--md-primary-container)',
+                      color: 'var(--md-on-primary-container)',
+                      border: 'none', cursor: 'pointer',
+                      fontSize: 'var(--md-body-md)', fontFamily: 'var(--md-font)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                    }}
+                    onClick={() => capturePhoto(CameraSource.Camera)}
+                  >
+                    <IonIcon icon={cameraOutline} style={{ fontSize: 28 }} />
+                    Take Photo
+                  </button>
+                  <button
+                    style={{
+                      flex: 1, padding: '16px 0', borderRadius: 'var(--md-shape-lg)',
+                      background: 'var(--md-secondary-container)',
+                      color: 'var(--md-on-secondary-container)',
+                      border: 'none', cursor: 'pointer',
+                      fontSize: 'var(--md-body-md)', fontFamily: 'var(--md-font)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                    }}
+                    onClick={() => capturePhoto(CameraSource.Photos)}
+                  >
+                    <IonIcon icon={imageOutline} style={{ fontSize: 28 }} />
+                    Gallery
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
-
-          <div style={S.divider} />
-
-          <div style={S.row} onClick={() => setDateModalOpen(true)}>
-            <IonIcon icon={calendarOutline} style={S.rowIcon} />
-            <span style={S.rowText}>{isToday(date) ? 'Today' : formatDate(date)}</span>
-            <span style={S.rowHint}>{isToday(date) ? formatDate(date) : ''}</span>
-          </div>
-
-          <div style={S.divider} />
-
-          <div style={{ ...S.row, cursor: 'text', alignItems: 'flex-start' }}>
-            <IonIcon icon={createOutline} style={{ ...S.rowIcon, marginTop: 2 }} />
-            <textarea
-              rows={1}
-              placeholder="Add a note…"
-              value={note}
-              onChange={(e) => {
-                setNote(e.target.value);
-                e.target.style.height = 'auto';
-                e.target.style.height = `${e.target.scrollHeight}px`;
-              }}
-              style={S.noteInput}
-            />
-          </div>
-
-          <div style={S.divider} />
+          )}
         </IonContent>
       </IonModal>
 
-      {/* ── Date picker sub-modal ───────────────────────────────────────── */}
+      {/* â”€â”€ Date picker sub-modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <IonModal
         ref={dateModal}
         isOpen={dateModalOpen}

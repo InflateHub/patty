@@ -23,7 +23,7 @@ import Home from './pages/Home';
 import Track from './pages/Track';
 import Recipes from './pages/Recipes';
 import Plan from './pages/Plan';
-import Progress from './pages/Progress';
+import Achievements from './pages/Achievements';
 import ProfilePage from './pages/ProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -119,7 +119,7 @@ const TabShell: React.FC = () => (
         <Plan />
       </Route>
       <Route exact path="/tabs/progress">
-        <Progress />
+        <Achievements />
       </Route>
       <Route exact path="/tabs/profile">
         <ProfilePage />
@@ -151,7 +151,7 @@ const TabShell: React.FC = () => (
       </IonTabButton>
       <IonTabButton tab="progress" href="/tabs/progress">
         <IonIcon icon={trendingUpOutline} />
-        <IonLabel>Progress</IonLabel>
+        <IonLabel>Achievements</IonLabel>
       </IonTabButton>
     </IonTabBar>
   </IonTabs>
