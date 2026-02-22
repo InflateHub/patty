@@ -70,6 +70,9 @@ jobs:
           restore-keys: gradle-
 
       # ── 8. Build release APK ───────────────────────────────────────────────
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
       - name: Build release APK
         working-directory: android
         run: ./gradlew assembleRelease
