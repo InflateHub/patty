@@ -18,12 +18,12 @@ Current production version: **1.1.0**. This document plans the path to **2.0.0**
 ## 1.2.0 â€” Onboarding
 *Goal: first-launch flow that collects profile data so the app is immediately personalised.*
 
-- [ ] Onboarding flag in `settings` table (`onboarding_complete`); main entry reads flag and routes accordingly
-- [ ] Multi-step onboarding: Welcome â†’ Name & DOB â†’ Height & Weight â†’ Goal â†’ Daily targets (water goal) â†’ Done
-- [ ] Step progress indicator (dots or top bar) with Back/Next navigation
-- [ ] Data written directly to the `settings` table (same as ProfilePage); no duplicate state
-- [ ] "Skip for now" option on every optional step
-- [ ] Celebrations screen on completion with confetti / hero animation before routing to Home
+- [x] Onboarding flag in `settings` table (`onboarding_complete`); main entry reads flag and routes accordingly
+- [x] Multi-step onboarding: Welcome → Name & DOB → Height & Weight → Goal → Activity & Water goal → Celebration
+- [x] Step progress indicator (4-dot pill indicator) with Back/Next navigation; all steps mandatory
+- [x] Data written directly to the `settings` table (same as ProfilePage); no duplicate state
+- [x] Starting weight also written to `weight_entries` table on save
+- [x] Celebration screen on completion with CSS confetti + hero animation before routing to Home
 
 ---
 

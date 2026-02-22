@@ -1,0 +1,86 @@
+/* ── Onboarding Animations ────────────────────────────────────────────────── */
+
+@keyframes ob-fade-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes ob-slide-up {
+  from { opacity: 0; transform: translateY(52px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+@keyframes ob-pop-in {
+  0%   { opacity: 0; transform: scale(0.6);  }
+  70%  { transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1);    }
+}
+
+@keyframes confetti-fall {
+  0%   { transform: translateY(-24px) rotate(0deg);    opacity: 1; }
+  85%  { opacity: 0.6; }
+  100% { transform: translateY(110vh)  rotate(760deg); opacity: 0; }
+}
+
+/* ── Welcome screen ─────────────────────────────────────────────────────── */
+
+.ob-hero-logo {
+  opacity: 0;
+  animation: ob-fade-in 0.55s ease-out 0.05s forwards;
+}
+.ob-hero-name {
+  opacity: 0;
+  animation: ob-fade-in 0.55s ease-out 0.18s forwards;
+}
+.ob-hero-tagline {
+  opacity: 0;
+  animation: ob-fade-in 0.55s ease-out 0.34s forwards;
+}
+.ob-feature-card {
+  opacity: 0;
+  transform: translateY(52px) scale(0.92);
+  animation: ob-slide-up 0.46s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+.ob-hero-btn {
+  opacity: 0;
+  animation: ob-fade-in 0.55s ease-out 1.3s forwards;
+}
+
+/* ── Form steps ─────────────────────────────────────────────────────────── */
+
+.ob-step-content {
+  opacity: 0;
+  animation: ob-fade-in 0.35s ease-out 0.05s forwards;
+}
+
+/* ── Celebration ────────────────────────────────────────────────────────── */
+
+.ob-celebration-check {
+  opacity: 0;
+  animation: ob-pop-in 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.2s forwards;
+}
+.ob-celebration-title {
+  opacity: 0;
+  animation: ob-fade-in 0.5s ease-out 0.7s forwards;
+}
+.ob-celebration-sub {
+  opacity: 0;
+  animation: ob-fade-in 0.5s ease-out 0.9s forwards;
+}
+.ob-celebration-btn {
+  opacity: 0;
+  animation: ob-fade-in 0.5s ease-out 1.1s forwards;
+}
+
+.ob-confetti {
+  position: absolute;
+  border-radius: 3px;
+  animation: confetti-fall linear forwards;
+}
+
+/* ── Native date-input theming ──────────────────────────────────────────── */
+
+input[type='date'].ob-date-input::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
+}

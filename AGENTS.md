@@ -95,6 +95,8 @@ Patty/
 │   │   ├── Plan.tsx           # Plan tab — cooking + exercise planners (stub → 0.7–0.8)
 │   │   ├── Progress.tsx       # Progress tab — stats card, photo gallery, compare modal, trend charts (0.9.0)
 │   │   ├── Home.tsx           # Dashboard — live stats, greeting, BMI, profile icon button (0.9.3)
+│   │   ├── OnboardingPage.tsx # First-launch onboarding: Welcome (Desire.Commit.Achieve + fly-in feature cards) → Name/DOB → Metrics → Goal → Activity/Water → Celebration (1.2.0)
+│   │   ├── OnboardingPage.css # Onboarding keyframe animations: ob-fade-in, ob-slide-up, ob-pop-in, confetti-fall
 │   │   ├── ProfilePage.tsx    # Profile + Settings page: About Me, Preferences, Derived Metrics (BMI/BMR/TDEE), App Info (0.9.3)
 │   │   └── Stub.css           # Shared empty-state styles for stub pages
 │   │

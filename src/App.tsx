@@ -1,4 +1,5 @@
-import { Redirect, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Redirect, Route, useHistory } from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -25,6 +26,8 @@ import Plan from './pages/Plan';
 import Progress from './pages/Progress';
 import ProfilePage from './pages/ProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
+import OnboardingPage from './pages/OnboardingPage';
+import { getDb } from './db/database';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -54,63 +57,127 @@ import './theme/md3.css';
 
 setupIonicReact();
 
+/**
+ * StartupGate — rendered at the root `/` path.
+ * Reads `onboarding_complete` from SQLite and redirects to
+ * `/onboarding` (first launch) or `/tabs/home` (returning user).
+ * Must live inside IonReactRouter to access useHistory.
+ */
+const StartupGate: React.FC = () => {
+  const history = useHistory();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const db = await getDb();
+        const res = await db.query(
+          "SELECT value FROM settings WHERE key = 'onboarding_complete';",
+        );
+        const done =
+          res.values && res.values.length > 0 && res.values[0].value === '1';
+        if (!cancelled) {
+          history.replace(done ? '/tabs/home' : '/onboarding');
+        }
+      } catch {
+        if (!cancelled) history.replace('/onboarding');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [history]);
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        background: 'var(--md-surface)',
+      }}
+    >
+      <span style={{ fontSize: 64 }}>🥗</span>
+    </div>
+  );
+};
+
+// ── Tab shell ──────────────────────────────────────────────────────────────────────────
+
+const TabShell: React.FC = () => (
+  <IonTabs>
+    <IonRouterOutlet>
+      <Route exact path="/tabs/home">
+        <Home />
+      </Route>
+      <Route exact path="/tabs/track">
+        <Track />
+      </Route>
+      <Route exact path="/tabs/recipes">
+        <Recipes />
+      </Route>
+      <Route exact path="/tabs/plan">
+        <Plan />
+      </Route>
+      <Route exact path="/tabs/progress">
+        <Progress />
+      </Route>
+      <Route exact path="/tabs/profile">
+        <ProfilePage />
+      </Route>
+      <Route exact path="/tabs/notifications">
+        <NotificationsPage />
+      </Route>
+      <Route exact path="/tabs">
+        <Redirect to="/tabs/home" />
+      </Route>
+    </IonRouterOutlet>
+
+    <IonTabBar slot="bottom">
+      <IonTabButton tab="home" href="/tabs/home">
+        <IonIcon icon={homeOutline} />
+        <IonLabel>Home</IonLabel>
+      </IonTabButton>
+      <IonTabButton tab="track" href="/tabs/track">
+        <IonIcon icon={pulseOutline} />
+        <IonLabel>Track</IonLabel>
+      </IonTabButton>
+      <IonTabButton tab="recipes" href="/tabs/recipes">
+        <IonIcon icon={restaurantOutline} />
+        <IonLabel>Recipes</IonLabel>
+      </IonTabButton>
+      <IonTabButton tab="plan" href="/tabs/plan">
+        <IonIcon icon={calendarOutline} />
+        <IonLabel>Plan</IonLabel>
+      </IonTabButton>
+      <IonTabButton tab="progress" href="/tabs/progress">
+        <IonIcon icon={trendingUpOutline} />
+        <IonLabel>Progress</IonLabel>
+      </IonTabButton>
+    </IonTabBar>
+  </IonTabs>
+);
+
+// ── Root app ──────────────────────────────────────────────────────────────────────────────
+
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      <IonTabs>
-        <IonRouterOutlet>
-          <Route exact path="/tabs/home">
-            <Home />
-          </Route>
-          <Route exact path="/tabs/track">
-            <Track />
-          </Route>
-          <Route exact path="/tabs/recipes">
-            <Recipes />
-          </Route>
-          <Route exact path="/tabs/plan">
-            <Plan />
-          </Route>
-          <Route exact path="/tabs/progress">
-            <Progress />
-          </Route>
-          <Route exact path="/tabs/profile">
-            <ProfilePage />
-          </Route>
-          <Route exact path="/tabs/notifications">
-            <NotificationsPage />
-          </Route>
-          <Route exact path="/tabs">
-            <Redirect to="/tabs/home" />
-          </Route>
-          <Route exact path="/">
-            <Redirect to="/tabs/home" />
-          </Route>
-        </IonRouterOutlet>
+      <IonRouterOutlet id="main-outlet">
+        {/* Onboarding — no tab bar */}
+        <Route exact path="/onboarding">
+          <OnboardingPage />
+        </Route>
 
-        <IonTabBar slot="bottom">
-          <IonTabButton tab="home" href="/tabs/home">
-            <IonIcon icon={homeOutline} />
-            <IonLabel>Home</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="track" href="/tabs/track">
-            <IonIcon icon={pulseOutline} />
-            <IonLabel>Track</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="recipes" href="/tabs/recipes">
-            <IonIcon icon={restaurantOutline} />
-            <IonLabel>Recipes</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="plan" href="/tabs/plan">
-            <IonIcon icon={calendarOutline} />
-            <IonLabel>Plan</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="progress" href="/tabs/progress">
-            <IonIcon icon={trendingUpOutline} />
-            <IonLabel>Progress</IonLabel>
-          </IonTabButton>
-        </IonTabBar>
-      </IonTabs>
+        {/* Main tab shell */}
+        <Route path="/tabs">
+          <TabShell />
+        </Route>
+
+        {/* Root: check DB and redirect */}
+        <Route exact path="/">
+          <StartupGate />
+        </Route>
+      </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>
 );

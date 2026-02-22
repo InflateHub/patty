@@ -2,6 +2,25 @@
 
 ---
 
+## [1.2.0] — Onboarding
+*Goal: first-launch flow that collects profile data so the app is immediately personalised.*
+
+- [x] **Startup gate** — `StartupGate` component in `App.tsx` reads `onboarding_complete` from SQLite on mount; routes to `/onboarding` (first launch) or `/tabs/home` (returning user); shows Patty logo spinner while resolving
+- [x] **Welcome screen** — full-screen `--md-primary-container` hero; 🥗 logo + **"Patty"** wordmark + **"Desire. Commit. Achieve."** tagline; four feature cards fly in with staggered `ob-slide-up` animation (Track Everything / Plan Your Meals / See Your Progress / Stay Consistent); **Get Started →** pill button fades in last
+- [x] **Step 1 — Tell us about you** — First Name (required) + Date of Birth (required) text/date inputs
+- [x] **Step 2 — Your body metrics** — Height (cm), Starting Weight with kg/lb chip picker, Biological Sex chip group; all three required
+- [x] **Step 3 — Main goal** — 5-option card picker (Lose Weight / Maintain / Build Muscle / Better Sleep / General Wellness); selection required
+- [x] **Step 4 — Your lifestyle** — Activity level 4-option card picker + daily water goal 4-preset chip row; both required
+- [x] **All mandatory** — Next button disabled until every field on the step is filled; no skip
+- [x] **4-dot progress indicator** — active dot expands to pill (24px); completed dots tinted `--md-primary-container`
+- [x] **Save on Step 4** — writes all 9 profile/pref keys + `onboarding_complete = '1'` to `settings` table; inserts starting weight into `weight_entries`
+- [x] **Celebration screen** — CSS confetti (`ob-confetti` / `confetti-fall` keyframes, 22 pieces, 8 MD3-palette colours); 🎉 check circle pop-in; personalised headline; **Let's Go →** routes to `/tabs/home`
+- [x] `src/pages/OnboardingPage.tsx` — new file (~784 lines)
+- [x] `src/pages/OnboardingPage.css` — keyframes: `ob-fade-in`, `ob-slide-up`, `ob-pop-in`, `confetti-fall`; class hooks for all animated elements
+- [x] `src/App.tsx` — `StartupGate` + `/onboarding` route + outer `IonRouterOutlet#main-outlet` wrapping `TabShell`
+
+---
+
 ## [1.1.0] — UI Polish & Core Fixes
 *Goal: resolve the most visible UX friction points in the shipped 1.0.5 build.*
 
