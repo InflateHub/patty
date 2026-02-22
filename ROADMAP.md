@@ -228,16 +228,17 @@ Each version ships something usable. **Minimal first, complete at 1.0.0.**
 
 ---
 
-## 1.0.0 — Release Build
+## 1.0.0 — Release Build ✓
 *Goal: signed, shippable APK (and IPA) produced from a clean build.*
 
-- [ ] Version bumped to `1.0.0` in `package.json` and `capacitor.config.ts`
-- [ ] `npm run build` produces a clean `dist/` with no TypeScript or lint errors
-- [ ] `npx cap sync android` applied to final dist
-- [ ] Release APK built and signed (`./gradlew assembleRelease`)
+- [x] Version bumped to `1.0.0` in `package.json` and `android/app/build.gradle`
+- [x] `npm run build` produces a clean `dist/` with no TypeScript or lint errors
+- [x] `npx cap sync android` applied to final dist
+- [x] Release APK built and signed (`./gradlew assembleRelease`) — `app-release.apk` (25.6 MB)
+- [x] Signing keystore generated (`patty-release.jks`, alias `patty`, 2048-bit RSA, 10000-day validity)
 - [ ] APK smoke-tested on a physical Android device
-- [ ] Git tag `v1.0.0` created
-- [ ] CHANGELOG.md finalised with full feature summary
+- [x] Git tag `v1.0.0` created
+- [x] CHANGELOG.md finalised with full feature summary
 
 ---
 

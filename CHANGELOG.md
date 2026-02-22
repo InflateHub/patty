@@ -2,6 +2,44 @@
 
 ---
 
+## [1.0.0] — Release Build
+*Goal: signed, shippable APK produced from a clean build.*
+
+- [x] `package.json` version bumped to `1.0.0`
+- [x] `android/app/build.gradle`: `versionCode 1`, `versionName "1.0.0"`, `signingConfigs.release` wired from `keystore.properties`
+- [x] `android/.gitignore` updated: `*.jks`, `*.keystore`, `keystore.properties` excluded from version control
+- [x] Release keystore generated: `patty-release.jks` (alias `patty`, 2048-bit RSA, SHA256withRSA, valid 10000 days)
+- [x] `npm run build` — TypeScript clean, 984 modules, `dist/` produced at `patty@1.0.0`
+- [x] `npx cap sync android` — clean sync, 3 plugins, no warnings
+- [x] `./gradlew assembleRelease` (Java 21 / Temurin 21.0.10) — BUILD SUCCESSFUL in ~7 min
+- [x] Output: `android/app/build/outputs/apk/release/app-release.apk` (25.6 MB, signed)
+- [x] Git tag `v1.0.0`
+
+**Full feature summary (0.1.0 → 1.0.0):**
+| Version | Feature |
+|---|---|
+| 0.1.0 | App shell, four-tab layout, MD3 Patty theme |
+| 0.2.0 | Weight tracking (SQLite, chart, history) |
+| 0.3.0 | Water intake (ring, quick-add, daily goal) |
+| 0.4.0 | Sleep tracking (log, quality, history) |
+| 0.4.1 | Daily alignment, useDailySummary foundation |
+| 0.5.0 | Food log (photo-first, four meal categories) |
+| 0.6.0 | Recipe library (12 seed recipes, search) |
+| 0.6.1 | User-created recipes (SQLite, CRUD) |
+| 0.7.0 | Cooking planner (week grid, grocery list) |
+| 0.9.0 | Progress hub (photos, compare, trend charts) |
+| 0.9.1 | Dashboard Home (live stats, greeting, BMI) |
+| 0.9.3 | Profile + Settings (BMI/BMR/TDEE, prefs) |
+| 0.9.4 | Calorie estimation + recipe kcal |
+| 0.9.5 | Recipe → food log shortcut |
+| 0.9.6 | Push notification reminders (10 channels) |
+| 0.9.7 | Data persistence audit (SQLite-only) |
+| 0.9.8 | UI polish (skeletons, toasts, spacing, transitions) |
+| 0.9.9 | Capacitor native build prep (icons, manifest, sync) |
+| 1.0.0 | Release build — signed APK |
+
+---
+
 ## [0.9.9] — Capacitor Native Build Prep
 *Goal: app is ready to compile as a native Android binary.*
 
