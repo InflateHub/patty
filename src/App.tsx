@@ -28,6 +28,8 @@ import ProfilePage from './pages/ProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import OnboardingPage from './pages/OnboardingPage';
 import { getDb } from './db/database';
+import LockScreen from './components/LockScreen';
+import { useAppLock } from './hooks/useAppLock';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -157,28 +159,50 @@ const TabShell: React.FC = () => (
   </IonTabs>
 );
 
+// ── App content (needs to be inside IonApp for hook context) ────────────────
+
+const AppContent: React.FC = () => {
+  const { isLocked, biometricAvailable, biometricEnabled, unlock, unlockBiometric } = useAppLock();
+
+  return (
+    <>
+      <IonReactRouter>
+        <IonRouterOutlet id="main-outlet">
+          {/* Onboarding — no tab bar */}
+          <Route exact path="/onboarding">
+            <OnboardingPage />
+          </Route>
+
+          {/* Main tab shell */}
+          <Route path="/tabs">
+            <TabShell />
+          </Route>
+
+          {/* Root: check DB and redirect */}
+          <Route exact path="/">
+            <StartupGate />
+          </Route>
+        </IonRouterOutlet>
+      </IonReactRouter>
+
+      {/* Lock screen overlay — rendered above everything when locked */}
+      {isLocked && (
+        <LockScreen
+          biometricAvailable={biometricAvailable}
+          biometricEnabled={biometricEnabled}
+          onUnlockPin={unlock}
+          onUnlockBiometric={unlockBiometric}
+        />
+      )}
+    </>
+  );
+};
+
 // ── Root app ──────────────────────────────────────────────────────────────────────────────
 
 const App: React.FC = () => (
   <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet id="main-outlet">
-        {/* Onboarding — no tab bar */}
-        <Route exact path="/onboarding">
-          <OnboardingPage />
-        </Route>
-
-        {/* Main tab shell */}
-        <Route path="/tabs">
-          <TabShell />
-        </Route>
-
-        {/* Root: check DB and redirect */}
-        <Route exact path="/">
-          <StartupGate />
-        </Route>
-      </IonRouterOutlet>
-    </IonReactRouter>
+    <AppContent />
   </IonApp>
 );
 

@@ -41,5 +41,12 @@ declare module 'ionicons/icons' {
   export const ribbonOutline: string;
   export const checkmarkCircle: string;
   export const ellipseOutline: string;
+  export const fingerprintOutline: string;
+  export const fingerPrintOutline: string;
+  export const backspaceOutline: string;
+  export const checkmarkOutline: string;
+  export const lockClosedOutline: string;
+  export const trashOutline: string;
+  export const warningOutline: string;
   export default icons;
 }

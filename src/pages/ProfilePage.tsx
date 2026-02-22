@@ -1,6 +1,7 @@
-/* ProfilePage — 0.9.3 */
-import React, { useEffect, useState } from 'react';
+/* ProfilePage — 1.5.0 */
+import React, { useEffect, useState, useCallback } from 'react';
 import {
+  IonAlert,
   IonBackButton,
   IonButton,
   IonButtons,
@@ -8,6 +9,7 @@ import {
   IonCardContent,
   IonContent,
   IonHeader,
+  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
@@ -20,9 +22,12 @@ import {
   IonSegment,
   IonSegmentButton,
   IonTitle,
+  IonToggle,
   IonToolbar,
   IonToast,
 } from '@ionic/react';
+import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline } from 'ionicons/icons';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 import {
   useProfile,
@@ -30,6 +35,9 @@ import {
   UserPrefs,
   ageFromDob,
 } from '../hooks/useProfile';
+import { useAppLock } from '../hooks/useAppLock';
+import PinSetupModal from '../components/PinSetupModal';
+import { getDb } from '../db/database';
 
 // ── Shared minor styles ───────────────────────────────────────────────────────
 const hdr: React.CSSProperties = { paddingTop: 20, paddingBottom: 4 };
@@ -39,6 +47,10 @@ const transparentItem = { '--background': 'transparent' } as React.CSSProperties
 
 const ProfilePage: React.FC = () => {
   const { profile, prefs, loading, saveProfile, savePrefs } = useProfile();
+  const {
+    lockEnabled, biometricEnabled, biometricAvailable,
+    enableLock, disableLock, changePIN, setBiometricEnabled,
+  } = useAppLock();
 
   // Local form state — initialised from hook once loaded
   const [form, setForm] = useState<UserProfile>({
@@ -54,6 +66,15 @@ const ProfilePage: React.FC = () => {
     waterGoalMl: 2000,
   });
   const [toast, setToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState('Profile saved');
+
+  // Privacy & Security modal state
+  const [pinSetupOpen, setPinSetupOpen]     = useState(false);
+  const [changePinOpen, setChangePinOpen]   = useState(false);
+
+  // Danger Zone alert state
+  type DangerAction = 'logs' | 'photos' | 'reset' | null;
+  const [dangerAction, setDangerAction]     = useState<DangerAction>(null);
 
   // Sync form state once profile loads
   useEffect(() => {
@@ -63,13 +84,98 @@ const ProfilePage: React.FC = () => {
     }
   }, [loading, profile, prefs]);
 
-  // ── Save
+  // ── Save profile
   const dobAge = ageFromDob(form.dob);
   const handleSave = async () => {
     await saveProfile(form);
     await savePrefs(prefForm);
+    setToastMsg('Profile saved');
     setToast(true);
   };
+
+  // ── Lock toggle
+  const handleLockToggle = useCallback(async (checked: boolean) => {
+    if (checked) {
+      setPinSetupOpen(true);
+    } else {
+      await disableLock();
+      setToastMsg('App lock disabled');
+      setToast(true);
+    }
+  }, [disableLock]);
+
+  const handlePinSave = useCallback(async (pin: string) => {
+    await enableLock(pin, false);
+    setPinSetupOpen(false);
+    setToastMsg('App lock enabled');
+    setToast(true);
+  }, [enableLock]);
+
+  const handleChangePinSave = useCallback(async (pin: string) => {
+    await changePIN(pin);
+    setChangePinOpen(false);
+    setToastMsg('PIN updated');
+    setToast(true);
+  }, [changePIN]);
+
+  const handleBiometricToggle = useCallback(async (checked: boolean) => {
+    await setBiometricEnabled(checked);
+    setToastMsg(checked ? 'Biometric unlock enabled' : 'Biometric unlock disabled');
+    setToast(true);
+  }, [setBiometricEnabled]);
+
+  // ── Data clear
+  const handleClearLogs = useCallback(async () => {
+    const db = await getDb();
+    await db.run('DELETE FROM weight_entries;');
+    await db.run('DELETE FROM water_entries;');
+    await db.run('DELETE FROM sleep_entries;');
+    await db.run('DELETE FROM food_entries;');
+    setToastMsg('All logs cleared');
+    setToast(true);
+    setDangerAction(null);
+  }, []);
+
+  const handleClearPhotos = useCallback(async () => {
+    const db = await getDb();
+    const res = await db.query('SELECT photo_path FROM weight_entries WHERE photo_path IS NOT NULL;');
+    for (const row of res.values ?? []) {
+      if (row.photo_path) {
+        try {
+          await Filesystem.deleteFile({ path: row.photo_path, directory: Directory.Data });
+        } catch { /* ignore if already gone */ }
+      }
+    }
+    await db.run('UPDATE weight_entries SET photo_path = NULL;');
+    setToastMsg('Progress photos cleared');
+    setToast(true);
+    setDangerAction(null);
+  }, []);
+
+  const handleFactoryReset = useCallback(async () => {
+    // 1. Delete all photos from filesystem
+    const db = await getDb();
+    const res = await db.query('SELECT photo_path FROM weight_entries WHERE photo_path IS NOT NULL;');
+    for (const row of res.values ?? []) {
+      if (row.photo_path) {
+        try {
+          await Filesystem.deleteFile({ path: row.photo_path, directory: Directory.Data });
+        } catch { /* ignore */ }
+      }
+    }
+    // 2. Wipe all data tables
+    await db.run('DELETE FROM weight_entries;');
+    await db.run('DELETE FROM water_entries;');
+    await db.run('DELETE FROM sleep_entries;');
+    await db.run('DELETE FROM food_entries;');
+    await db.run('DELETE FROM user_recipes;');
+    await db.run('DELETE FROM deleted_seed_recipes;');
+    await db.run('DELETE FROM meal_plan_slots;');
+    await db.run('DELETE FROM settings;');
+    setDangerAction(null);
+    // 3. Reload the page — StartupGate will route to /onboarding
+    window.location.href = '/';
+  }, []);
 
   if (loading) {
     return (
@@ -277,7 +383,7 @@ const ProfilePage: React.FC = () => {
             <IonList lines="none" style={{ background: 'transparent' }}>
               <IonItem style={transparentItem}>
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">1.4.1</IonNote>
+                <IonNote slot="end">1.5.0</IonNote>
               </IonItem>
               <IonItem style={transparentItem}>
                 <IonLabel>Built by</IonLabel>
@@ -287,9 +393,61 @@ const ProfilePage: React.FC = () => {
           </IonCardContent>
         </IonCard>
 
+        {/* ── PIN Setup modal (enable) */}
+        <PinSetupModal
+          isOpen={pinSetupOpen}
+          title="Set App PIN"
+          onSave={handlePinSave}
+          onCancel={() => setPinSetupOpen(false)}
+        />
+
+        {/* ── Change PIN modal */}
+        <PinSetupModal
+          isOpen={changePinOpen}
+          title="Change PIN"
+          onSave={handleChangePinSave}
+          onCancel={() => setChangePinOpen(false)}
+        />
+
+        {/* ── Danger Zone — Clear Logs alert */}
+        <IonAlert
+          isOpen={dangerAction === 'logs'}
+          header="Clear All Logs?"
+          message="This will permanently delete all weight, water, sleep and food entries. This cannot be undone."
+          buttons={[
+            { text: 'Cancel', role: 'cancel', handler: () => setDangerAction(null) },
+            { text: 'Delete', role: 'destructive', cssClass: 'alert-button-danger', handler: handleClearLogs },
+          ]}
+          onDidDismiss={() => setDangerAction(null)}
+        />
+
+        {/* ── Danger Zone — Clear Photos alert */}
+        <IonAlert
+          isOpen={dangerAction === 'photos'}
+          header="Delete All Photos?"
+          message="All progress photos will be permanently removed from your device. This cannot be undone."
+          buttons={[
+            { text: 'Cancel', role: 'cancel', handler: () => setDangerAction(null) },
+            { text: 'Delete', role: 'destructive', cssClass: 'alert-button-danger', handler: handleClearPhotos },
+          ]}
+          onDidDismiss={() => setDangerAction(null)}
+        />
+
+        {/* ── Danger Zone — Factory Reset alert */}
+        <IonAlert
+          isOpen={dangerAction === 'reset'}
+          header="Factory Reset?"
+          message="ALL data will be wiped — logs, photos, recipes, meal plans, settings and your profile. The app will restart. This cannot be undone."
+          buttons={[
+            { text: 'Cancel', role: 'cancel', handler: () => setDangerAction(null) },
+            { text: 'Reset Everything', role: 'destructive', cssClass: 'alert-button-danger', handler: handleFactoryReset },
+          ]}
+          onDidDismiss={() => setDangerAction(null)}
+        />
+
         <IonToast
           isOpen={toast}
-          message="Profile saved"
+          message={toastMsg}
           duration={1800}
           onDidDismiss={() => setToast(false)}
           style={{ '--background': 'var(--md-inverse-surface)', '--color': 'var(--md-inverse-on-surface)' } as React.CSSProperties}

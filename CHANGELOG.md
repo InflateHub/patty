@@ -2,6 +2,26 @@
 
 ---
 
+## [1.5.0] — Privacy & Security
+*Goal: protect personal health data with PIN / biometric app lock and give users full control over their stored data.*
+
+**App Lock**
+- [x] `@aparajita/capacitor-biometric-auth` installed; `useAppLock` hook manages lock state, PIN hash (SHA-256 via Web Crypto API), biometric availability, and Capacitor `App` resume listener
+- [x] `LockScreen.tsx`: full-viewport fixed overlay — Patty logo, 4-dot PIN indicator, numeric pad, backspace, shake animation on wrong PIN; no tab content visible underneath
+- [x] `PinSetupModal.tsx`: two-step create-and-confirm PIN flow (IonModal); reused for both initial enable and Change PIN
+- [x] Lock triggers automatically on app foreground resume when lock is enabled
+- [x] Biometric unlock (Face ID / Fingerprint): toggle in ProfilePage; auto-prompts on lock screen mount; only shown when device has biometrics enrolled
+- [x] PIN stored as SHA-256 hex in `settings` KV table — never plaintext
+
+**Data Clear (Danger Zone)**
+- [x] ProfilePage → **Privacy & Security** card: App Lock toggle, Biometric Unlock toggle (conditional), Change PIN button
+- [x] ProfilePage → **Danger Zone** card with three `IonAlert`-confirmed destructive actions:
+  - **Clear Logs** — deletes all weight, water, sleep & food entries
+  - **Clear Photos** — removes all progress photo files from device storage + nulls `photo_path`
+  - **Factory Reset** — wipes all tables + settings, reloads app → Onboarding
+
+---
+
 ## [1.4.1] — Bug Fixes + Lifetime Achievement Card
 *Goal: fix broken emoji/unicode rendering across Notifications, WeightTab and ShareCards; add Lifetime shareable card; update Achievements tab icon.*
 

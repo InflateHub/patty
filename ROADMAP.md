@@ -52,15 +52,23 @@ Current production version: **1.1.0**. This document plans the path to **2.0.0**
 
 ---
 
-## 1.5.0 â€” Biometrics Lock
-*Goal: optional app lock via fingerprint / Face ID for privacy-conscious users.*
+## 1.5.0 — Privacy & Security
+*Goal: protect personal health data with app lock and give users full control over their stored data.*
 
-- [ ] `@capacitor-community/biometric-auth` integration
-- [ ] Lock toggle in ProfilePage â†’ Preferences section
-- [ ] On lock enable: prompt biometrics immediately to verify capability; store `app_lock_enabled` in `settings`
-- [ ] App lock triggers on `appStateChange` â†’ background â†’ foreground (Capacitor App plugin)
-- [ ] Fallback to device PIN/passcode if biometrics unavailable
-- [ ] Lock screen: Patty logo, "Unlock Patty" button, no content visible underneath
+**App Lock (PIN + Biometric)**
+- [ ] `@aparajita/capacitor-biometric-auth` installed; `useAppLock` hook manages lock state, PIN hash (SHA-256 via Web Crypto API), biometric availability and app-resume listener
+- [ ] Lock screen: full-viewport overlay (`LockScreen.tsx`) — Patty logo, 4-dot PIN indicator, numeric pad, backspace, shake animation on wrong PIN, no tab content visible underneath
+- [ ] PIN setup: two-step create-and-confirm flow (`PinSetupModal.tsx`) — shown on first enable; reusable for Change PIN
+- [ ] Lock triggers on `appStateChange` → background → foreground (Capacitor `App` plugin)
+- [ ] Biometric unlock: Face ID / Fingerprint via device capability; toggle shown only when biometrics are enrolled; auto-prompts on lock screen mount
+- [ ] ProfilePage → **Privacy & Security** card: App Lock toggle, Biometric toggle (conditional), Change PIN button
+- [ ] PIN stored as SHA-256 hex hash in `settings` KV table — never plaintext
+
+**Data Clear (Danger Zone)**
+- [ ] ProfilePage → **Danger Zone** card with three destructive actions, each behind a two-tap `IonAlert` confirm:
+  - **Clear Logs** — deletes all `weight_entries`, `water_entries`, `sleep_entries`, `food_entries` rows
+  - **Clear Photos** — deletes all progress photo files from device storage + nulls `photo_path` in `weight_entries`
+  - **Factory Reset** — wipes all tables including recipes, meal plan, settings; reloads app → Onboarding
 
 ---
 
