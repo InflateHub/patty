@@ -242,6 +242,7 @@ Ready to proceed?
      - [ ] Key point or sub-feature 1
      - [ ] Key point or sub-feature 2
      ```
+   - `src/pages/ProfilePage.tsx` — update the hardcoded version string in the **App Info** card (`<IonNote slot="end">`) to match the new version added to CHANGELOG.md.
    - Make git commit with a clear message following the conventional commits format (e.g. `feat: add weight entry form`).
 
 4. **Report outcome** — state clearly:
