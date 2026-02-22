@@ -159,4 +159,11 @@ export const migrations: Migration[] = [
       `ALTER TABLE weight_entries ADD COLUMN photo_path TEXT;`,
     ],
   },
+  {
+    version: 13,
+    // 1.5.0 — add created_at to weight_entries for correct time-based ordering
+    statements: [
+      `ALTER TABLE weight_entries ADD COLUMN created_at TEXT;`,
+    ],
+  },
 ];

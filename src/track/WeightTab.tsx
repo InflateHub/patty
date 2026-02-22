@@ -30,7 +30,7 @@ import { calendarOutline, cameraOutline, createOutline, imageOutline, trash } fr
 import { WeightChart } from '../components/WeightChart';
 import { useWeightLog } from '../hooks/useWeightLog';
 import type { WeightEntry } from '../hooks/useWeightLog';
-import { S, today, formatDate, isToday } from './trackUtils';
+import { S, today, formatDate, formatTime, isToday } from './trackUtils';
 
 interface WeightTabProps {
   openTrigger?: number;
@@ -245,7 +245,12 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
                     <h3>{entry.value} {entry.unit}</h3>
                     {entry.note && <p>{entry.note}</p>}
                   </IonLabel>
-                  <IonNote slot="end">{formatDate(entry.date)}</IonNote>
+                  <IonNote slot="end" style={{ textAlign: 'right' }}>
+                    <div>{isToday(entry.date) ? 'Today' : formatDate(entry.date)}</div>
+                    {entry.created_at && (
+                      <div style={{ fontSize: 'var(--md-label-sm)', opacity: 0.7 }}>{formatTime(entry.created_at)}</div>
+                    )}
+                  </IonNote>
                 </IonItem>
                 <IonItemOptions side="end">
                   <IonItemOption color="danger" onClick={() => handleWeightDelete(entry.id)}>

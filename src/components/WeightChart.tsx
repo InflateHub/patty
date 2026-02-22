@@ -27,7 +27,12 @@ export const WeightChart: React.FC<Props> = ({ entries }) => {
   const data: ChartPoint[] = useMemo(
     () =>
       [...entries]
-        .reverse()
+        .sort((a, b) => {
+          const aKey = a.created_at ?? a.id;
+          const bKey = b.created_at ?? b.id;
+          if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+          return aKey < bKey ? -1 : 1;
+        })
         .map((e) => ({
           date: e.date,
           value: e.value,

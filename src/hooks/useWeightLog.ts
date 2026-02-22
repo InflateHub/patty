@@ -4,7 +4,8 @@ import { savePhotoFile, loadPhotoFile, deletePhotoFile } from '../utils/photoSto
 
 export interface WeightEntry {
   id: string;
-  date: string;   // ISO date string, e.g. "2026-02-21"
+  date: string;       // ISO date string, e.g. "2026-02-21"
+  created_at?: string; // ISO datetime string, e.g. "2026-02-21T09:32:00.000Z"
   value: number;
   unit: 'kg' | 'lbs';
   note?: string;
@@ -30,13 +31,14 @@ export function useWeightLog() {
     try {
       const db = getDb();
       const result = await db.query(
-        'SELECT * FROM weight_entries ORDER BY date DESC, id DESC;'
+        'SELECT * FROM weight_entries ORDER BY date DESC, COALESCE(created_at, id) DESC;'
       );
       const rows: WeightEntry[] = await Promise.all(
         (result.values ?? []).map(async (r: Record<string, unknown>) => {
           const entry: WeightEntry = {
             id: r.id as string,
             date: r.date as string,
+            created_at: (r.created_at as string | null) ?? undefined,
             value: r.value as number,
             unit: r.unit as 'kg' | 'lbs',
             note: r.note as string | undefined,
@@ -75,8 +77,8 @@ export function useWeightLog() {
         }
         const db = getDb();
         await db.run(
-          'INSERT INTO weight_entries (id, date, value, unit, note, photo_path) VALUES (?, ?, ?, ?, ?, ?);',
-          [id, entry.date, entry.value, entry.unit, entry.note ?? null, photoPath]
+          'INSERT INTO weight_entries (id, date, value, unit, note, photo_path, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);',
+          [id, entry.date, entry.value, entry.unit, entry.note ?? null, photoPath, new Date().toISOString()]
         );
         await load();
       } catch (err) {
@@ -107,7 +109,16 @@ export function useWeightLog() {
 
   // Earliest entry ever (for journeys / starting weight)
   const startingEntry = entries.length > 0
-    ? entries.reduce((earliest, e) => e.date < earliest.date ? e : earliest)
+    ? entries.reduce((earliest, e) => {
+        if (e.date < earliest.date) return e;
+        if (e.date === earliest.date) {
+          // prefer the one logged earliest in the day
+          const eTime = e.created_at ?? e.id;
+          const earlyTime = earliest.created_at ?? earliest.id;
+          return eTime < earlyTime ? e : earliest;
+        }
+        return earliest;
+      })
     : null;
 
   return {
