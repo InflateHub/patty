@@ -76,24 +76,29 @@ ion-title[size="large"] {
 ion-tab-bar {
   --background: var(--md-surface-container);
   --border: none;
-  padding: 0 8px;
-  height: 60px;
-  border-top: 1px solid var(--md-outline-variant);
+  padding: 0 4px;
+  height: 80px;
+  /* MD3 Navigation Bar: tonal surface elevation instead of a hard border */
+  box-shadow:
+    0 -1px 2px  color-mix(in srgb, var(--md-shadow) 8%,  transparent),
+    0 -3px 10px color-mix(in srgb, var(--md-shadow) 5%,  transparent);
 }
 
 ion-tab-button {
   --color: var(--md-on-surface-variant);
-  --color-selected: var(--md-primary);
+  --color-selected: var(--md-on-primary-container);
   --ripple-color: color-mix(in srgb, var(--md-primary) 20%, transparent);
   border-radius: var(--md-shape-full);
   position: relative;
+  padding-top: 12px;
+  padding-bottom: 16px;
 }
 
-/* MD3 active indicator on selected tab */
+/* MD3 active pill indicator */
 ion-tab-button.tab-selected::before {
   content: '';
   position: absolute;
-  top: 6px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   width: 64px;
@@ -101,6 +106,7 @@ ion-tab-button.tab-selected::before {
   background: var(--md-primary-container);
   border-radius: var(--md-shape-full);
   z-index: 0;
+  transition: background var(--md-duration-sm) var(--md-easing-standard);
 }
 
 ion-tab-button ion-icon,
@@ -110,9 +116,13 @@ ion-tab-button ion-label {
   transition: color var(--md-duration-sm) var(--md-easing-standard);
 }
 
+ion-tab-button ion-icon {
+  font-size: 24px;
+}
+
 ion-tab-button ion-label {
-  font-size: var(--md-label-md);
-  font-weight: 600;
+  font-size: var(--md-label-sm);
+  font-weight: 500;
   margin-top: 4px;
 }
 

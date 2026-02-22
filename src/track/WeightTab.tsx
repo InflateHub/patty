@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   IonButton,
   IonButtons,
@@ -6,8 +6,6 @@ import {
   IonCardContent,
   IonContent,
   IonDatetime,
-  IonFab,
-  IonFabButton,
   IonHeader,
   IonIcon,
   IonInfiniteScroll,
@@ -27,13 +25,17 @@ import {
   IonToolbar,
   useIonAlert,
 } from '@ionic/react';
-import { add, calendarOutline, createOutline, trash } from 'ionicons/icons';
+import { calendarOutline, createOutline, trash } from 'ionicons/icons';
 import { WeightChart } from '../components/WeightChart';
 import { useWeightLog } from '../hooks/useWeightLog';
 import type { WeightEntry } from '../hooks/useWeightLog';
 import { S, today, formatDate, isToday } from './trackUtils';
 
-export const WeightTab: React.FC = () => {
+interface WeightTabProps {
+  openTrigger?: number;
+}
+
+export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
   const { entries, todayEntries, loading, addEntry, deleteEntry } = useWeightLog();
   const modal = useRef<HTMLIonModalElement>(null);
   const dateModal = useRef<HTMLIonModalElement>(null);
@@ -48,6 +50,12 @@ export const WeightTab: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(30);
 
   const [presentAlert] = useIonAlert();
+
+  /* Open modal when Track's contextual FAB fires */
+  useEffect(() => {
+    if (!openTrigger) return;
+    setModalOpen(true);
+  }, [openTrigger]);
 
   function resetWeightForm() {
     setValue('');
@@ -201,13 +209,6 @@ export const WeightTab: React.FC = () => {
           <p style={{ margin: '8px 0 0', fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)' }}>Tap + to log your first weight entry.</p>
         </div>
       )}
-
-      {/* FAB */}
-      <IonFab vertical="bottom" horizontal="end" slot="fixed">
-        <IonFabButton onClick={() => setModalOpen(true)}>
-          <IonIcon icon={add} />
-        </IonFabButton>
-      </IonFab>
 
       <IonToast
         isOpen={!!errorMsg}

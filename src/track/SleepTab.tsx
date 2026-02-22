@@ -1,12 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   IonButton,
   IonButtons,
   IonCard,
   IonCardContent,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonHeader,
   IonIcon,
   IonItem,
@@ -24,7 +22,7 @@ import {
   IonToolbar,
   useIonAlert,
 } from '@ionic/react';
-import { add, moonOutline, timeOutline, trash } from 'ionicons/icons';
+import { moonOutline, timeOutline, trash } from 'ionicons/icons';
 import { useSleepLog } from '../hooks/useSleepLog';
 import type { SleepEntry } from '../hooks/useSleepLog';
 import { S, formatDate, formatDuration, formatTime, today } from './trackUtils';
@@ -79,7 +77,12 @@ const starBtn = (active: boolean): React.CSSProperties => ({
 
 /* ── Component ───────────────────────────────────────────────────────── */
 
-export const SleepTab: React.FC = () => {
+interface SleepTabProps {
+  openTrigger?: number;
+  onAlreadyLoggedChange?: (v: boolean) => void;
+}
+
+export const SleepTab: React.FC<SleepTabProps> = ({ openTrigger, onAlreadyLoggedChange }) => {
   const { entries, lastNightEntry, loading, addEntry, deleteEntry, avgDurationMin } = useSleepLog();
   const [modalOpen, setModalOpen] = useState(false);
   const [bedtimeInput, setBedtimeInput] = useState('22:00');
@@ -113,6 +116,17 @@ export const SleepTab: React.FC = () => {
   const alreadyLogged =
     lastNightEntry !== null &&
     (lastNightEntry.date === todayStr || lastNightEntry.date === yesterday);
+
+  /* Communicate alreadyLogged up so Track.tsx can disable its FAB */
+  useEffect(() => {
+    onAlreadyLoggedChange?.(alreadyLogged);
+  }, [alreadyLogged, onAlreadyLoggedChange]);
+
+  /* Open modal when Track's contextual FAB fires */
+  useEffect(() => {
+    if (!openTrigger) return;
+    openModal();
+  }, [openTrigger]);
 
   function openModal() {
     setBedtimeInput('22:00');
@@ -295,13 +309,6 @@ export const SleepTab: React.FC = () => {
           <p style={{ margin: '8px 0 0', fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)' }}>Tap + to log last night’s sleep.</p>
         </div>
       )}
-
-      {/* ── FAB (disabled when today/last night already logged) ──────────── */}
-      <IonFab vertical="bottom" horizontal="end" slot="fixed">
-        <IonFabButton onClick={openModal} disabled={alreadyLogged}>
-          <IonIcon icon={add} />
-        </IonFabButton>
-      </IonFab>
 
       <IonToast
         isOpen={!!errorMsg}

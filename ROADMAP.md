@@ -1,17 +1,17 @@
 ﻿# Patty â€” Roadmap (Post-1.0.5)
 
 All versions prior to 1.1.0 are archived in [`ROADMAP/ROADMAP-v1.0.5.md`](ROADMAP/ROADMAP-v1.0.5.md).
-Current production version: **1.0.5**. This document plans the path to **2.0.0**.
+Current production version: **1.1.0**. This document plans the path to **2.0.0**.
 
 ---
 
 ## 1.1.0 â€” UI Polish & Core Fixes
 *Goal: resolve the most visible UX friction points in the shipped 1.0.5 build.*
 
-- [ ] **Fancy bottom bar** â€” taller tab bar with label visibility, active indicator pill/blob, subtle shadow elevation; uses MD3 tonal surface tokens
-- [ ] **Smooth splash screen transition** â€” replace abrupt splash dismiss with a cross-fade or scale-out animation into the Home tab (Capacitor SplashScreen `fadeOutDuration` + CSS entry animation)
-- [ ] **Track page contextual FAB** â€” FAB icon, label, and action change to match the active tab (Weight / Water / Sleep / Food); single `<IonFab>` driven by `activeTab` state; no more static `+`
-- [ ] **Delete seed recipe** â€” allow all recipes (seed and custom) to be deleted; deleted seed recipe IDs stored in a `deleted_seed_recipes` SQLite set; `useRecipes` filters them out on load
+- [x] **Fancy bottom bar** â€” taller tab bar with label visibility, active indicator pill/blob, subtle shadow elevation; uses MD3 tonal surface tokens
+- [x] **Smooth splash screen transition** â€” replace abrupt splash dismiss with a cross-fade or scale-out animation into the Home tab (Capacitor SplashScreen `fadeOutDuration` + CSS entry animation)
+- [x] **Track page contextual FAB** â€” FAB icon, label, and action change to match the active tab (Weight / Water / Sleep / Food); single `<IonFab>` driven by `activeTab` state; no more static `+`
+- [x] **Delete seed recipe** â€” allow all recipes (seed and custom) to be deleted; deleted seed recipe IDs stored in a `deleted_seed_recipes` SQLite set; `useRecipes` filters them out on load
 
 ---
 

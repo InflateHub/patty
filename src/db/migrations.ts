@@ -143,4 +143,13 @@ export const migrations: Migration[] = [
       `ALTER TABLE food_entries ADD COLUMN photo_path TEXT;`,
     ],
   },
+  {
+    version: 11,
+    // 1.1.0 — allow deletion of seed recipes
+    statements: [
+      `CREATE TABLE IF NOT EXISTS deleted_seed_recipes (
+        id TEXT PRIMARY KEY NOT NULL
+      );`,
+    ],
+  },
 ];

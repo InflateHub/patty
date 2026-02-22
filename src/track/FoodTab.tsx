@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IonButton,
   IonButtons,
   IonCard,
   IonCardContent,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonHeader,
   IonIcon,
   IonInput,
@@ -27,7 +25,7 @@ import {
   useIonViewWillEnter,
 } from '@ionic/react';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { add, albumsOutline, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
+import { albumsOutline, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
 import { useFoodLog } from '../hooks/useFoodLog';
 import type { FoodEntry, MealType } from '../hooks/useFoodLog';
 import { S, formatTime, today } from './trackUtils';
@@ -91,7 +89,11 @@ const photoPlaceholder: React.CSSProperties = {
 
 /* ── Component ───────────────────────────────────────────────────────── */
 
-export const FoodTab: React.FC = () => {
+interface FoodTabProps {
+  openTrigger?: number;
+}
+
+export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
   const { loading, addEntry, deleteEntry, todayEntries, reload } = useFoodLog();
 
   useIonViewWillEnter(() => {
@@ -104,6 +106,12 @@ export const FoodTab: React.FC = () => {
   const [kcal, setKcal] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  /* Open modal when Track's contextual FAB fires */
+  useEffect(() => {
+    if (!openTrigger) return;
+    openModal();
+  }, [openTrigger]);
 
   const todayStr = today();
   const grouped = todayEntries(todayStr);
@@ -283,12 +291,7 @@ export const FoodTab: React.FC = () => {
         </IonCardContent>
       </IonCard>
 
-      {/* ── FAB ─────────────────────────────────────────────────────── */}
-      <IonFab vertical="bottom" horizontal="end" slot="fixed">
-        <IonFabButton onClick={openModal} style={{ '--background': 'var(--md-primary-container)', '--color': 'var(--md-on-primary-container)' } as React.CSSProperties}>
-          <IonIcon icon={add} />
-        </IonFabButton>
-      </IonFab>
+
       <IonToast
         isOpen={!!errorMsg}
         message={errorMsg ?? ''}

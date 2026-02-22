@@ -2,6 +2,16 @@
 
 ---
 
+## [1.1.0] — UI Polish & Core Fixes
+*Goal: resolve the most visible UX friction points in the shipped 1.0.5 build.*
+
+- [x] **Fancy bottom bar** — `ion-tab-bar` height 60 → 80px; hard `border-top` replaced with MD3 tonal box-shadow elevation; active indicator `top` adjusted to 10px; `--color-selected` updated to `--md-on-primary-container` (matches indicator fill); label scale set to `--md-label-sm` weight 500
+- [x] **Smooth splash transition** — `capacitor.config.ts`: `SplashScreen.fadeOutDuration: 300` so the native splash cross-fades out over 300 ms instead of cutting abruptly; pairs with the existing `md-fade-in` CSS entry animation on `ion-router-outlet > .ion-page`
+- [x] **Track page contextual FAB** — single `<IonFab>` lives in `Track.tsx`; icon changes per sub-tab (`scaleOutline` / `waterOutline` / `moonOutline` / `fastFoodOutline`); clicking increments `fabTrigger` which each tab listens to via `useEffect`; tab switch resets `fabTrigger` to 0 so the new tab never auto-opens; Sleep FAB disabled when `alreadyLogged` (communicated back via `onAlreadyLoggedChange` prop)
+- [x] **Delete seed recipes** — migration v11: `deleted_seed_recipes (id TEXT PK)` table; `useRecipes` fetches deleted IDs and filters `RECIPES` on load; `deleteSeedRecipe(id)` inserts to the table; `Recipes.tsx` `handleDelete` dispatches to `deleteRecipe` or `deleteSeedRecipe` based on `recipe.custom`; `RecipeDetailModal` `onDelete` now always supplied (trash icon visible for all recipes)
+
+---
+
 ## [1.0.5] — Photo filesystem storage
 *Goal: stop storing image data as base64 blobs in SQLite; write each photo to the device filesystem and store only a path string in the database.*
 

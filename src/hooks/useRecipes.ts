@@ -29,18 +29,20 @@ function rowToUserRecipe(r: Record<string, unknown>): UserRecipe {
 
 export function useRecipes() {
   const [userRecipes, setUserRecipes] = useState<UserRecipe[]>([]);
+  const [deletedSeedIds, setDeletedSeedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   const loadAll = useCallback(async () => {
     try {
       const db = getDb();
-      const result = await db.query(
-        'SELECT * FROM recipes ORDER BY created_at DESC;',
-        []
-      );
-      setUserRecipes((result.values ?? []).map((r: Record<string, unknown>) => rowToUserRecipe(r)));
+      const [recipesResult, deletedResult] = await Promise.all([
+        db.query('SELECT * FROM recipes ORDER BY created_at DESC;', []),
+        db.query('SELECT id FROM deleted_seed_recipes;', []),
+      ]);
+      setUserRecipes((recipesResult.values ?? []).map((r: Record<string, unknown>) => rowToUserRecipe(r)));
+      setDeletedSeedIds(new Set((deletedResult.values ?? []).map((r: Record<string, unknown>) => r.id as string)));
     } catch (err) {
-      console.error('Failed to load user recipes:', err);
+      console.error('Failed to load recipes:', err);
     } finally {
       setLoading(false);
     }
@@ -52,10 +54,10 @@ export function useRecipes() {
 
   /**
    * Seed recipes first, then user-created newest-first.
-   * Each item has `custom: true` only for user recipes.
+   * Seed recipes that have been explicitly deleted are excluded.
    */
   const allRecipes: Array<Recipe & { custom?: true }> = [
-    ...RECIPES,
+    ...RECIPES.filter((r) => !deletedSeedIds.has(r.id)),
     ...userRecipes,
   ];
 
@@ -104,5 +106,19 @@ export function useRecipes() {
     [loadAll]
   );
 
-  return { allRecipes, userRecipes, loading, addRecipe, deleteRecipe };
+  const deleteSeedRecipe = useCallback(
+    async (id: string) => {
+      try {
+        const db = getDb();
+        await db.run('INSERT OR IGNORE INTO deleted_seed_recipes (id) VALUES (?);', [id]);
+        await loadAll();
+      } catch (err) {
+        console.error('Failed to delete seed recipe:', err);
+        throw err;
+      }
+    },
+    [loadAll]
+  );
+
+  return { allRecipes, userRecipes, loading, addRecipe, deleteRecipe, deleteSeedRecipe };
 }

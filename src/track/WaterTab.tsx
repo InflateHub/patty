@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IonButton,
   IonButtons,
   IonCard,
   IonCardContent,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonHeader,
   IonIcon,
   IonItem,
@@ -24,13 +22,17 @@ import {
   IonToolbar,
   useIonAlert,
 } from '@ionic/react';
-import { add, settingsOutline, trash, waterOutline } from 'ionicons/icons';
+import { settingsOutline, trash, waterOutline } from 'ionicons/icons';
 import { WaterRing } from '../components/WaterRing';
 import { useWaterLog } from '../hooks/useWaterLog';
 import type { WaterEntry } from '../hooks/useWaterLog';
 import { S, QUICK_AMOUNTS, formatTime } from './trackUtils';
 
-export const WaterTab: React.FC = () => {
+interface WaterTabProps {
+  openTrigger?: number;
+}
+
+export const WaterTab: React.FC<WaterTabProps> = ({ openTrigger }) => {
   const {
     todayEntries: waterEntries,
     todayTotal,
@@ -48,6 +50,12 @@ export const WaterTab: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [presentAlert] = useIonAlert();
+
+  /* Open custom-amount modal when Track's contextual FAB fires */
+  useEffect(() => {
+    if (!openTrigger) return;
+    setCustomModalOpen(true);
+  }, [openTrigger]);
 
   async function handleQuickAdd(ml: number) {
     try { await addWater(ml); } catch { setErrorMsg('Could not log water.'); }
@@ -172,13 +180,6 @@ export const WaterTab: React.FC = () => {
           <p style={{ margin: 0, fontSize: 'var(--md-body-md)', fontFamily: 'var(--md-font)' }}>Tap a chip above to log water.</p>
         </div>
       )}
-
-      {/* FAB */}
-      <IonFab vertical="bottom" horizontal="end" slot="fixed">
-        <IonFabButton onClick={() => setCustomModalOpen(true)}>
-          <IonIcon icon={add} />
-        </IonFabButton>
-      </IonFab>
 
       <IonToast
         isOpen={!!errorMsg}

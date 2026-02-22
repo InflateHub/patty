@@ -25,7 +25,7 @@ import RecipeFormModal from '../recipes/RecipeFormModal';
 type AnyRecipe = Recipe & { custom?: true };
 
 const Recipes: React.FC = () => {
-  const { allRecipes, addRecipe, deleteRecipe } = useRecipes();
+  const { allRecipes, addRecipe, deleteRecipe, deleteSeedRecipe } = useRecipes();
   const { addEntry } = useFoodLog();
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<AnyRecipe | null>(null);
@@ -42,8 +42,12 @@ const Recipes: React.FC = () => {
   }, [query, allRecipes]);
 
   async function handleDelete() {
-    if (!selected?.custom) return;
-    await deleteRecipe(selected.id);
+    if (!selected) return;
+    if (selected.custom) {
+      await deleteRecipe(selected.id);
+    } else {
+      await deleteSeedRecipe(selected.id);
+    }
     setSelected(null);
   }
 
@@ -123,7 +127,7 @@ const Recipes: React.FC = () => {
       <RecipeDetailModal
         recipe={selected}
         onClose={() => setSelected(null)}
-        onDelete={selected?.custom ? handleDelete : undefined}
+        onDelete={handleDelete}
         onLogMeal={handleLogMeal}
       />
 
