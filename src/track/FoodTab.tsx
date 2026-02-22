@@ -24,6 +24,7 @@ import {
   IonTitle,
   IonToast,
   IonToolbar,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import { add, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
 import { useFoodLog } from '../hooks/useFoodLog';
@@ -99,7 +100,11 @@ const photoPlaceholder: React.CSSProperties = {
 /* ── Component ───────────────────────────────────────────────────────── */
 
 export const FoodTab: React.FC = () => {
-  const { loading, addEntry, deleteEntry, todayEntries } = useFoodLog();
+  const { loading, addEntry, deleteEntry, todayEntries, reload } = useFoodLog();
+
+  useIonViewWillEnter(() => {
+    reload();
+  });
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<MealType>('breakfast');
   const [photoUri, setPhotoUri] = useState<string | undefined>();

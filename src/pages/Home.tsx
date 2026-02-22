@@ -54,6 +54,7 @@ const Home: React.FC = () => {
   const { todayTotal, dailyGoal, loading: waterLoading, reload: reloadWater } = useWaterLog();
   const { lastNightEntry, reload: reloadSleep } = useSleepLog();
   const { entries: foodEntries, reload: reloadFood } = useFoodLog();
+  const { profile, reload: reloadProfile } = useProfile();
 
   useIonViewWillEnter(() => {
     reloadWeight();
@@ -62,7 +63,6 @@ const Home: React.FC = () => {
     reloadFood();
     reloadProfile();
   });
-  const { profile, reload: reloadProfile } = useProfile();
 
   const weightKg = latestEntry
     ? latestEntry.unit === 'lbs'

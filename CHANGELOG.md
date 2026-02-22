@@ -2,6 +2,23 @@
 
 ---
 
+## [1.0.3] — Sync audit: two bugs fixed
+*Goal: close two bugs found during deep sync analysis.*
+
+- [x] `Home.tsx`: move `useProfile()` call above `useIonViewWillEnter` — fixes `reloadProfile` being referenced before declaration (const TDZ violation)
+- [x] `FoodTab.tsx`: add `useIonViewWillEnter` + `reload` — fixes stale food entries when a recipe is logged from the Recipes tab while FoodTab is the active sub-tab
+
+**Full sync status post-1.0.3:**
+- Home: all 5 data hooks reload on tab entry ✅
+- Progress: photos + trends reload on tab entry ✅
+- Track sub-tabs: Weight/Water/Sleep — only mutated from their own tab, no cross-page stale risk ✅
+- Track FoodTab: reloads on tab entry ✅ (food can also be logged from Recipes)
+- Plan: useMealPlan reloads after every assign/clear, only mutated from Plan ✅
+- Recipes: useRecipes only mutated from Recipes; useFoodLog write-only (no display) ✅
+- ProfilePage / NotificationsPage: push routes — fresh mount every visit ✅
+
+---
+
 ## [1.0.2] — Full live-refresh coverage
 *Goal: every tab refreshes its data on entry — no stale reads anywhere in the app.*
 
