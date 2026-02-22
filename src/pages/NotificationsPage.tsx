@@ -197,7 +197,7 @@ const NotificationsPage: React.FC = () => {
         {/* ── Water section (frequency-based) ───────────────────────── */}
         <IonCard style={cardStyle}>
           <IonListHeader style={sectionHeaderStyle}>
-            \uD83D\uDCA7&nbsp;&nbsp;Hydration
+            💧&nbsp;&nbsp;Hydration
           </IonListHeader>
           <IonCardContent style={{ padding: '0 0 8px' }}>
             <IonList lines="inset" style={{ background: 'transparent' }}>
@@ -205,7 +205,7 @@ const NotificationsPage: React.FC = () => {
               {/* Master water toggle */}
               <IonItem style={{ '--background': 'transparent' } as React.CSSProperties}>
                 <span slot="start" style={{ fontSize: 20, width: 28, textAlign: 'center' }}>
-                  \uD83D\uDCA7
+                  💧
                 </span>
                 <IonLabel style={{ fontFamily: 'var(--md-font)' }}>
                   Water reminders
@@ -255,7 +255,7 @@ const NotificationsPage: React.FC = () => {
                           lineHeight: 1,
                         }}
                       >
-                        \u2212
+                        −
                       </button>
                       <span
                         style={{
@@ -398,7 +398,7 @@ const NotificationsPage: React.FC = () => {
                             {ch.label}
                             {ch.weekday !== undefined && (
                               <p style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
-                                {ch.weekday === 1 ? 'Weekly \u2014 Sundays' : 'Weekly \u2014 Mondays'}
+                                {ch.weekday === 1 ? 'Weekly — Sundays' : 'Weekly — Mondays'}
                               </p>
                             )}
                           </IonLabel>
@@ -448,12 +448,12 @@ const NotificationsPage: React.FC = () => {
         {/* ── Engagement nudges ──────────────────────────────────────── */}
         <IonCard style={cardStyle}>
           <IonListHeader style={sectionHeaderStyle}>
-            \u2728&nbsp;&nbsp;Engagement Nudges
+            ✨&nbsp;&nbsp;Engagement Nudges
           </IonListHeader>
           <IonCardContent style={{ padding: '0 0 8px' }}>
             <IonItem lines="none" style={{ '--background': 'transparent', '--min-height': '44px' } as React.CSSProperties}>
               <IonLabel style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', whiteSpace: 'normal' }}>
-                Motivational prompts timed to follow your functional reminders \u2014 never sent before you\u2019ve had a chance to act.
+                Motivational prompts timed to follow your functional reminders — never sent before you’ve had a chance to act.
               </IonLabel>
             </IonItem>
             <IonList lines="inset" style={{ background: 'transparent' }}>
@@ -472,7 +472,7 @@ const NotificationsPage: React.FC = () => {
                         {ch.label}
                         {ch.adaptsTo && (
                           <p style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
-                            ~{derivedTime} \u2014 30 min after {engageLinkedLabel(ch.adaptsTo)}
+                            ~{derivedTime} — 30 min after {engageLinkedLabel(ch.adaptsTo)}
                           </p>
                         )}
                       </IonLabel>
@@ -501,7 +501,7 @@ const NotificationsPage: React.FC = () => {
             }}
           >
             Reminders are delivered by the device OS. They require Patty to be installed
-            natively (Android&nbsp;/&nbsp;iOS) \u2014 in the browser they are saved but not fired.
+            natively (Android&nbsp;/&nbsp;iOS) — in the browser they are saved but not fired.
           </IonNote>
         </div>
       </IonContent>

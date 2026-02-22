@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { getDb } from '../db/database';
+import { getLevel } from './useGamification';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -71,12 +72,30 @@ export interface YearlyCard {
   headline: string;
 }
 
+export interface LifetimeCard {
+  joinDate: string;          // e.g. 'Jun 12, 2025'
+  daysSince: number;         // days since first log entry
+  totalWeighIns: number;
+  totalWaterL: number;
+  totalSleepNights: number;
+  totalMeals: number;
+  allTimeBestStreak: number;
+  totalXP: number;
+  levelName: string;
+  levelEmoji: string;
+  badgesEarned: number;
+  totalWeightChange: number | null;
+  weightUnit: string;
+  headline: string;
+}
+
 export interface AchievementCardsData {
   habitRing: HabitRingDay[];    // last 7 days
   daily: DailyCard;
   weekly: WeeklyCard;
   monthly: MonthlyCard;
   yearly: YearlyCard;
+  lifetime: LifetimeCard;
   loading: boolean;
 }
 
@@ -169,6 +188,22 @@ export function useAchievementCards(): AchievementCardsData & { reload: () => vo
       levelName: 'Seedling',
       xpEarned: 0,
       badgesEarned: 0,
+      headline: '',
+    },
+    lifetime: {
+      joinDate: '',
+      daysSince: 0,
+      totalWeighIns: 0,
+      totalWaterL: 0,
+      totalSleepNights: 0,
+      totalMeals: 0,
+      allTimeBestStreak: 0,
+      totalXP: 0,
+      levelName: 'Seedling',
+      levelEmoji: '🌱',
+      badgesEarned: 0,
+      totalWeightChange: null,
+      weightUnit: 'kg',
       headline: '',
     },
     loading: true,
@@ -406,6 +441,76 @@ export function useAchievementCards(): AchievementCardsData & { reload: () => vo
         allXp >= 300  ? 'Achiever' :
         allXp >= 100  ? 'Sprout' : 'Seedling';
 
+      // ── All-time Lifetime data ────────────────────────────────────────────────
+      const ltWeightRes = await db.query(`SELECT COUNT(*) as cnt FROM weight_entries;`);
+      const ltWaterRes  = await db.query(`SELECT SUM(amount_ml) as total FROM water_entries;`);
+      const ltSleepRes  = await db.query(`SELECT COUNT(*) as cnt FROM sleep_entries;`);
+      const ltFoodRes   = await db.query(`SELECT COUNT(*) as cnt FROM food_entries;`);
+      const ltWaterGoalRes = await db.query(
+        `SELECT COUNT(*) as cnt FROM (
+           SELECT date FROM water_entries GROUP BY date HAVING SUM(amount_ml) >= ?
+         );`,
+        [waterGoalMl]
+      );
+
+      const ltTotalWeighIns = (ltWeightRes.values?.[0]?.cnt  as number) ?? 0;
+      const ltTotalWaterL   = Math.round(((ltWaterRes.values?.[0]?.total as number) ?? 0) / 1000);
+      const ltTotalSleep    = (ltSleepRes.values?.[0]?.cnt   as number) ?? 0;
+      const ltTotalMeals    = (ltFoodRes.values?.[0]?.cnt    as number) ?? 0;
+      const ltWaterGoalDays = (ltWaterGoalRes.values?.[0]?.cnt as number) ?? 0;
+
+      const ltXP    = ltTotalWeighIns * 10 + ltWaterGoalDays * 10 + ltTotalSleep * 5 + ltTotalMeals * 2;
+      const ltLevel = getLevel(ltXP);
+
+      // Join date (earliest logged date across any habit table)
+      const ltJoinIso   = allDates[0] ?? null;
+      const ltJoinDate  = ltJoinIso
+        ? new Date(ltJoinIso + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+        : '';
+      const ltDaysSince = ltJoinIso
+        ? Math.round((new Date(today).getTime() - new Date(ltJoinIso).getTime()) / 86_400_000)
+        : 0;
+
+      // All-time best streak (allDates is sorted ascending)
+      let ltBestStreak = allDates.length > 0 ? 1 : 0;
+      let ltRun = 1;
+      for (let i = 1; i < allDates.length; i++) {
+        const gap = Math.round(
+          (new Date(allDates[i]).getTime() - new Date(allDates[i - 1]).getTime()) / 86_400_000
+        );
+        if (gap === 1) {
+          ltRun++;
+          if (ltRun > ltBestStreak) ltBestStreak = ltRun;
+        } else {
+          ltRun = 1;
+        }
+      }
+
+      // First and latest weight for lifetime total change
+      const ltFirstRes  = await db.query(
+        `SELECT value, unit FROM weight_entries ORDER BY date ASC,  id ASC  LIMIT 1;`
+      );
+      const ltLatestRes = await db.query(
+        `SELECT value, unit FROM weight_entries ORDER BY date DESC, id DESC LIMIT 1;`
+      );
+      const ltFirstW  = ltFirstRes.values?.[0];
+      const ltLatestW = ltLatestRes.values?.[0];
+      const ltWeightChange = ltFirstW && ltLatestW
+        ? parseFloat(((ltLatestW.value as number) - (ltFirstW.value as number)).toFixed(2))
+        : null;
+      const ltWeightUnit = ltFirstW ? (ltFirstW.unit as string) : 'kg';
+
+      let ltHeadline = '';
+      if (ltWeightChange !== null && ltWeightChange < 0) {
+        ltHeadline = `${Math.abs(ltWeightChange).toFixed(1)} ${ltWeightUnit} lost since day one! \uD83C\uDFC6`;
+      } else if (ltDaysSince > 30) {
+        ltHeadline = `${ltDaysSince} days on your journey!`;
+      } else if (ltTotalWeighIns > 0) {
+        ltHeadline = `${ltTotalWeighIns} total weigh-ins logged!`;
+      } else {
+        ltHeadline = 'Your journey starts here!';
+      }
+
       setData({
         habitRing,
         daily: {
@@ -455,6 +560,22 @@ export function useAchievementCards(): AchievementCardsData & { reload: () => vo
           xpEarned: xpYear,
           badgesEarned: 0, // filled by Progress component from gamification hook
           headline: yearlyHeadline,
+        },
+        lifetime: {
+          joinDate: ltJoinDate,
+          daysSince: ltDaysSince,
+          totalWeighIns: ltTotalWeighIns,
+          totalWaterL: ltTotalWaterL,
+          totalSleepNights: ltTotalSleep,
+          totalMeals: ltTotalMeals,
+          allTimeBestStreak: ltBestStreak,
+          totalXP: ltXP,
+          levelName: ltLevel.name,
+          levelEmoji: ltLevel.emoji,
+          badgesEarned: 0,
+          totalWeightChange: ltWeightChange,
+          weightUnit: ltWeightUnit,
+          headline: ltHeadline,
         },
         loading: false,
       });

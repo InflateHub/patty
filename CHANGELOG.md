@@ -2,6 +2,16 @@
 
 ---
 
+## [1.4.1] — Bug Fixes + Lifetime Achievement Card
+*Goal: fix broken emoji/unicode rendering across Notifications, WeightTab and ShareCards; add Lifetime shareable card; update Achievements tab icon.*
+
+- [x] **Unicode fixes**: replaced literal `\uXXXX` escape sequences in JSX text nodes (NotificationsPage, ShareCard) with actual UTF-8 emoji/punctuation — fixes `\UD83D\UDCA7 HYDRATION` and `0 days \uD83D\uDD25` display bugs
+- [x] **WeightTab mojibake**: fixed `â€"`, `Â·`, `â€¦` garbled characters (UTF-8 bytes mis-read as Latin-1) — em-dash, middle-dot and ellipsis now render correctly
+- [x] **Lifetime Card**: 5th shareable card (`LifetimeShareCard`) added to the achievements page-snap scroll — shows all-time totals, best streak, days on journey, level, and total weight change since day one
+- [x] **Tab icon**: Achievements tab now uses `trophyOutline` instead of `trendingUpOutline`
+
+---
+
 ## [1.4.0] — Achievements Page Redesign
 *Goal: transform the Progress tab into a social-ready achievements screen.*
 

@@ -5,7 +5,7 @@
  * Rendered inside a hidden absolute div off-screen; captured via html-to-image.
  */
 import React from 'react';
-import type { DailyCard, WeeklyCard, MonthlyCard, YearlyCard } from '../hooks/useAchievementCards';
+import type { DailyCard, WeeklyCard, MonthlyCard, YearlyCard, LifetimeCard } from '../hooks/useAchievementCards';
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
@@ -194,7 +194,7 @@ export const DailyShareCard = React.forwardRef<HTMLDivElement, { data: DailyCard
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
         <div style={BIG_STAT}>{data.streak}</div>
-        <div style={SUBSTAT}>day streak \uD83D\uDD25</div>
+        <div style={SUBSTAT}>day streak 🔥</div>
       </div>
 
       <HabitPips weight={data.weight} water={data.water} sleep={data.sleep} food={data.food} />
@@ -203,7 +203,7 @@ export const DailyShareCard = React.forwardRef<HTMLDivElement, { data: DailyCard
         <div style={{ textAlign: 'center' }}>
           <span style={{ fontSize: 32, fontWeight: 300 }}>{data.weightValue}</span>
           <span style={{ fontSize: 16, opacity: 0.7, marginLeft: 4 }}>{data.weightUnit}</span>
-          <div style={{ ...SUBSTAT, marginTop: 2 }}>today\u2019s weight</div>
+          <div style={{ ...SUBSTAT, marginTop: 2 }}>today’s weight</div>
         </div>
       )}
 
@@ -285,7 +285,7 @@ export const MonthlyShareCard = React.forwardRef<HTMLDivElement, { data: Monthly
 
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 13, opacity: 0.7, marginBottom: 2 }}>Best streak</div>
-        <div style={{ fontSize: 44, fontWeight: 300 }}>{data.bestStreak} days \uD83D\uDD25</div>
+        <div style={{ fontSize: 44, fontWeight: 300 }}>{data.bestStreak} days 🔥</div>
       </div>
 
       {data.weightDeltaKg !== null && (
@@ -329,9 +329,9 @@ export const YearlyShareCard = React.forwardRef<HTMLDivElement, { data: YearlyCa
 
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 18, fontWeight: 600 }}>{data.levelName}</div>
-        <div style={{ fontSize: 13, opacity: 0.65 }}>{data.xpEarned.toLocaleString()} XP earned \u2B50</div>
+          <div style={{ fontSize: 13, opacity: 0.65 }}>{data.xpEarned.toLocaleString()} XP earned ⭐</div>
         {data.badgesEarned > 0 && (
-          <div style={{ fontSize: 13, opacity: 0.65, marginTop: 2 }}>{data.badgesEarned} badges unlocked \uD83C\uDF96\uFE0F</div>
+          <div style={{ fontSize: 13, opacity: 0.65, marginTop: 2 }}>{data.badgesEarned} badges unlocked 🎖️</div>
         )}
       </div>
 
@@ -353,3 +353,67 @@ export const YearlyShareCard = React.forwardRef<HTMLDivElement, { data: YearlyCa
   )
 );
 YearlyShareCard.displayName = 'YearlyShareCard';
+
+// ── LIFETIME CARD ──────────────────────────────────────────────────────
+export const LifetimeShareCard = React.forwardRef<HTMLDivElement, { data: LifetimeCard }>(
+  ({ data }, ref) => (
+    <div ref={ref} style={{ ...BASE, background: 'linear-gradient(145deg, #1A1A2E 0%, #2D3561 55%, #7C4F1A 100%)', color: '#fff' }}>
+      <WatermarkCircles />
+      <Brand variant="All Time" />
+
+      {/* Level badge */}
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 40, marginBottom: 4 }}>{data.levelEmoji}</div>
+        <div style={{ ...HEADLINE, fontSize: 22 }}>{data.levelName}</div>
+        <div style={{ fontSize: 12, opacity: 0.6, marginTop: 4 }}>
+          {data.totalXP.toLocaleString()} XP
+          {data.joinDate ? ` • Since ${data.joinDate}` : ''}
+        </div>
+      </div>
+
+      {/* Stats grid */}
+      <div style={STAT_GRID}>
+        {([
+          { val: data.totalWeighIns,              label: 'Weigh-ins',    emoji: '⚖️' },
+          { val: `${data.totalWaterL}L`,           label: 'Water drank',  emoji: '💧' },
+          { val: data.totalSleepNights,            label: 'Nights logged',emoji: '😴' },
+          { val: data.totalMeals,                  label: 'Meals logged', emoji: '🍽️' },
+        ] as { val: number | string; label: string; emoji: string }[]).map(s => (
+          <div key={s.label} style={STAT_BLOCK}>
+            <span style={{ ...STAT_VAL, color: '#fff' }}>{s.emoji} {s.val}</span>
+            <span style={{ ...STAT_LBL, color: 'rgba(255,255,255,0.6)' }}>{s.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Streak + days side by side */}
+      <div style={{ display: 'flex', gap: 32, justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 40, fontWeight: 300 }}>{data.allTimeBestStreak}</div>
+          <div style={{ fontSize: 11, opacity: 0.65 }}>Best streak 🔥</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 40, fontWeight: 300 }}>{data.daysSince}</div>
+          <div style={{ fontSize: 11, opacity: 0.65 }}>Days on journey</div>
+        </div>
+      </div>
+
+      {/* Total weight change */}
+      {data.totalWeightChange !== null && (
+        <div style={{ textAlign: 'center' }}>
+          <span style={{
+            fontSize: 36, fontWeight: 300,
+            color: data.totalWeightChange < 0 ? '#A8E6CF' : '#F5C842',
+          }}>
+            {data.totalWeightChange > 0 ? '+' : ''}{data.totalWeightChange.toFixed(1)} {data.weightUnit}
+          </span>
+          <div style={{ ...SUBSTAT }}>total change</div>
+        </div>
+      )}
+
+      <div style={{ ...HEADLINE, color: '#fff' }}>{data.headline}</div>
+      <div style={{ fontSize: 11, opacity: 0.5 }}>My journey on Patty</div>
+    </div>
+  )
+);
+LifetimeShareCard.displayName = 'LifetimeShareCard';

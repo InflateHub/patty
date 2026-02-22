@@ -198,7 +198,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
                 lineHeight: 1.1,
                 letterSpacing: '-0.5px',
               }}>
-                {todayLatest ? `${todayLatest.value}` : 'â€”'}
+                {todayLatest ? `${todayLatest.value}` : '—'}
               </div>
               <div style={{
                 marginTop: 8,
@@ -209,7 +209,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
                 letterSpacing: '.08em',
               }}>
                 {todayLatest
-                  ? `${todayLatest.unit} Â· Today${todayEntries.length > 1 ? ` Â· ${todayEntries.length} entries` : ''}`
+                  ? `${todayLatest.unit} · Today${todayEntries.length > 1 ? ` · ${todayEntries.length} entries` : ''}`
                   : 'No entry today'}
               </div>
             </div>
@@ -262,7 +262,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
               setTimeout(() => (ev.target as HTMLIonInfiniteScrollElement).complete(), 300);
             }}
           >
-            <IonInfiniteScrollContent loadingText="Loading moreâ€¦" />
+            <IonInfiniteScrollContent loadingText="Loading more…" />
           </IonInfiniteScroll>
         </>
       )}
@@ -345,7 +345,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
                 <IonIcon icon={createOutline} style={{ ...S.rowIcon, marginTop: 2 }} />
                 <textarea
                   rows={1}
-                  placeholder="Add a noteâ€¦"
+                  placeholder="Add a note…"
                   value={note}
                   onChange={(e) => {
                     setNote(e.target.value);

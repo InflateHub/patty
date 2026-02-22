@@ -16,7 +16,7 @@ import {
   homeOutline,
   pulseOutline,
   restaurantOutline,
-  trendingUpOutline,
+  trophyOutline,
 } from 'ionicons/icons';
 
 import Home from './pages/Home';
@@ -150,7 +150,7 @@ const TabShell: React.FC = () => (
         <IonLabel>Plan</IonLabel>
       </IonTabButton>
       <IonTabButton tab="progress" href="/tabs/progress">
-        <IonIcon icon={trendingUpOutline} />
+        <IonIcon icon={trophyOutline} />
         <IonLabel>Achievements</IonLabel>
       </IonTabButton>
     </IonTabBar>

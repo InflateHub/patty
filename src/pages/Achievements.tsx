@@ -43,6 +43,7 @@ import {
   WeeklyShareCard,
   MonthlyShareCard,
   YearlyShareCard,
+  LifetimeShareCard,
 } from '../progress/ShareCard';
 
 // ── Shared style tokens ───────────────────────────────────────────────────────
@@ -210,20 +211,21 @@ const MarqueeCard: React.FC<MarqueeCardProps> = ({ uri, value, unit, date, delta
 
 // ── Section: Shareable Cards ──────────────────────────────────────────────────
 
-const CARD_LABELS = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
-const CARD_COLORS = ['#3D6659', '#2E4F66', '#5A3A6B', '#6B3A3A'];
+const CARD_LABELS = ['Daily', 'Weekly', 'Monthly', 'Yearly', 'Lifetime'];
+const CARD_COLORS = ['#3D6659', '#2E4F66', '#5A3A6B', '#6B3A3A', '#2D3561'];
 
 interface ShareableSectionProps {
   cards: ReturnType<typeof useAchievementCards>;
 }
 
 const ShareableSection: React.FC<ShareableSectionProps> = ({ cards }) => {
-  const dailyRef  = useRef<HTMLDivElement>(null);
-  const weeklyRef = useRef<HTMLDivElement>(null);
-  const monthlyRef = useRef<HTMLDivElement>(null);
-  const yearlyRef = useRef<HTMLDivElement>(null);
+  const dailyRef    = useRef<HTMLDivElement>(null);
+  const weeklyRef   = useRef<HTMLDivElement>(null);
+  const monthlyRef  = useRef<HTMLDivElement>(null);
+  const yearlyRef   = useRef<HTMLDivElement>(null);
+  const lifetimeRef = useRef<HTMLDivElement>(null);
 
-  const refs = [dailyRef, weeklyRef, monthlyRef, yearlyRef];
+  const refs = [dailyRef, weeklyRef, monthlyRef, yearlyRef, lifetimeRef];
 
   const [sharing, setSharing] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -302,10 +304,11 @@ const ShareableSection: React.FC<ShareableSectionProps> = ({ cards }) => {
     <>
       {/* Hidden off-screen full-size cards for capture */}
       <div style={{ position: 'absolute', left: -9999, top: 0, zIndex: -1, pointerEvents: 'none' }}>
-        <DailyShareCard   ref={dailyRef}   data={cards.daily}   />
-        <WeeklyShareCard  ref={weeklyRef}  data={cards.weekly}  />
-        <MonthlyShareCard ref={monthlyRef} data={cards.monthly} />
-        <YearlyShareCard  ref={yearlyRef}  data={cards.yearly}  />
+        <DailyShareCard    ref={dailyRef}    data={cards.daily}    />
+        <WeeklyShareCard   ref={weeklyRef}   data={cards.weekly}   />
+        <MonthlyShareCard  ref={monthlyRef}  data={cards.monthly}  />
+        <YearlyShareCard   ref={yearlyRef}   data={cards.yearly}   />
+        <LifetimeShareCard ref={lifetimeRef} data={cards.lifetime} />
       </div>
 
       {/* Visible page-snap scroll */}
@@ -320,10 +323,11 @@ const ShareableSection: React.FC<ShareableSectionProps> = ({ cards }) => {
         }}
       >
         {[
-          <DailyShareCard   key="d" data={cards.daily}   />,
-          <WeeklyShareCard  key="w" data={cards.weekly}  />,
-          <MonthlyShareCard key="m" data={cards.monthly} />,
-          <YearlyShareCard  key="y" data={cards.yearly}  />,
+          <DailyShareCard    key="d" data={cards.daily}    />,
+          <WeeklyShareCard   key="w" data={cards.weekly}   />,
+          <MonthlyShareCard  key="m" data={cards.monthly}  />,
+          <YearlyShareCard   key="y" data={cards.yearly}   />,
+          <LifetimeShareCard key="l" data={cards.lifetime} />,
         ].map((CardEl, idx) => (
           <div
             key={idx}
