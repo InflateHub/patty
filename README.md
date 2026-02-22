@@ -1,150 +1,80 @@
-# Patty
+<div align="center">
+  <img src="docs/assets/icon.png" alt="Patty Logo" width="100" />
+  <h1>Patty</h1>
+  <p><strong>A calm daily health companion — not a hardcore fitness tracker.</strong></p>
 
-> **A calm daily health planner — not a hardcore fitness tracker.**
+  <p>
+    <a href="https://github.com/InflateHub/patty/releases/latest">
+      <img src="https://img.shields.io/github/v/release/InflateHub/patty?label=latest&color=5C7A6E" alt="Latest Release" />
+    </a>
+    <a href="https://github.com/InflateHub/patty/blob/main/LICENSE">
+      <img src="https://img.shields.io/github/license/InflateHub/patty?color=5C7A6E" alt="License" />
+    </a>
+    <a href="https://patty.saranmahadev.in">
+      <img src="https://img.shields.io/badge/website-patty.saranmahadev.in-5C7A6E" alt="Website" />
+    </a>
+  </p>
 
-Patty is a minimal, elegant lifestyle companion that integrates health tracking with practical action. It doesn't just log your data — it helps you cook, eat, sleep, and exercise consistently by reducing the friction between *tracking* and *doing*.
-
----
-
-## Table of Contents
-
-- [Vision](#vision)
-- [Target Users](#target-users)
-- [Features](#features)
-- [Information Architecture](#information-architecture)
-- [Design Philosophy](#design-philosophy)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Available Scripts](#available-scripts)
-- [Differentiation](#differentiation)
-
----
-
-## Vision
-
-Most health apps make you log data endlessly without guiding your next action. Patty bridges that gap.
-
-**Primary Goal:** Reduce friction between *tracking* and *doing*.
+  <p>
+    <a href="https://patty.saranmahadev.in">🌐 Website</a> ·
+    <a href="https://github.com/InflateHub/patty/releases/latest">📦 Download APK</a> ·
+    <a href="CHANGELOG.md">📋 Changelog</a> ·
+    <a href="ROADMAP.md">🗺️ Roadmap</a>
+  </p>
+</div>
 
 ---
 
-## Target Users
+## What is Patty?
 
-| Audience | Need |
-|---|---|
-| Beginners starting weight loss or fitness | Simple onboarding, no overwhelm |
-| Busy individuals | Fast logging, minimal taps |
-| People who dislike complex fitness apps | Visual progress, low cognitive load |
+Patty is a minimal, open-source iOS/Android lifestyle companion that combines **health tracking** with **practical planning** in one calm, low-friction app.
 
-**Design Principle:** Few taps. Visual progress. Low cognitive load.
+Most health apps make you log data endlessly without guiding your next action. Patty bridges that gap — it doesn't just track, it helps you **cook, eat, sleep, and move** more consistently.
+
+> **Design principle:** Few taps. Visual progress. Low cognitive load.
 
 ---
 
 ## Features
 
-### Tracking System
-
-#### Weight Tracking
-- Manual weight entry
-- Progress timeline with graph
-- Photo-based visual progress
-- Side-by-side photo comparison
-- Optional notes per entry
-
-#### Water Intake
-- One-tap logging with 250ml / 500ml presets
-- Daily goal ring
-- Reminder notifications
-
-#### Sleep Tracking
-- Log sleep time and wake time
-- Sleep quality slider
-- MVP-first — no heavy biometrics
-
-#### Food Intake
-- Photo logging per meal
-- Meal categories: Breakfast, Lunch, Dinner, Snacks
-- Basic calorie estimation (planned for MVP+)
-
-#### Recipe Library
-- Ingredients & step-by-step instructions
-- Prep time per recipe
-- Nutrition summary (planned for MVP+)
-- Linked directly to meal tracking
-
----
-
-### Planning & Guidance Layer
-
-#### Cooking Planner
-- Weekly meal plan generator
-- Auto-generated grocery list from selected recipes
-- "Cook Today" quick suggestion
-
-#### Exercise Planner
-Structured routines for:
-- Beginners
-- Fat loss
-- Mobility
-- Strength basics
-
-Focus: short sessions (10–20 min), minimal equipment.
-
----
-
-## Information Architecture
-
-```
-Home (Dashboard)
-│
-├── Track
-│   ├── Weight + Photos
-│   ├── Water
-│   ├── Sleep
-│   └── Food Log
-│
-├── Recipes
-│   └── Saved / Recommended
-│
-├── Plan
-│   ├── Cooking Planner
-│   └── Exercise Planner
-│
-└── Progress
-    ├── Photos
-    └── Trends
-```
-
-### Daily User Flow
-
-1. Open the app
-2. View the **Dashboard**
-   - Weight trend
-   - Water intake ring
-   - Sleep summary
-   - Today's meals
-3. Quick actions
-   - Log weight
-   - Add meal photo
-   - Log water
-   - Start a workout
-
----
-
-## Design Philosophy
-
-| Principle | Application |
+### 📊 Health Tracking
+| Tab | What you can track |
 |---|---|
-| Neutral colors | No harsh or distracting palettes |
-| Soft typography | Readable, calm, approachable |
-| Card-based layout | Clear content separation |
-| Large touch targets | Accessible, fast interaction |
+| **Weight** | Daily entries with mandatory progress photo, chart, history, delta chips |
+| **Water** | One-tap logging with presets (250 ml / 500 ml), animated goal ring |
+| **Sleep** | Log bedtime + wake time, quality slider, one entry per day |
+| **Food** | Photo-first meal logging across Breakfast / Lunch / Dinner / Snacks |
 
-**Avoided deliberately:**
-- Overloaded analytics dashboards
-- Too many charts at once
-- Aggressive gamification (streaks, badges spam)
+### 🍽️ Recipes & Meal Planning
+- **Recipe library** — 12 built-in seed recipes + create your own (name, emoji, ingredients, steps, times, tags)
+- **Weekly meal plan grid** — assign recipes to Mon–Sun × 3 meal slots
+- **Auto-generated grocery list** — deduplicated ingredients from the week's plan
+
+### 🏆 Achievements & Gamification
+- **Shareable cards** — Daily, Weekly, Monthly, Yearly and Lifetime branded cards (400×600), captured and shared natively
+- **XP system** — earn XP for every logged habit; progress through 5 levels (Seedling → Legend)
+- **Streaks & badges** — current/best streak counters, 8 milestone badges, 7-day habit ring grid
+- **Weight photo marquee** — horizontal hero scroll of weigh-in photos with delta chips
+
+### 🔒 Privacy & Security
+- **PIN lock** — 4-digit PIN with SHA-256 hashing; no plaintext ever stored
+- **Biometric unlock** — Face ID / Fingerprint via device capability (toggle in Profile)
+- **100% local** — all data lives on-device in SQLite; no accounts, no cloud, no analytics
+- **Data controls** — Clear Logs, Clear Photos, Factory Reset (all behind two-tap confirm dialogs)
+
+### 🎨 Personalisation
+- **Dynamic theming** — pick from 8 curated seed colours or enter a custom hex; the full MD3 tonal palette re-generates live
+- **Light / Dark / System** mode toggle
+- **Font size** — Default / Large / XL
+- **Profile** — name, DOB, height, weight, biological sex, goal, activity level, water goal
+
+### 🔔 Smart Reminders
+- 10 independent notification channels: Weight, Water (frequency-based, 1–8/day), Sleep, Food (Breakfast/Lunch/Dinner), Weekly check-in, Progress photo, Engagement nudges
+- All times individually configurable; water slots auto-distributed with manual override
+
+### 🧭 Onboarding
+- 6-step first-launch flow (Welcome → Name/DOB → Metrics → Goal → Activity/Water → Celebration)
+- All steps mandatory; "Desire. Commit. Achieve." tagline; CSS confetti celebration screen
 
 ---
 
@@ -152,14 +82,17 @@ Home (Dashboard)
 
 | Layer | Technology |
 |---|---|
-| Framework | [Ionic](https://ionicframework.com/) 8 + [React](https://react.dev/) 19 |
-| Build Tool | [Vite](https://vitejs.dev/) 5 |
-| Language | TypeScript 5 |
-| Routing | React Router 5 |
-| Native Runtime | [Capacitor](https://capacitorjs.com/) |
-| Unit Testing | [Vitest](https://vitest.dev/) + Testing Library |
-| E2E Testing | [Cypress](https://www.cypress.io/) 13 |
-| Linting | ESLint 9 |
+| **Framework** | [Ionic](https://ionicframework.com/) 8 + [React](https://react.dev/) 19 |
+| **Language** | TypeScript 5 |
+| **Build tool** | [Vite](https://vitejs.dev/) 5 |
+| **Native runtime** | [Capacitor](https://capacitorjs.com/) 8 |
+| **Database** | SQLite via `@capacitor-community/sqlite` + `jeep-sqlite` (browser WASM) |
+| **Design system** | Material Design 3 (Material Expressive 3 / Material You) |
+| **Charts** | [Recharts](https://recharts.org/) 3 |
+| **Theming** | `@material/material-color-utilities` — live MD3 palette generation |
+| **Unit tests** | [Vitest](https://vitest.dev/) + Testing Library |
+| **E2E tests** | [Cypress](https://www.cypress.io/) 13 |
+| **Linting** | ESLint 9 |
 
 ---
 
@@ -167,56 +100,51 @@ Home (Dashboard)
 
 ### Prerequisites
 
-- Node.js >= 18
-- npm >= 9
-- Ionic CLI
+- **Node.js** ≥ 18
+- **npm** ≥ 9
+- **Ionic CLI** (optional but recommended)
 
 ```bash
 npm install -g @ionic/cli
 ```
 
-### Install Dependencies
+### Install
 
 ```bash
-cd Patty
+git clone https://github.com/InflateHub/patty.git
+cd patty
 npm install
 ```
 
-### Run in Development
+### Run in the browser
 
 ```bash
 npm run dev
-# or
-ionic serve
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open [http://localhost:5173](http://localhost:5173).
 
-### Build for Production
+> **Note:** SQLite runs via `jeep-sqlite` (WebAssembly) in the browser. All features work except native camera and biometrics — use the file-input fallbacks instead.
+
+### Build for production
 
 ```bash
 npm run build
 ```
 
----
+The output lands in `dist/`.
 
-## Project Structure
+### Run on Android
 
+Requires Android Studio and a connected device or emulator.
+
+```bash
+npm run build
+npx cap sync android
+npx cap open android
 ```
-Patty/
-├── public/              # Static assets
-├── src/
-│   ├── components/      # Reusable UI components
-│   ├── pages/           # Route-level page components
-│   ├── theme/           # Ionic theme variables
-│   ├── App.tsx          # Root component & routing
-│   └── main.tsx         # Entry point
-├── cypress/             # E2E tests
-├── ionic.config.json    # Ionic project config
-├── vite.config.ts       # Vite build config
-├── tsconfig.json        # TypeScript config
-└── package.json
-```
+
+Then **Run ▶** from Android Studio, or use `npx cap run android` for a direct deploy.
 
 ---
 
@@ -225,7 +153,7 @@ Patty/
 | Script | Description |
 |---|---|
 | `npm run dev` | Start the local dev server |
-| `npm run build` | Type-check and build for production |
+| `npm run build` | Type-check + build for production |
 | `npm run preview` | Preview the production build locally |
 | `npm run lint` | Run ESLint |
 | `npm run test.unit` | Run unit tests with Vitest |
@@ -233,12 +161,78 @@ Patty/
 
 ---
 
-## Differentiation
+## Project Structure
 
-| Feature | Most Apps | Patty |
-|---|---|---|
-| Progress tracking | Charts only | Photos + charts |
-| Cooking | Separate app | Built-in, linked to food log |
-| Workout guidance | Complex plans | Short, minimal-equipment sessions |
-| Data presentation | Dashboard overload | One calm daily summary |
-| User mindset | Hardcore tracking | Gentle daily habit building |
+```
+src/
+├── pages/          # Route-level page components (Home, Track, Recipes, Plan, Achievements, Profile, Onboarding…)
+├── track/          # Self-contained tab modules (WeightTab, WaterTab, SleepTab, FoodTab)
+├── recipes/        # Recipe data, detail modal, create modal
+├── plan/           # Meal plan grid, grocery list, recipe picker modal
+├── progress/       # Shareable card components
+├── components/     # Reusable UI (WeightChart, WaterRing, TrendCharts, LockScreen, PinSetupModal)
+├── hooks/          # All data + logic hooks (useWeightLog, useWaterLog, useSleepLog, useFoodLog, useRecipes, useMealPlan, useProfile, useTheme, useAppLock, useGamification, useAchievementCards, useNotifications…)
+├── db/             # SQLite init + versioned migrations (v1–v12)
+├── utils/          # Shared utilities (photoStorage)
+├── theme/          # MD3 design tokens (variables.css, md3.css)
+├── App.tsx         # Root component — IonTabs + startup gate
+└── main.tsx        # Entry point
+```
+
+---
+
+## Design System
+
+Patty uses **Material Design 3** as its design language, implemented via CSS custom property overrides on top of Ionic.
+
+- **Seed colour:** `#5C7A6E` (Patty slate-green) — all palette values derive from this seed
+- **Tokens:** `--md-primary`, `--md-surface`, `--md-on-surface`, shape scale (`--md-shape-xs` → `--md-shape-full`), type scale (`--md-title-lg`, `--md-body-md`…)
+- **Dark mode:** automatic via `@media (prefers-color-scheme: dark)` — no component-level dark logic
+- **Dynamic theming:** `@material/material-color-utilities` generates a full tonal palette from any hex seed at runtime
+
+---
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. **Fork** the repository and create a feature branch: `git checkout -b feat/your-feature`
+2. Follow the **three-phase workflow** documented in [AGENTS.md](AGENTS.md): Plan → Implement → Verify
+3. Use **conventional commits**: `feat:`, `fix:`, `refactor:`, `style:`, `docs:`, `test:`, `chore:`
+4. Run tests before opening a PR: `npm run test.unit` and `npm run lint`
+5. Open a pull request against `main` with a clear description of the change
+
+### Code style rules
+- Use **MD3 tokens only** — never hard-code colours or font sizes
+- No `color="primary"` Ionic props in new code — use `var(--md-*)` tokens directly
+- Dark mode handled by tokens, not component-level conditionals
+- SQLite for all persistence — no `localStorage`
+
+---
+
+## Roadmap
+
+Current version: **1.8.0** — [Landing Page live at patty.saranmahadev.in](https://patty.saranmahadev.in)
+
+Upcoming milestones:
+
+| Version | Goal |
+|---|---|
+| **1.9.0** | Google Play Store release pipeline |
+| **1.9.1** | Crash reporting & analytics (Firebase Crashlytics) |
+| **1.9.2** | Open Beta |
+| **2.0.0** | Cloud sync & user accounts |
+
+See [ROADMAP.md](ROADMAP.md) for the full plan and [CHANGELOG.md](CHANGELOG.md) for what's already shipped.
+
+---
+
+## License
+
+Distributed under the terms of the [LICENSE](LICENSE) file in this repository.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ using Ionic + React + Capacitor · Material Design 3</sub>
+</div>
