@@ -29,6 +29,8 @@ import Achievements from './pages/Achievements';
 import ProfilePage from './pages/ProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import OnboardingPage from './pages/OnboardingPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsPage from './pages/TermsPage';
 import { getDb } from './db/database';
 import LockScreen from './components/LockScreen';
 import SplashOverlay from './components/SplashOverlay';
@@ -204,6 +206,16 @@ const AppContent: React.FC = () => {
           {/* Onboarding — no tab bar */}
           <Route exact path="/onboarding">
             <OnboardingPage />
+          </Route>
+
+          {/* Privacy Policy — no tab bar */}
+          <Route exact path="/privacy-policy">
+            <PrivacyPolicyPage />
+          </Route>
+
+          {/* Terms & Conditions — no tab bar */}
+          <Route exact path="/terms">
+            <TermsPage />
           </Route>
 
           {/* Main tab shell */}

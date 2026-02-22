@@ -1,5 +1,6 @@
 /* ProfilePage — 2.0.0 */
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   IonAlert,
   IonBackButton,
@@ -47,6 +48,7 @@ const transparentItem = { '--background': 'transparent' } as React.CSSProperties
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const ProfilePage: React.FC = () => {
+  const history = useHistory();
   const { profile, prefs, loading, saveProfile, savePrefs } = useProfile();
   const {
     lockEnabled, biometricEnabled, biometricAvailable,
@@ -767,6 +769,22 @@ const ProfilePage: React.FC = () => {
               <IonItem style={transparentItem}>
                 <IonLabel>Built by</IonLabel>
                 <IonNote slot="end">Saran Mahadev</IonNote>
+              </IonItem>
+              <IonItem
+                style={{ ...transparentItem, cursor: 'pointer' }}
+                button
+                detail
+                onClick={() => history.push('/privacy-policy')}
+              >
+                <IonLabel style={{ color: 'var(--md-primary)' }}>Privacy Policy</IonLabel>
+              </IonItem>
+              <IonItem
+                style={{ ...transparentItem, cursor: 'pointer' }}
+                button
+                detail
+                onClick={() => history.push('/terms')}
+              >
+                <IonLabel style={{ color: 'var(--md-primary)' }}>Terms &amp; Conditions</IonLabel>
               </IonItem>
             </IonList>
           </IonCardContent>
