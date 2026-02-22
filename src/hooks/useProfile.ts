@@ -157,21 +157,19 @@ export function useProfile() {
   const [prefs, setPrefs] = useState<UserPrefs>(DEFAULT_PREFS);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const rows = await readAll();
-        if (!cancelled) {
-          setProfile(rowsToProfile(rows));
-          setPrefs(rowsToPrefs(rows));
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
+  const loadAll = useCallback(async () => {
+    try {
+      const rows = await readAll();
+      setProfile(rowsToProfile(rows));
+      setPrefs(rowsToPrefs(rows));
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadAll();
+  }, [loadAll]);
 
   const saveProfile = useCallback(async (next: UserProfile) => {
     await upsert('profile_name', next.name);
@@ -189,5 +187,5 @@ export function useProfile() {
     setPrefs(next);
   }, []);
 
-  return { profile, prefs, loading, saveProfile, savePrefs };
+  return { profile, prefs, loading, saveProfile, savePrefs, reload: loadAll };
 }

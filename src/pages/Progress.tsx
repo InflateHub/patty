@@ -18,6 +18,7 @@ import {
   IonTitle,
   IonToast,
   IonToolbar,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import { closeOutline, imageOutline, swapHorizontalOutline, trash } from 'ionicons/icons';
 import { useProgressPhotos, type ProgressPhoto } from '../hooks/useProgressPhotos';
@@ -67,8 +68,13 @@ const StatItem: React.FC<{ label: string; value: string }> = ({ label, value }) 
 
 /* ── main component ───────────────────────────────────────────────── */
 const Progress: React.FC = () => {
-  const { photos, loading: photosLoading, addPhoto, deletePhoto } = useProgressPhotos();
-  const { trendDays, stats } = useTrends(30);
+  const { photos, loading: photosLoading, addPhoto, deletePhoto, refresh: refreshPhotos } = useProgressPhotos();
+  const { trendDays, stats, refresh: refreshTrends } = useTrends(30);
+
+  useIonViewWillEnter(() => {
+    refreshPhotos();
+    refreshTrends();
+  });
 
   /* Add-photo modal */
   const [showAdd, setShowAdd] = useState(false);

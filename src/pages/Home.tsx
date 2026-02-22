@@ -60,8 +60,9 @@ const Home: React.FC = () => {
     reloadWater();
     reloadSleep();
     reloadFood();
+    reloadProfile();
   });
-  const { profile } = useProfile();
+  const { profile, reload: reloadProfile } = useProfile();
 
   const weightKg = latestEntry
     ? latestEntry.unit === 'lbs'

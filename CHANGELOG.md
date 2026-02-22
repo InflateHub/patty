@@ -2,6 +2,16 @@
 
 ---
 
+## [1.0.2] — Full live-refresh coverage
+*Goal: every tab refreshes its data on entry — no stale reads anywhere in the app.*
+
+- [x] `useProfile.ts`: extract load into `useCallback loadAll`; expose `reload: loadAll`
+- [x] `useProgressPhotos.ts` / `useTrends.ts`: already exposed `refresh` — no change needed
+- [x] `Progress.tsx`: import `useIonViewWillEnter`; call `refreshPhotos` + `refreshTrends` on tab entry
+- [x] `Home.tsx`: add `reloadProfile` to existing `useIonViewWillEnter` block
+
+---
+
 ## [1.0.1] — Live Home Refresh
 *Goal: Home dashboard reflects the latest data immediately when switching back to the tab — no restart required.*
 
