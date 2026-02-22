@@ -127,4 +127,20 @@ export const migrations: Migration[] = [
       `ALTER TABLE recipes ADD COLUMN kcal_per_serving INTEGER;`,
     ],
   },
+  {
+    version: 10,
+    // 1.0.5 — move photo storage from SQLite TEXT blobs to app filesystem
+    //         progress_photos: drop + recreate with photo_path (pre-production data wipe)
+    //         food_entries:    add photo_path column (new entries use FS; old rows keep null photo_uri)
+    statements: [
+      `DROP TABLE IF EXISTS progress_photos;`,
+      `CREATE TABLE IF NOT EXISTS progress_photos (
+        id         TEXT    PRIMARY KEY NOT NULL,
+        date       TEXT    NOT NULL,
+        photo_path TEXT    NOT NULL,
+        created_at TEXT    NOT NULL
+      );`,
+      `ALTER TABLE food_entries ADD COLUMN photo_path TEXT;`,
+    ],
+  },
 ];

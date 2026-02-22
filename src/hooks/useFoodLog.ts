@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getDb } from '../db/database';
+import { savePhotoFile, loadPhotoFile, deletePhotoFile } from '../utils/photoStorage';
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
@@ -28,15 +29,27 @@ export function useFoodLog() {
         'SELECT * FROM food_entries ORDER BY created_at DESC;',
         []
       );
-      const rows: FoodEntry[] = (result.values ?? []).map((r: Record<string, unknown>) => ({
-        id: r.id as string,
-        date: r.date as string,
-        meal: r.meal as MealType,
-        photo_uri: r.photo_uri as string | null,
-        note: r.note as string | null,
-        kcal: r.kcal != null ? (r.kcal as number) : null,
-        created_at: r.created_at as string,
-      }));
+      const rows: FoodEntry[] = await Promise.all(
+        (result.values ?? []).map(async (r: Record<string, unknown>) => {
+          let photo_uri: string | null = r.photo_uri as string | null;
+          if (r.photo_path) {
+            try {
+              photo_uri = await loadPhotoFile(r.photo_path as string);
+            } catch {
+              photo_uri = null;
+            }
+          }
+          return {
+            id: r.id as string,
+            date: r.date as string,
+            meal: r.meal as MealType,
+            photo_uri,
+            note: r.note as string | null,
+            kcal: r.kcal != null ? (r.kcal as number) : null,
+            created_at: r.created_at as string,
+          };
+        })
+      );
       setEntries(rows);
     } catch (err) {
       console.error('Failed to load food entries:', err);
@@ -63,9 +76,15 @@ export function useFoodLog() {
       const created_at = new Date().toISOString();
       try {
         const db = getDb();
+        // If a photo was provided, save it to the filesystem and store only its path.
+        let storedPhotoUri: string | null = null;
+        let storedPhotoPath: string | null = null;
+        if (photo_uri) {
+          storedPhotoPath = await savePhotoFile('food_photos', id, photo_uri);
+        }
         await db.run(
-          'INSERT INTO food_entries (id, date, meal, photo_uri, note, kcal, created_at) VALUES (?, ?, ?, ?, ?, ?, ?);',
-          [id, date, meal, photo_uri ?? null, note ?? null, kcal ?? null, created_at]
+          'INSERT INTO food_entries (id, date, meal, photo_uri, photo_path, note, kcal, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
+          [id, date, meal, storedPhotoUri, storedPhotoPath, note ?? null, kcal ?? null, created_at]
         );
         await loadAll();
       } catch (err) {
@@ -80,7 +99,13 @@ export function useFoodLog() {
     async (id: string) => {
       try {
         const db = getDb();
+        const res = await db.query(
+          'SELECT photo_path FROM food_entries WHERE id = ?;',
+          [id]
+        );
+        const photoPath = res.values?.[0]?.photo_path as string | undefined;
         await db.run('DELETE FROM food_entries WHERE id = ?;', [id]);
+        if (photoPath) await deletePhotoFile(photoPath);
         await loadAll();
       } catch (err) {
         console.error('Failed to delete food entry:', err);

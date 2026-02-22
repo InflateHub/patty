@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   IonButton,
   IonButtons,
@@ -26,7 +26,8 @@ import {
   IonToolbar,
   useIonViewWillEnter,
 } from '@ionic/react';
-import { add, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { add, albumsOutline, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
 import { useFoodLog } from '../hooks/useFoodLog';
 import type { FoodEntry, MealType } from '../hooks/useFoodLog';
 import { S, formatTime, today } from './trackUtils';
@@ -48,15 +49,6 @@ function mealLabel(meal: MealType): string {
 
 function mealEmoji(meal: MealType): string {
   return MEALS.find((m) => m.id === meal)?.emoji ?? '🍴';
-}
-
-async function fileToDataUri(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 }
 
 /* ── Styles ──────────────────────────────────────────────────────────── */
@@ -112,7 +104,6 @@ export const FoodTab: React.FC = () => {
   const [kcal, setKcal] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const todayStr = today();
   const grouped = todayEntries(todayStr);
@@ -132,11 +123,31 @@ export const FoodTab: React.FC = () => {
     setModalOpen(true);
   }
 
-  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const uri = await fileToDataUri(file);
-    setPhotoUri(uri);
+  async function captureFood(source: CameraSource) {
+    try {
+      if (source === CameraSource.Camera) {
+        const perms = await Camera.checkPermissions();
+        if (perms.camera === 'denied') { setErrorMsg('Camera permission denied. Enable it in device settings.'); return; }
+        if (perms.camera !== 'granted') {
+          const req = await Camera.requestPermissions({ permissions: ['camera'] });
+          if (req.camera !== 'granted') { setErrorMsg('Camera permission was not granted.'); return; }
+        }
+      } else {
+        const perms = await Camera.checkPermissions();
+        if (perms.photos === 'denied') { setErrorMsg('Photo library permission denied. Enable it in device settings.'); return; }
+        if (perms.photos !== 'granted') {
+          const req = await Camera.requestPermissions({ permissions: ['photos'] });
+          if (req.photos !== 'granted') { setErrorMsg('Photo library permission was not granted.'); return; }
+        }
+      }
+      const photo = await Camera.getPhoto({ resultType: CameraResultType.DataUrl, source, quality: 80 });
+      if (photo.dataUrl) setPhotoUri(photo.dataUrl);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!msg.toLowerCase().includes('cancel') && !msg.toLowerCase().includes('no image')) {
+        setErrorMsg('Could not capture photo.');
+      }
+    }
   }
 
   async function handleSave() {
@@ -323,50 +334,46 @@ export const FoodTab: React.FC = () => {
               </div>
             </div>
 
-            {/* Photo upload */}
+            {/* Photo */}
             <div>
               <div style={{ fontSize: 'var(--md-label-lg)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
                 Photo (optional)
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                {photoUri ? (
-                  <img src={photoUri} alt="preview" style={{ ...photoThumb, width: 80, height: 80 }} />
-                ) : (
-                  <div style={{ ...photoPlaceholder, width: 80, height: 80 }}>
-                    <IonIcon icon={cameraOutline} style={{ fontSize: 28, color: 'var(--md-on-surface-variant)' }} />
-                  </div>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <IonButton
-                    fill="outline"
-                    size="small"
-                    onClick={() => fileInputRef.current?.click()}
-                    style={{ '--border-radius': 'var(--md-shape-full)' } as React.CSSProperties}
-                  >
-                    <IonIcon slot="start" icon={cameraOutline} />
-                    {photoUri ? 'Change' : 'Add photo'}
-                  </IonButton>
-                  {photoUri && (
-                    <IonButton
-                      fill="clear"
-                      size="small"
-                      color="danger"
-                      onClick={() => setPhotoUri(undefined)}
-                      style={{ '--border-radius': 'var(--md-shape-full)' } as React.CSSProperties}
-                    >
-                      Remove
-                    </IonButton>
-                  )}
+              {photoUri && (
+                <div style={{ borderRadius: 'var(--md-shape-md)', overflow: 'hidden', marginBottom: 12, border: '1px solid var(--md-outline-variant)' }}>
+                  <img src={photoUri} alt="preview" style={{ width: '100%', maxHeight: 180, objectFit: 'cover', display: 'block' }} />
                 </div>
+              )}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <IonButton
+                  fill="outline"
+                  size="small"
+                  style={{ flex: 1, '--border-radius': 'var(--md-shape-full)', '--border-color': 'var(--md-outline)', '--color': 'var(--md-on-surface)' } as React.CSSProperties}
+                  onClick={() => captureFood(CameraSource.Camera)}
+                >
+                  <IonIcon slot="start" icon={cameraOutline} />
+                  Take Photo
+                </IonButton>
+                <IonButton
+                  fill="outline"
+                  size="small"
+                  style={{ flex: 1, '--border-radius': 'var(--md-shape-full)', '--border-color': 'var(--md-outline)', '--color': 'var(--md-on-surface)' } as React.CSSProperties}
+                  onClick={() => captureFood(CameraSource.Photos)}
+                >
+                  <IonIcon slot="start" icon={albumsOutline} />
+                  Gallery
+                </IonButton>
+                {photoUri && (
+                  <IonButton
+                    fill="clear"
+                    size="small"
+                    onClick={() => setPhotoUri(undefined)}
+                    style={{ '--color': 'var(--md-error)' } as React.CSSProperties}
+                  >
+                    Remove
+                  </IonButton>
+                )}
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                style={{ display: 'none' }}
-                onChange={handlePhotoChange}
-              />
             </div>
 
             {/* Note */}

@@ -2,6 +2,19 @@
 
 ---
 
+## [1.0.5] — Photo filesystem storage
+*Goal: stop storing image data as base64 blobs in SQLite; write each photo to the device filesystem and store only a path string in the database.*
+
+- [x] `@capacitor/filesystem@8.1.2` installed
+- [x] `src/utils/photoStorage.ts`: new shared utility — `savePhotoFile` (writes raw base64 to `Directory.Data`), `loadPhotoFile` (reads back as data URL; handles both native base64 string and browser Blob), `deletePhotoFile` (silent if absent)
+- [x] Migration v10: `DROP + recreate progress_photos` with `photo_path TEXT NOT NULL` (pre-production wipe of base64 blobs); `ALTER TABLE food_entries ADD COLUMN photo_path TEXT`
+- [x] `useProgressPhotos.ts`: `addPhoto` writes to `progress_photos/` folder; `load` reads each file via FS; `deletePhoto` removes the file before the DB row
+- [x] `useFoodLog.ts`: `addEntry` writes photo to `food_photos/` folder, stores `photo_path`, leaves `photo_uri` null in DB; `loadAll` reads FS for entries with `photo_path`; `deleteEntry` also deletes the photo file
+- [x] `FoodTab.tsx`: replace `<input type="file">` + `handlePhotoChange` with Capacitor Camera API — same **Take Photo** / **Gallery** two-button pattern as Progress.tsx; removes `fileInputRef`, `fileToDataUri`, `useRef`
+- [x] No display-layer changes — both hooks still return `photo_uri` as a data URL to consumers
+
+---
+
 ## [1.0.4] — Progress Photo: Take Photo / Select From Gallery
 *Goal: replace the single file-input tap area with explicit camera and gallery actions, backed by the Capacitor Camera API with permission handling.*
 
