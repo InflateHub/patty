@@ -30,12 +30,13 @@ Current production version: **1.1.0**. This document plans the path to **2.0.0**
 ## 1.3.0 â€” Notification System Redesigned
 *Goal: smarter, more actionable notification experience.*
 
-- [ ] Replace the flat toggle list with grouped cards per category (Health, Meals, Planning)
-- [ ] Quick presets: "Morning routine", "Evening check-in", "Meal reminders only" â€” apply all channels in one tap
-- [ ] Per-channel snooze: dismiss a reminder for today without disabling the channel
-- [ ] Adaptive reminders: if a log entry already exists for the day, skip the corresponding reminder (e.g. skip weigh-in reminder once weight is logged)
-- [ ] Notification summary: small badge on the bell icon in Home header showing pending unlogged habits today
-- [ ] Permission rationale sheet shown on first visit explaining why each notification exists
+- [x] Weight reminder: default time 08:00 (morning)
+- [x] Water: frequency system (1â€"8/day), configurable day window (start/end time), slots auto-distributed and individually editable, Reset to even spacing
+- [x] Sleep log: changed from bedtime nag (22:00) to morning prompt (08:30 â€" "How did you sleep?")
+- [x] Planning: Weekly check-in added (Mondays 09:00); meal plan + progress photo remain (Sundays)
+- [x] Engagement nudges: Morning boost / Midday nudge / Evening reflection â€" each fires 30 min after its linked functional reminder; times cascade when the linked reminder changes
+- [x] NotificationsPage redesigned: grouped cards, water stepper + window pickers + per-slot time editors, Engagement section with derived-time display
+- [x] patty-engage Android notification channel added
 
 ---
 

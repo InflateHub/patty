@@ -2,6 +2,24 @@
 
 ---
 
+## [1.3.0] — Notification System Redesigned
+*Goal: smarter, more actionable notification experience that spans the whole day without being annoying.*
+
+- [x] **Weight** — default reminder time changed to 08:00 (was 07:30); label updated to "Weigh-in reminder"
+- [x] **Water** — replaced 3 hardcoded slots (morning/afternoon/evening) with a frequency-based system: user picks 1–8 reminders/day + day-window start/end; slots auto-distributed evenly; each slot individually editable; "Reset to even spacing" chip clears overrides; IDs 120–127
+- [x] **Sleep log** — changed from bedtime nag at 22:00 to morning prompt at 08:30: "Good morning! How did you sleep?" uses ☀️ emoji
+- [x] **Weekly check-in** — new channel `weekly_checkin` (notifId 111, Mondays 09:00): "New week, fresh goals. Check your meal plan and start the week strong!"
+- [x] **Engagement nudges** (new `engage` section, notifIds 112–114):
+  - `morning_boost` (⚡ 08:30) — 30 min after weigh-in; cascades when weigh-in time changes
+  - `midday_nudge` (🌟 13:30) — 30 min after lunch_log; cascades when lunch time changes
+  - `evening_reflect` (🌙 19:30) — 30 min after dinner_log; cascades when dinner time changes
+- [x] **`useNotifications.ts`** — full rewrite: `WaterFreqSettings` type; `distributeWaterSlots()` exported; `toggleWater / setWaterCount / setWaterWindow / setWaterSlotTime / resetWaterSpacing` actions; `getEngageTime()` helper; `waterFreqRef` + `statesRef` prevent stale closures; `patty-engage` Android channel added
+- [x] **`NotificationsPage.tsx`** — full redesign: Water card with stepper (−/+), dual time-pickers for window, per-slot time inputs with "edited" badge and Reset chip; Engagement card shows derived time and linked-reminder label; Health/Meals/Planning cards retain toggle + time-picker pattern; master toggle count updated to include water group
+- [x] `vite-env.d.ts` — `refreshOutline` declared
+- [x] `src/pages/ProfilePage.tsx` — version bumped to 1.3.0
+
+---
+
 ## [1.2.0] — Onboarding
 *Goal: first-launch flow that collects profile data so the app is immediately personalised.*
 
