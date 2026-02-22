@@ -290,8 +290,12 @@ const OnboardingPage: React.FC = () => {
     >
       {/* Hero */}
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <div className="ob-hero-logo" style={{ fontSize: 88, lineHeight: 1, marginBottom: 16 }}>
-          🥗
+        <div className="ob-hero-logo" style={{ lineHeight: 1, marginBottom: 16 }}>
+          <img
+            src="/assets/icon/icon.png"
+            alt="Patty"
+            style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', display: 'block', margin: '0 auto' }}
+          />
         </div>
         <h1
           className="ob-hero-name"

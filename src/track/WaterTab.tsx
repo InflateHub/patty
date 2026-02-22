@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import '../pages/OnboardingPage.css';
 import {
   IonButton,
   IonButtons,
@@ -28,6 +29,17 @@ import { useWaterLog } from '../hooks/useWaterLog';
 import type { WaterEntry } from '../hooks/useWaterLog';
 import { S, QUICK_AMOUNTS, formatTime } from './trackUtils';
 
+const WC_COLORS = ['#5C7A6E','#80DEEA','#4FC3F7','#B2EBF2','#00BCD4','#26C6DA','#FFF176','#F48FB1'];
+const WATER_CONFETTI = Array.from({ length: 20 }, (_, i) => ({
+  id: i,
+  color: WC_COLORS[i % WC_COLORS.length],
+  left: `${4 + (i * 4.8) % 88}%`,
+  delay: `${(i * 0.11) % 1.4}s`,
+  duration: `${2.0 + (i * 0.22) % 1.8}s`,
+  size: `${7 + (i * 3) % 9}px`,
+  width: `${5 + (i * 2) % 8}px`,
+}));
+
 interface WaterTabProps {
   openTrigger?: number;
 }
@@ -48,8 +60,23 @@ export const WaterTab: React.FC<WaterTabProps> = ({ openTrigger }) => {
   const [goalInput, setGoalInput] = useState('');
   const [waterSaving, setWaterSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [goalToastOpen, setGoalToastOpen] = useState(false);
+  const [goalCelebOpen, setGoalCelebOpen] = useState(false);
+  const prevReachedRef = useRef(false);
 
   const [presentAlert] = useIonAlert();
+
+  /* Fire confetti + toast when goal is newly crossed */
+  useEffect(() => {
+    const nowReached = !waterLoading && dailyGoal > 0 && todayTotal >= dailyGoal;
+    if (nowReached && !prevReachedRef.current) {
+      setGoalToastOpen(true);
+      setGoalCelebOpen(true);
+      const t = setTimeout(() => setGoalCelebOpen(false), 3200);
+      return () => clearTimeout(t);
+    }
+    prevReachedRef.current = nowReached;
+  }, [todayTotal, dailyGoal, waterLoading]);
 
   /* Open custom-amount modal when Track's contextual FAB fires */
   useEffect(() => {
@@ -110,6 +137,19 @@ export const WaterTab: React.FC<WaterTabProps> = ({ openTrigger }) => {
 
   return (
     <>
+      {/* Confetti overlay — shown briefly when goal is reached */}
+      {goalCelebOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 999, overflow: 'hidden' }}>
+          {WATER_CONFETTI.map(c => (
+            <div
+              key={c.id}
+              className="ob-confetti"
+              style={{ top: 0, left: c.left, width: c.width, height: c.size, background: c.color, animationDelay: c.delay, animationDuration: c.duration }}
+            />
+          ))}
+        </div>
+      )}
+
       {/* Ring + quick-add + goal in one card */}
       <IonCard>
         <IonCardContent style={{ padding: 0 }}>
@@ -180,6 +220,15 @@ export const WaterTab: React.FC<WaterTabProps> = ({ openTrigger }) => {
           <p style={{ margin: 0, fontSize: 'var(--md-body-md)', fontFamily: 'var(--md-font)' }}>Tap a chip above to log water.</p>
         </div>
       )}
+
+      <IonToast
+        isOpen={goalToastOpen}
+        message="🎉 Daily water goal reached!"
+        duration={3500}
+        color="success"
+        position="top"
+        onDidDismiss={() => setGoalToastOpen(false)}
+      />
 
       <IonToast
         isOpen={!!errorMsg}

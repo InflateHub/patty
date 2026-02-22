@@ -94,7 +94,7 @@ export const WaterRing: React.FC<WaterRingProps> = ({ total, goal, size = 200 })
         fill="var(--md-on-surface-variant)"
         style={{ fontSize: size * 0.085, fontFamily: 'var(--md-font)' }}
       >
-        {reached ? '🎉 goal reached' : goalLabel}
+        {reached ? `\u2713 ${goalLabel}` : goalLabel}
       </text>
     </svg>
   );

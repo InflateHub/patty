@@ -96,7 +96,7 @@ const StartupGate: React.FC = () => {
         background: 'var(--md-surface)',
       }}
     >
-      <span style={{ fontSize: 64 }}>🥗</span>
+      <img src="/assets/icon/icon.png" alt="Patty" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }} />
     </div>
   );
 };

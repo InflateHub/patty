@@ -129,18 +129,12 @@ const Home: React.FC = () => {
           <IonCardContent style={{ padding: '16px 4px' }}>
             <IonGrid style={{ padding: 0 }}>
               <IonRow style={{ textAlign: 'center' }}>
-                {/* Weight + BMI */}
+                {/* Weight */}
                 <IonCol>
                   <p className="md-stat-value">
                     {latestEntry ? `${latestEntry.value} ${latestEntry.unit}` : '\u2014'}
                   </p>
                   <p className="md-stat-label">Weight</p>
-                  {bmi > 0 && (
-                    <p className="md-stat-accent">BMI {bmi.toFixed(1)}</p>
-                  )}
-                  {bmiCat && (
-                    <p className="md-stat-tiny">{bmiCat}</p>
-                  )}
                 </IonCol>
                 {/* Divider */}
                 <IonCol style={{ borderLeft: '1px solid var(--md-outline-variant)', borderRight: '1px solid var(--md-outline-variant)' }}>
