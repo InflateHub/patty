@@ -20,7 +20,8 @@ import {
   IonToolbar,
   useIonViewWillEnter,
 } from '@ionic/react';
-import { closeOutline, imageOutline, swapHorizontalOutline, trash } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { albumsOutline, cameraOutline, closeOutline, imageOutline, swapHorizontalOutline, trash } from 'ionicons/icons';
 import { useProgressPhotos, type ProgressPhoto } from '../hooks/useProgressPhotos';
 import { useTrends } from '../hooks/useTrends';
 import { TrendCharts } from '../components/TrendCharts';
@@ -81,15 +82,49 @@ const Progress: React.FC = () => {
   const [addDate, setAddDate] = useState(today());
   const [addUri, setAddUri] = useState<string | null>(null);
   const addSaving = useRef(false);
-  const fileRef = useRef<HTMLInputElement>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setAddUri(ev.target?.result as string);
-    reader.readAsDataURL(file);
+  const capturePhoto = async (source: CameraSource) => {
+    try {
+      if (source === CameraSource.Camera) {
+        const perms = await Camera.checkPermissions();
+        if (perms.camera === 'denied') {
+          setErrorMsg('Camera permission denied. Please enable it in device settings.');
+          return;
+        }
+        if (perms.camera !== 'granted') {
+          const req = await Camera.requestPermissions({ permissions: ['camera'] });
+          if (req.camera !== 'granted') {
+            setErrorMsg('Camera permission was not granted.');
+            return;
+          }
+        }
+      } else {
+        const perms = await Camera.checkPermissions();
+        if (perms.photos === 'denied') {
+          setErrorMsg('Photo library permission denied. Please enable it in device settings.');
+          return;
+        }
+        if (perms.photos !== 'granted') {
+          const req = await Camera.requestPermissions({ permissions: ['photos'] });
+          if (req.photos !== 'granted') {
+            setErrorMsg('Photo library permission was not granted.');
+            return;
+          }
+        }
+      }
+      const photo = await Camera.getPhoto({
+        resultType: CameraResultType.DataUrl,
+        source,
+        quality: 80,
+      });
+      if (photo.dataUrl) setAddUri(photo.dataUrl);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!msg.toLowerCase().includes('cancel') && !msg.toLowerCase().includes('no image')) {
+        setErrorMsg('Could not capture photo.');
+      }
+    }
   };
 
   const savePhoto = async () => {
@@ -105,7 +140,6 @@ const Progress: React.FC = () => {
     setShowAdd(false);
     setAddUri(null);
     setAddDate(today());
-    if (fileRef.current) fileRef.current.value = '';
   };
 
   /* Gallery expand */
@@ -451,55 +485,77 @@ const Progress: React.FC = () => {
                 />
               </IonItem>
 
-              <div
-                style={{
-                  borderRadius: 'var(--md-shape-lg)',
-                  border: '2px dashed var(--md-outline-variant)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: 200,
-                  cursor: 'pointer',
-                  overflow: 'hidden',
-                  marginBottom: 24,
-                  background: 'var(--md-surface-variant)',
-                }}
-                onClick={() => fileRef.current?.click()}
-              >
-                {addUri ? (
+              {/* Preview */}
+              {addUri ? (
+                <div
+                  style={{
+                    borderRadius: 'var(--md-shape-lg)',
+                    overflow: 'hidden',
+                    marginBottom: 20,
+                    border: '1px solid var(--md-outline-variant)',
+                    background: 'var(--md-surface-variant)',
+                  }}
+                >
                   <img
                     src={addUri}
                     alt="Preview"
-                    style={{ width: '100%', maxHeight: 320, objectFit: 'contain' }}
+                    style={{ width: '100%', maxHeight: 300, objectFit: 'contain', display: 'block' }}
                   />
-                ) : (
-                  <>
-                    <IonIcon
-                      icon={imageOutline}
-                      style={{
-                        fontSize: 40,
-                        color: 'var(--md-on-surface-variant)',
-                        marginBottom: 8,
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontSize: 'var(--md-body-md)',
-                        color: 'var(--md-on-surface-variant)',
-                      }}
-                    >
-                      Tap to choose a photo
-                    </span>
-                  </>
-                )}
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={handleFileChange}
-                />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    borderRadius: 'var(--md-shape-lg)',
+                    border: '2px dashed var(--md-outline-variant)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: 140,
+                    marginBottom: 20,
+                    background: 'var(--md-surface-variant)',
+                  }}
+                >
+                  <IonIcon
+                    icon={imageOutline}
+                    style={{ fontSize: 36, color: 'var(--md-on-surface-variant)', marginBottom: 8 }}
+                  />
+                  <span style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
+                    No photo selected
+                  </span>
+                </div>
+              )}
+
+              {/* Source buttons */}
+              <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
+                <IonButton
+                  expand="block"
+                  fill="outline"
+                  style={{
+                    flex: 1,
+                    '--border-radius': 'var(--md-shape-full)',
+                    '--border-color': 'var(--md-outline)',
+                    '--color': 'var(--md-on-surface)',
+                  } as React.CSSProperties}
+                  onClick={() => capturePhoto(CameraSource.Camera)}
+                >
+                  <IonIcon slot="start" icon={cameraOutline} />
+                  Take Photo
+                </IonButton>
+                <IonButton
+                  expand="block"
+                  fill="outline"
+                  style={{
+                    flex: 1,
+                    '--border-radius': 'var(--md-shape-full)',
+                    '--border-color': 'var(--md-outline)',
+                    '--color': 'var(--md-on-surface)',
+                  } as React.CSSProperties}
+                  onClick={() => capturePhoto(CameraSource.Photos)}
+                >
+                  <IonIcon slot="start" icon={albumsOutline} />
+                  Gallery
+                </IonButton>
               </div>
 
               <IonButton

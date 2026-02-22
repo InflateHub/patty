@@ -2,6 +2,18 @@
 
 ---
 
+## [1.0.4] — Progress Photo: Take Photo / Select From Gallery
+*Goal: replace the single file-input tap area with explicit camera and gallery actions, backed by the Capacitor Camera API with permission handling.*
+
+- [x] Install `@capacitor/camera@8.0.1`
+- [x] `AndroidManifest.xml`: add `READ_MEDIA_IMAGES` permission (`android:minSdkVersion="33"`) for gallery access on Android 13+
+- [x] `Progress.tsx`: replace `fileRef` / `handleFileChange` / single tap zone with `capturePhoto(source)` using `CameraResultType.DataUrl`
+- [x] Add-photo modal now shows a preview area + two explicit buttons: **Take Photo** (`CameraSource.Camera`) and **Gallery** (`CameraSource.Photos`)
+- [x] Permission flow: `Camera.checkPermissions()` before each action; if `'denied'` show toast; if `'prompt'` call `Camera.requestPermissions()` and re-check before proceeding
+- [x] `vite-env.d.ts`: declare `albumsOutline` (gallery icon) + `cameraOutline` was already declared
+
+---
+
 ## [1.0.3] — Sync audit: two bugs fixed
 *Goal: close two bugs found during deep sync analysis.*
 
