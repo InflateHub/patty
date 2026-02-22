@@ -286,3 +286,161 @@ docs: update AGENTS.md with file map
 - **No silent decisions** — if something is ambiguous, ask in Phase 1.
 - **No skipping tests** — Phase 3 is not optional.
 - **One increment at a time** — finish and verify before starting the next.
+
+---
+
+## Android Release Build Procedure
+
+This section documents the exact procedure used to produce the signed release APK for Patty 1.0.0 on Windows.
+Reproduce these steps for every subsequent release.
+
+---
+
+### Prerequisites
+
+| Tool | Version | Installed path |
+|---|---|---|
+| Node.js | 20+ | in PATH |
+| Eclipse Temurin JDK | **21** (21.0.10+7) | `C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot` |
+| Android SDK | API 36, Build-Tools 35 | `%LOCALAPPDATA%\Android\Sdk` |
+| Android Studio (optional) | Ladybug or newer | Only needed for emulator / device debug |
+
+> **Critical:** Android Studio ships with a bundled JBR (Java 17). That JBR is **not** sufficient —
+> Capacitor Android requires Java 21 at compile time. Always set `JAVA_HOME` to the Temurin 21 path
+> before running Gradle. If you skip this, Gradle will fail with:
+> `error: invalid source release: 21`
+
+Install Temurin 21 (one-time, already done):
+```powershell
+winget install --id EclipseAdoptium.Temurin.21.JDK
+```
+
+Set JAVA_HOME permanently for the current Windows user (one-time, already done):
+```powershell
+[System.Environment]::SetEnvironmentVariable(
+  "JAVA_HOME",
+  "C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot",
+  "User"
+)
+```
+
+---
+
+### One-Time Keystore Setup
+
+The release keystore lives at `android/app/patty-release.jks` and is **gitignored**.
+If you are on a new machine, regenerate it (or copy it from secure storage).
+
+Generate the keystore (run once; keep the file safe):
+```powershell
+& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" `
+  -genkeypair `
+  -v `
+  -keystore android\app\patty-release.jks `
+  -alias patty `
+  -keyalg RSA `
+  -keysize 2048 `
+  -validity 10000
+```
+
+Create `android/app/keystore.properties` (also gitignored) with exactly this content:
+```properties
+storeFile=patty-release.jks
+storePassword=PattyRelease1
+keyAlias=patty
+keyPassword=PattyRelease1
+```
+
+`android/app/build.gradle` reads this file automatically via:
+```groovy
+def keystorePropertiesFile = rootProject.file("app/keystore.properties")
+```
+No further changes to `build.gradle` are needed for signing.
+
+---
+
+### Release Build — Step by Step
+
+Run all commands from the project root (`c:\Users\USER\Desktop\Projects\Patty`).
+
+**Step 1 — Build the web bundle**
+```powershell
+npm run build
+```
+Expected output: `dist/` populated, `✓ built in X.XXs`, ~984 modules.
+
+**Step 2 — Sync web assets to Android**
+```powershell
+npx cap sync android
+```
+Expected output: `✔ Copying web assets` + plugin sync lines, no errors.
+
+**Step 3 — Set environment variables for Gradle**
+```powershell
+$env:JAVA_HOME  = "C:\Program Files\Eclipse Adoptium\jdk-21.0.10.7-hotspot"
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+```
+(If JAVA_HOME is already set permanently for your user, this is optional but harmless.)
+
+**Step 4 — Assemble the signed release APK**
+```powershell
+cd android
+.\gradlew.bat assembleRelease
+cd ..
+```
+First run downloads Gradle 8.14.3 (~170 MB) — this is normal and takes several minutes.
+Subsequent runs take ~1–2 minutes.
+
+Expected final lines:
+```
+BUILD SUCCESSFUL in Xm Xs
+248 actionable tasks: Y executed, Z up-to-date
+```
+
+**Step 5 — Locate the output APK**
+```
+android\app\build\outputs\apk\release\app-release.apk
+```
+Size for 1.0.0: **25.6 MB** (25,606,016 bytes).
+
+---
+
+### Icon & Splash Asset Generation (one-time per asset change)
+
+Source images must be placed before running the generator:
+```
+resources/icon.png    — 1024×1024 px, no transparency
+resources/splash.png  — 1024×1024 px (or larger)
+```
+The source file used for Patty 1.0.0: `C:\Users\USER\Downloads\Patty Logo\1.png`
+(copied to both `resources/icon.png` and `resources/splash.png`).
+
+Generate all Android densities (mipmap-* + adaptive icons + splash variants):
+```powershell
+npx @capacitor/assets generate --android
+```
+This writes directly into `android/app/src/main/res/`.
+
+---
+
+### Version Bumping Checklist
+
+Before each release, update these three places to keep versions in sync:
+
+| File | Field | Example |
+|---|---|---|
+| `package.json` | `"version"` | `"1.0.1"` |
+| `android/app/build.gradle` | `versionName` | `"1.0.1"` |
+| `android/app/build.gradle` | `versionCode` | `2` (increment by 1 each release) |
+
+---
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `error: invalid source release: 21` | JAVA_HOME points to Android Studio JBR (Java 17) | Set JAVA_HOME to Temurin 21 path (see Prerequisites) |
+| `keytool not found` | Android Studio JBR not in PATH | Use full path: `C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe` |
+| `Keystore file not found` | `keystore.properties` missing or wrong path | Verify `android/app/keystore.properties` exists and `storeFile` is relative to `android/app/` |
+| `ANDROID_HOME not set` | SDK not found by Gradle | Set `$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"` |
+| Gradle downloads take very long | First run fetches Gradle distribution | Normal — subsequent runs use `~/.gradle/wrapper/dists` cache |
