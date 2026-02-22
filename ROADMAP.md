@@ -1,251 +1,158 @@
-# Patty — Roadmap
+﻿# Patty â€” Roadmap (Post-1.0.5)
 
-Releases progress from a working app shell to a fully featured lifestyle companion.
-Each version ships something usable. **Minimal first, complete at 1.0.0.**
-
----
-
-## 0.1.0 — App Shell ✓
-*Goal: navigable app in the browser, nothing broken.*
-
-- [x] Bottom tab bar with four tabs: Track, Recipes, Plan, Progress
-- [x] Placeholder page per tab (title + empty state)
-- [x] Ionic theme applied (colors, typography, spacing via `variables.css`)
-- [x] React Router routes wired to each page
-- [x] Home/Dashboard stub (will be fleshed out in 1.0.0)
+All versions prior to 1.1.0 are archived in [`ROADMAP/ROADMAP-v1.0.5.md`](ROADMAP/ROADMAP-v1.0.5.md).
+Current production version: **1.0.5**. This document plans the path to **2.0.0**.
 
 ---
 
-## 0.2.0 — Weight Tracking ✓
-*Goal: users can log and review their weight.*
+## 1.1.0 â€” UI Polish & Core Fixes
+*Goal: resolve the most visible UX friction points in the shipped 1.0.5 build.*
 
-- [x] Weight entry form (value + optional note + date)
-- [x] Weight history list (reverse chronological)
-- [x] Simple line graph of weight over time
-- [x] Local data persistence (SQLite via `@capacitor-community/sqlite`)
-
----
-
-## 0.3.0 — Water Intake ✓
-*Goal: one-tap water logging with a visual daily goal.*
-
-- [x] Quick-add buttons: +150 ml, +250 ml, +500 ml, custom amount
-- [x] Daily goal ring (progress toward configurable daily target)
-- [x] Log resets at midnight
-- [x] Daily history list
+- [ ] **Fancy bottom bar** â€” taller tab bar with label visibility, active indicator pill/blob, subtle shadow elevation; uses MD3 tonal surface tokens
+- [ ] **Smooth splash screen transition** â€” replace abrupt splash dismiss with a cross-fade or scale-out animation into the Home tab (Capacitor SplashScreen `fadeOutDuration` + CSS entry animation)
+- [ ] **Track page contextual FAB** â€” FAB icon, label, and action change to match the active tab (Weight / Water / Sleep / Food); single `<IonFab>` driven by `activeTab` state; no more static `+`
+- [ ] **Delete seed recipe** â€” allow all recipes (seed and custom) to be deleted; deleted seed recipe IDs stored in a `deleted_seed_recipes` SQLite set; `useRecipes` filters them out on load
 
 ---
 
-## 0.4.0 — Sleep Tracking ✓
-*Goal: users can log sleep and see their patterns.*
+## 1.2.0 â€” Onboarding
+*Goal: first-launch flow that collects profile data so the app is immediately personalised.*
 
-- [x] Sleep entry form (bedtime, wake time, quality slider 1–5)
-- [x] Calculated sleep duration display
-- [x] Sleep history list with quality indicator
-- [x] Average sleep duration stat
-
----
-
-## 0.4.1 — Daily Alignment + Analytics Foundation ✓
-*Goal: align all three trackers to a daily model and lay the data foundation for the Home dashboard.*
-
-- [x] Weight tab gains a "Today" stat card (most recent entry or "No entry today")
-- [x] Sleep restricted to one entry per bedtime date; FAB disabled when already logged
-- [x] Sleep tab stat card replaced with "Last Night" view (duration, quality stars, time range)
-- [x] `useDailySummary` hook aggregates weight / water / sleep for any given date
+- [ ] Onboarding flag in `settings` table (`onboarding_complete`); main entry reads flag and routes accordingly
+- [ ] Multi-step onboarding: Welcome â†’ Name & DOB â†’ Height & Weight â†’ Goal â†’ Daily targets (water goal) â†’ Done
+- [ ] Step progress indicator (dots or top bar) with Back/Next navigation
+- [ ] Data written directly to the `settings` table (same as ProfilePage); no duplicate state
+- [ ] "Skip for now" option on every optional step
+- [ ] Celebrations screen on completion with confetti / hero animation before routing to Home
 
 ---
 
-## 0.5.0 — Food Log ✓
-*Goal: photo-first meal capture across four categories.*
+## 1.3.0 â€” Notification System Redesigned
+*Goal: smarter, more actionable notification experience.*
 
-- [x] Meal categories: Breakfast, Lunch, Dinner, Snacks
-- [x] Photo capture / upload per meal entry
-- [x] Optional text note per entry
-- [x] Daily food log view grouped by category
-
----
-
-## 0.6.0 — Recipe Library ✓
-*Goal: users can browse and view saved recipes.*
-
-- [x] Recipe card list with name, prep time, and thumbnail
-- [x] Recipe detail page: ingredients, step-by-step instructions, prep time
-- [x] Seed library with 10–15 starter recipes
-- [x] Search / filter by name
+- [ ] Replace the flat toggle list with grouped cards per category (Health, Meals, Planning)
+- [ ] Quick presets: "Morning routine", "Evening check-in", "Meal reminders only" â€” apply all channels in one tap
+- [ ] Per-channel snooze: dismiss a reminder for today without disabling the channel
+- [ ] Adaptive reminders: if a log entry already exists for the day, skip the corresponding reminder (e.g. skip weigh-in reminder once weight is logged)
+- [ ] Notification summary: small badge on the bell icon in Home header showing pending unlogged habits today
+- [ ] Permission rationale sheet shown on first visit explaining why each notification exists
 
 ---
 
-## 0.6.1 — User-Created Recipes ✓
-*Goal: users can add, view, and delete their own custom recipes.*
+## 1.4.0 â€” Progress Page Complete Redesign
+*Goal: the Progress tab becomes the most visually compelling screen in the app.*
 
-- [x] Create recipe form: name, emoji picker, prep/cook time, tags, dynamic ingredients + steps
-- [x] SQLite persistence for user recipes (migration v5)
-- [x] Custom recipes appear in the grid alongside seed recipes (tagged "custom")
-- [x] Custom recipes deletable from the detail modal; seed recipes are read-only
-
----
-
-## 0.7.0 — Cooking Planner ✓
-*Goal: plan meals for the week and get a grocery list.*
-
-- [x] Weekly meal plan grid (7 days × 3 meal slots)
-- [x] Assign recipes to slots by picking from the library
-- [x] Auto-generated grocery list aggregated from the weekly plan
-- [x] Prev / next week navigation with «This week» badge
-- [x] Today's Meals card (shows today's three slots at a glance)
+- [ ] Hero stats banner at the top: current weight, total water streaks, average sleep â€” large, typographic
+- [ ] Streak tracker: consecutive days of logging (overall + per-category); streak cards with fire emoji milestone badges
+- [ ] Progress photos redesigned: full-width card carousel with pinch-to-zoom; month separators in the gallery
+- [ ] Side-by-side comparison upgraded: swipe gesture between the two photos (not a modal); draggable divider
+- [ ] Trend charts upgraded: interactive (tap a point to see exact value); 7d / 30d / 90d time window toggle
+- [ ] Weekly report card (auto-generated Sunday evening): avg weight, water adherence %, sleep quality score, meals logged
 
 ---
 
-## 0.8.0 — Exercise Planner & Logger ~~DEPRECATED~~
-*Shipped in commit 8910d83 but subsequently removed from scope. Exercise tracking added complexity without sufficient user value at this stage. All exercise_plan / exercise_log DB tables and associated files are considered inactive.*
+## 1.5.0 â€” Biometrics Lock
+*Goal: optional app lock via fingerprint / Face ID for privacy-conscious users.*
 
-- [x] DB migration v7: `exercise_plan` + `exercise_log` tables (committed)
-- [x] `useExerciseLog.ts`, `ExerciseTab.tsx`, `ExerciseLogModal.tsx` (committed then deprecated)
-- [x] `ExercisePlanWeek.tsx`, `ExercisePlanModal.tsx` (committed then deprecated)
-- **Status: deprecated. Files not wired into active UI. Will not be carried forward.**
-
----
-
-## 0.9.0 — Progress Hub ✓
-*Goal: visual history of body changes and trends.*
-
-- [x] Progress photo upload (date-stamped)
-- [x] Side-by-side photo comparison (pick two dates)
-- [x] Trend charts: weight, average sleep, daily water — all on one screen
-- [x] Basic stats summary (current weight, 7-day avg sleep, weekly water avg)
+- [ ] `@capacitor-community/biometric-auth` integration
+- [ ] Lock toggle in ProfilePage â†’ Preferences section
+- [ ] On lock enable: prompt biometrics immediately to verify capability; store `app_lock_enabled` in `settings`
+- [ ] App lock triggers on `appStateChange` â†’ background â†’ foreground (Capacitor App plugin)
+- [ ] Fallback to device PIN/passcode if biometrics unavailable
+- [ ] Lock screen: Patty logo, "Unlock Patty" button, no content visible underneath
 
 ---
 
-## 0.9.1 — Dashboard Home ✓
-*Goal: Home tab shows a live at-a-glance summary of today's data.*
+## 1.6.0 â€” Personalisation Theming
+*Goal: users can pick their own accent colour; the entire MD3 palette re-seeds dynamically.*
 
-- [x] Today's stats row: current weight, water progress, last night's sleep
-- [x] Weight mini-chart (last 7 entries, reuses `WeightChart`)
-- [x] Water ring widget (reuses `WaterRing`)
-- [x] Today's meals preview: breakfast / lunch / dinner / snacks entry count
-- [x] Greeting header with current date
-
----
-
-## 0.9.2 — Quick-Action Shortcuts ~~SKIPPED~~
-*Descoped. The dashboard already links directly to the Track tab; a duplicate action grid adds UI noise without meaningful value. Skipped to keep scope lean for 1.0.0.*
+- [ ] Colour picker in ProfilePage â†’ Preferences: 8 curated seed colours (slate-green default) + custom hex input
+- [ ] Selected seed colour stored in `settings` (`pref_theme_seed`)
+- [ ] On change: MD3 tonal palette recalculated in-app and written as CSS custom properties on `:root`
+- [ ] Dark / light mode manual override toggle (currently follows system; add explicit "Light", "Dark", "System" option)
+- [ ] Font size setting: Default / Large / Extra Large (scales `--md-body-lg` base size; affects all type-scale tokens)
+- [ ] Theme preview card in the picker showing a sample card + FAB with the live palette
 
 ---
 
-## 0.9.3 — Profile + Settings Page ✓
-*Goal: collect personal data to unlock derived health metrics and personalise the app.*
+## 1.7.0 â€” App Landing Page (Design)
+*Goal: a polished marketing webpage for Patty exists as a static site in the repo.*
 
-- [x] DB migration v8: `settings` key-value SQLite table (profile + preferences)
-- [x] `src/hooks/useProfile.ts`: `useProfile` hook (read/write profile + prefs); pure utils: `computeBMI`, `computeBMR`, `computeTDEE`, `bmiCategory`, `ageFromDob`
-- [x] `src/pages/ProfilePage.tsx`: About Me (name, DOB, sex, height, activity, goal) + Preferences (weight unit, water goal) + Derived Metrics (BMI with category, BMR, TDEE) + App Info
-- [x] `src/pages/Home.tsx`: person-icon button in toolbar → pushes ProfilePage; greeting personalised with first name; BMI + category shown under weight stat
-- [x] `src/App.tsx`: route `/tabs/profile` wired to `ProfilePage`
-- [x] `vite-env.d.ts`: `personCircleOutline` declared
-
----
-
-## 0.9.4 — Calorie Estimation + Nutrition on Recipes ✓
-*Goal: basic nutritional awareness in food log and recipe detail.*
-
-- [x] Food log entry modal gains optional kcal field (stored in `food_entries` via migration v9)
-- [x] Today's food summary card shows total kcal logged
-- [x] Recipe detail page shows estimated kcal per serving (editable field on recipe form)
-- [x] Recipe kcal stored in `recipes` table (migration v9 adds `kcal_per_serving` column)
+- [ ] Create `docs/` folder in the repository as the website source (GitHub Pages standard)
+- [ ] Single-page design: Hero (app name + tagline + mockup), Features, Screenshots, Download CTA, Footer
+- [ ] Built with plain HTML + CSS; MD3 tokens referenced via inline custom properties
+- [ ] Mobile-responsive layout (flexbox, 375px â†’ 1440px)
+- [ ] Dark-mode support via `prefers-color-scheme`
+- [ ] App screenshots embedded as static assets under `docs/assets/screenshots/`
+- [ ] Favicon and Open Graph meta tags matching the app brand
 
 ---
 
-## 0.9.5 — Recipe → Food Log Link ✓
-*Goal: users can log a recipe directly as a meal entry.*
+## 1.8.0 â€” Landing Page Deployed to GitHub Pages
+*Goal: `https://<username>.github.io/patty` (or custom domain) is live.*
 
-- [x] "Log as meal" button in `RecipeDetailModal` footer
-- [x] Tapping it opens an inline meal-slot picker (Breakfast / Lunch / Dinner / Snack chips)
-- [x] Meal slot selectable before confirming; entry saved to today's food log
-- [x] Note pre-filled with `{emoji} {recipe name}`; kcal pre-filled from recipe if set
-- [x] Toast confirmation shown on success
-
----
-
-## 0.9.6 — Push Notification Reminders ✓
-*Goal: opt-in reminders to keep daily habits consistent — 10 channels across health, meals, and planning.*
-
-- [x] `@capacitor/local-notifications` installed and Android notification channel created (`patty-reminders`)
-- [x] `src/hooks/useNotifications.ts` — 10 `NotifChannel` definitions; prefs persisted to SQLite `settings` table; `toggleChannel` / `setChannelTime` / `enableAll` / `disableAll`; `requestPermission`; `checkPermissions` on load
-- [x] `src/pages/NotificationsPage.tsx` — dedicated full-screen page; permission banner; master enable-all toggle; three sections (Health Tracking, Meal Logging, Planning); per-channel toggle + time picker shown when enabled
-- [x] `src/pages/ProfilePage.tsx` — "Notifications" nav row (with `notificationsOutline` icon + chevron) pushes `NotificationsPage`
-- [x] `src/App.tsx` — `/tabs/notifications` route added
-- [x] `vite-env.d.ts` — `notificationsOutline`, `alarmOutline` declared
-
-**10 channels:**
-| Channel | Default | Cadence |
-|---|---|---|
-| ⚖️ Weigh-in | 07:30 | Daily |
-| 💧 Hydration check (morning) | 10:00 | Daily |
-| 💧 Hydration check (afternoon) | 14:00 | Daily |
-| 💧 Hydration check (evening) | 17:00 | Daily |
-| 😴 Sleep log reminder | 22:00 | Daily |
-| 🍳 Breakfast log | 08:30 | Daily |
-| 🥗 Lunch log | 13:00 | Daily |
-| 🍽️ Dinner log | 19:00 | Daily |
-| 📸 Weekly progress photo | 09:00 | Sundays |
-| 📅 Weekly meal plan | 18:00 | Sundays |
+- [ ] GitHub Actions workflow: on push to `main`, deploy `docs/` to `gh-pages` branch
+- [ ] `CNAME` file added if a custom domain is used
+- [ ] `sitemap.xml` and `robots.txt` added
+- [ ] Lighthouse score â‰¥ 90 (Performance, Accessibility, Best Practices, SEO)
+- [ ] Download button links to the latest GitHub Release APK asset
 
 ---
 
-## 0.9.7 — Data Persistence Audit ✓
-*Goal: all features store data consistently and reliably.*
+## 1.9.0 â€” Play Store Release Pipeline
+*Goal: repeatable, documented process to publish Patty to the Google Play Store.*
 
-- [x] Audit every hook — all user data confirmed to use SQLite (no in-memory-only state)
-- [x] Daily water goal migrated from `localStorage` to the `settings` table (`pref_water_goal_ml`)
-- [x] Weight unit preference already in `settings` table (`pref_weight_unit`, completed in 0.9.3)
-- [x] Notification preferences already in `settings` table (completed in 0.9.6)
-- [x] DB migrations v1–v9 verified clean (TypeScript compiles; no migration errors at runtime)
-
----
-
-## 0.9.8 — UI Polish Pass ✓
-*Goal: the app looks and feels finished.*
-
-- [x] Consistent loading skeletons on all data-fetching tabs (`IonSkeletonText`) — WeightTab, WaterTab, SleepTab, FoodTab, Progress photos
-- [x] Empty states reviewed and improved: two-line message + emoji on every tab; SleepTab empty state upgraded with title + body copy
-- [x] Error handling: failed DB operations surface a dismissible `IonToast` (WeightTab, WaterTab, SleepTab, FoodTab, Progress)
-- [x] Spacing and alignment audit: off-grid values (20px, 12px, 6px) corrected to 8 dp multiples across all stat cards and section headers
-- [x] Transitions: tab page entry uses `md-fade-in` on `ion-router-outlet > .ion-page`; cards/items retain staggered `md-fade-up`/`md-fade-in` with MD3 easing tokens
-- [x] Long-list pagination: weight history uses `IonInfiniteScroll` (30 rows/page); sleep and water lists are inherently short
+- [ ] Google Play Console: app created, store listing drafted (title, short/long description, category)
+- [ ] Store listing assets produced: 512px icon, feature graphic (1024Ã—500), phone screenshots (min 2, max 8)
+- [ ] Content rating questionnaire completed; target audience declared
+- [ ] Privacy policy published (linked from the store listing and the landing page)
+- [ ] `android/app/build.gradle`: `versionCode` increment strategy documented in AGENTS.md
+- [ ] Internal testing track: AAB built via `./gradlew bundleRelease` and uploaded
+- [ ] Internal testers complete smoke test checklist (all four Track tabs, Recipes, Plan, Progress, Profile)
 
 ---
 
-## 0.9.9 — Capacitor Native Build Prep ✓
-*Goal: app is ready to compile as a native Android (and iOS) binary.*
+## 1.9.1 â€” Crash Reporting & Analytics
+*Goal: production crashes are visible and diagnosable without user reports.*
 
-- [x] App icon designed and exported at all required densities (mipmap-*)
-- [x] Splash screen configured via `@capacitor/splash-screen`
-- [x] `AndroidManifest.xml` permissions audited (camera, notifications, storage)
-- [x] `capacitor.config.ts` finalised: appId `com.patty.app`, appName `Patty`, webDir `dist`
-- [x] `npx cap sync android` runs clean with no warnings
-- [x] App launches correctly on Android emulator (API 34 target)
-- [ ] iOS scheme verified (`npx cap sync ios`; no build errors in Xcode) — **deferred: requires macOS/Xcode**
+- [ ] Firebase App Distribution set up for beta builds
+- [ ] Firebase Crashlytics integrated (`@capacitor-firebase/crashlytics`); crashes surface in Firebase console
+- [ ] Non-PII usage events logged: tab switches, entry creates, photo captures (no personally identifiable data)
+- [ ] Crash-free session target: â‰¥ 99% before promoting to production track
+- [ ] `AGENTS.md` updated with Firebase project ID and crash-review process
 
 ---
 
-## 1.0.0 — Release Build ✓
-*Goal: signed, shippable APK (and IPA) produced from a clean build.*
+## 1.9.2 â€” Open Beta
+*Goal: wider real-world validation before public launch.*
 
-- [x] Version bumped to `1.0.0` in `package.json` and `android/app/build.gradle`
-- [x] `npm run build` produces a clean `dist/` with no TypeScript or lint errors
-- [x] `npx cap sync android` applied to final dist
-- [x] Release APK built and signed (`./gradlew assembleRelease`) — `app-release.apk` (25.6 MB)
-- [x] Signing keystore generated (`patty-release.jks`, alias `patty`, 2048-bit RSA, 10000-day validity)
-- [ ] APK smoke-tested on a physical Android device
-- [x] Git tag `v1.0.0` created
-- [x] CHANGELOG.md finalised with full feature summary
+- [ ] Play Store Open Beta track enabled; store listing published in "draft" state
+- [ ] Beta feedback form linked from the app (ProfilePage â†’ App Info â†’ "Send feedback")
+- [ ] All P1 bugs from internal testing resolved; no force-close crashes in the wild
+- [ ] App size target: < 30 MB APK / < 15 MB AAB
 
 ---
 
-## Post-1.0.0 (Backlog)
+## 2.0.0 â€” Cloud Sync & Accounts
+*Goal: data lives in the cloud; users can switch devices and never lose history.*
 
-- Cloud sync / account system
-- Barcode scanner for food logging
-- AI meal suggestions based on logged data
-- Apple Health / Google Fit integration
-- Wearable data import (sleep, steps)
+- [ ] Authentication: email + password via Firebase Auth (or Supabase); optional Google Sign-In
+- [ ] Cloud database: Firestore (or Supabase Postgres) mirroring the local SQLite schema
+- [ ] Bidirectional sync: local-first; cloud push on save; pull on app open / foreground resume
+- [ ] Conflict resolution: last-write-wins with server timestamp; UI alert on conflict
+- [ ] Account page: sign up / log in / log out; link existing local data to a new account ("Import local data")
+- [ ] Data export: full JSON dump of all logs downloadable from the account page
+- [ ] Privacy: all user data encrypted at rest; no third-party data sharing
+- [ ] Play Store production track promoted from beta; `v2.0.0` tag + GitHub Release created
+
+---
+
+## Post-2.0.0 Backlog
+
+- Barcode scanner for food logging (Open Food Facts API)
+- AI meal suggestions based on logged food + recipe library
+- Apple Health / Google Fit two-way sync
+- Wearable data import: sleep (Fitbit, Garmin), steps
+- iOS App Store submission (requires macOS / Xcode build machine)
+- Social: optional friend progress sharing (streak badges)
+- Habit streaks gamification: unlock themes / badges at milestones
