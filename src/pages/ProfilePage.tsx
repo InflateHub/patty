@@ -400,19 +400,20 @@ const ProfilePage: React.FC = () => {
                 />
               </IonItem>
 
-              {/* Biometric toggle — only when lock enabled and biometrics available */}
-              {lockEnabled && biometricAvailable && (
+              {/* Biometric toggle — only when lock enabled */}
+              {lockEnabled && (
                 <IonItem style={transparentItem}>
-                  <IonIcon icon={fingerPrintOutline} slot="start" style={{ color: 'var(--md-primary)', fontSize: 20 }} />
+                  <IonIcon icon={fingerPrintOutline} slot="start" style={{ color: biometricAvailable ? 'var(--md-primary)' : 'var(--md-on-surface-variant)', fontSize: 20 }} />
                   <IonLabel>
                     <h3>Biometric Unlock</h3>
                     <p style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
-                      Face ID / Fingerprint
+                      {biometricAvailable ? 'Face ID / Fingerprint' : 'Not available on this device'}
                     </p>
                   </IonLabel>
                   <IonToggle
                     slot="end"
                     checked={biometricEnabled}
+                    disabled={!biometricAvailable}
                     onIonChange={e => handleBiometricToggle(e.detail.checked)}
                   />
                 </IonItem>
