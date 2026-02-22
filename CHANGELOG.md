@@ -2,6 +2,43 @@
 
 ---
 
+## [1.8.0] — Landing Page Deployed to GitHub Pages
+*Goal: `https://inflatehub.github.io/patty` is live and auto-deployed on every push to `main`.*
+
+- [x] **GitHub Actions workflow** (`pages.yml`): on push to `main` (when `docs/**` changes), deploys `docs/` to GitHub Pages via `actions/deploy-pages@v4`; also supports manual `workflow_dispatch`
+- [x] **`CNAME`** — custom domain `patty.saranmahadev.in`; all OG/sitemap URLs updated to match
+- [x] **`sitemap.xml`** added to `docs/` with canonical URL `https://patty.saranmahadev.in/`
+- [x] **`robots.txt`** added — allows all crawlers, references sitemap
+- [x] **Download button** links to `github.com/InflateHub/patty/releases/latest` — always points to the newest APK
+- [x] **Open Graph + Twitter Card** meta tags for social sharing
+
+---
+
+## [1.7.0] — App Landing Page
+*Goal: a polished marketing webpage for Patty exists as a static site in the repo.*
+
+- [x] **`docs/`** folder created as GitHub Pages source
+- [x] **`docs/index.html`** — single-page, self-contained HTML + CSS landing page:
+  - Sticky **nav bar** with logo, anchor links, and Download CTA
+  - **Hero section**: large title, "Desire. Commit. Achieve." tagline, CSS phone mockup with animated floating stat cards, feature badge chips
+  - **Stats banner**: 5 app highlights (10+ habits, 12 recipes, 8 notification channels, 5 levels, 100% local)
+  - **Features grid**: 9 feature cards — Health Tracking, Recipes & Meal Planning, Achievements & Gamification, Privacy & Security, Personalisation, Smart Reminders, Progress Photos, Health Metrics, Onboarding
+  - **How it works**: 4-step sequence (Download → Track → Plan → Celebrate)
+  - **Screenshots section**: 6 CSS phone screen mockups (Home, Weight, Water, Recipes, Achievements, Profile)
+  - **Privacy callout**: 4 privacy pillars with shield visual
+  - **Theming callout**: 8 palette swatches
+  - **Download CTA** section
+  - **Footer**: brand, app links, project links, legal, copyright
+- [x] **MD3 Patty palette** implemented via CSS custom properties (`:root` tokens + `@media prefers-color-scheme: dark` overrides)
+- [x] **Mobile-responsive** layout — flexbox + CSS grid, 375 px → 1440 px
+- [x] **Dark mode** support via `prefers-color-scheme`
+- [x] **Favicon** and **Open Graph** meta tags matching app brand
+- [x] **Roboto font** loaded via Google Fonts (matches app typography)
+- [x] **Scroll animations** via `IntersectionObserver` — feature, step and screenshot cards fade up on enter
+- [x] **`docs/assets/icon.png`** and **`docs/assets/favicon.png`** copied from `public/assets/icon/`
+
+---
+
 ## [1.6.0] — Personalisation Theming
 *Goal: users pick their own accent colour and the entire MD3 palette re-seeds dynamically; light/dark/system mode toggle; font size control.*
 

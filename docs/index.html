@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ─── Primary SEO ─────────────────────────────────────────────── -->
+  <title>Patty — Free Health Tracker & Meal Planner App for Android</title>
+  <meta name="description" content="Patty is a free Android app for tracking weight, water, sleep and food, planning meals, and building healthy habits. No account. No cloud. 100% local. Download the APK free." />
+  <meta name="keywords" content="health tracker app, meal planner android, weight tracker, water intake tracker, sleep tracker, food diary, habit tracker, meal prep app, free health app, offline health app, calorie tracker, BMI calculator, android fitness app, open source health app, patty app" />
+  <meta name="author" content="Saran Mahadev" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="theme-color" content="#3D6B5C" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="canonical" href="https://patty.saranmahadev.in/" />
+
+  <!-- ─── Open Graph (Facebook / LinkedIn / WhatsApp) ─────────────── -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Patty App" />
+  <meta property="og:title" content="Patty — Free Health Tracker & Meal Planner for Android" />
+  <meta property="og:description" content="Track weight, water, sleep & food. Plan meals. Build streaks. 100% offline, no account needed. Free APK download." />
+  <meta property="og:url" content="https://patty.saranmahadev.in/" />
+  <meta property="og:image" content="https://patty.saranmahadev.in/assets/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Patty app screens showing weight tracking, water ring, meal planner and achievement cards" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- ─── Twitter / X Card ────────────────────────────────────────── -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Patty — Free Health Tracker & Meal Planner for Android" />
+  <meta name="twitter:description" content="Track weight, water, sleep & food. Plan meals. Build streaks. 100% offline, no account needed. Free APK." />
+  <meta name="twitter:image" content="https://patty.saranmahadev.in/assets/og-image.png" />
+  <meta name="twitter:image:alt" content="Patty app screens showing weight tracking, water ring, meal planner and achievement cards" />
+  <meta name="twitter:creator" content="@saranmahadev" />
+  <meta name="twitter:site" content="@saranmahadev" />
+
+  <!-- ─── Mobile / PWA ────────────────────────────────────────────── -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Patty" />
+  <meta name="application-name" content="Patty" />
+
+  <!-- ─── Geo / Language ──────────────────────────────────────────── -->
+  <meta name="language" content="English" />
+  <link rel="alternate" href="https://patty.saranmahadev.in/" hreflang="en" />
+  <link rel="alternate" href="https://patty.saranmahadev.in/" hreflang="x-default" />
+
+  <!-- ─── Favicon ─────────────────────────────────────────────────── -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/icon.png" />
+
+  <!-- ─── Performance ─────────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="dns-prefetch" href="https://github.com" />
+
+  <!-- ─── Structured Data: SoftwareApplication ────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Patty",
+    "alternateName": "Patty Health Tracker",
+    "description": "Patty is a free, open-source Android lifestyle companion for tracking weight, water, sleep and food, planning meals, and building healthy habits. All data stays on your device — no account required.",
+    "url": "https://patty.saranmahadev.in/",
+    "downloadUrl": "https://github.com/InflateHub/patty/releases/latest",
+    "softwareVersion": "1.8.0",
+    "datePublished": "2026-02-22",
+    "dateModified": "2026-02-22",
+    "operatingSystem": "Android 5.0+",
+    "applicationCategory": "HealthApplication",
+    "applicationSubCategory": "Fitness, Nutrition, Lifestyle",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5",
+      "reviewCount": "1",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "featureList": [
+      "Weight tracking with progress photos",
+      "Water intake ring tracker",
+      "Sleep duration and quality logging",
+      "Food diary with calorie estimation",
+      "Meal planner with weekly grid",
+      "Recipe library with 12 seed recipes",
+      "Grocery list generator",
+      "XP gamification and achievement badges",
+      "PIN and biometric app lock",
+      "Material Design 3 theming with custom colour picker",
+      "Smart push notification reminders",
+      "BMI, BMR and TDEE calculator",
+      "100% offline — no cloud, no account"
+    ],
+    "screenshot": [
+      "https://patty.saranmahadev.in/assets/screenshot-home.png",
+      "https://patty.saranmahadev.in/assets/screenshot-track.png"
+    ],
+    "author": {
+      "@type": "Person",
+      "name": "Saran Mahadev",
+      "url": "https://github.com/InflateHub"
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "Saran Mahadev",
+      "url": "https://github.com/InflateHub"
+    },
+    "maintainer": {
+      "@type": "Person",
+      "name": "Saran Mahadev"
+    },
+    "codeRepository": "https://github.com/InflateHub/patty",
+    "license": "https://github.com/InflateHub/patty/blob/main/LICENSE",
+    "isAccessibleForFree": true,
+    "isFamilyFriendly": true,
+    "inLanguage": "en"
+  }
+  </script>
+
+  <!-- ─── Structured Data: WebSite + SearchAction ─────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Patty App",
+    "url": "https://patty.saranmahadev.in/",
+    "description": "Official landing page for Patty — a free Android health tracker and meal planner.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://github.com/InflateHub/patty/search?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "Saran Mahadev",
+      "url": "https://saranmahadev.in"
+    }
+  }
+  </script>
+
+  <!-- ─── Structured Data: FAQPage ─────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is Patty free to download?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Patty is completely free with no in-app purchases, no subscription, and no hidden costs. Download the APK directly from GitHub Releases."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Patty require an account or internet connection?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Patty works 100% offline. All your health data is stored locally in a SQLite database on your device — no account, no cloud, no tracking."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What health metrics can I track with Patty?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Patty lets you track weight (with progress photos), daily water intake, sleep duration and quality, and food intake with calorie estimates. It also computes your BMI, BMR and TDEE from your profile."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I plan my meals with Patty?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Patty includes a full meal planner with a Monday–Sunday grid, a library of 12 curated seed recipes you can extend with your own, and an automatic grocery list that deduplicates ingredients."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Patty open source?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Patty is fully open source under the MIT licence. The complete source code is available on GitHub at https://github.com/InflateHub/patty."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the app lock work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Patty supports a 4-digit PIN stored as a SHA-256 hash (never plaintext) and biometric unlock (Face ID or Fingerprint) via the device's native API. The lock triggers automatically when the app is resumed from the background."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which Android version does Patty support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Patty supports Android 5.0 (API 21) and above. It is built with Ionic + React and Capacitor, targeting the latest Android SDK."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- ─── Structured Data: BreadcrumbList ─────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://patty.saranmahadev.in/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Features",
+        "item": "https://patty.saranmahadev.in/#features"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Privacy",
+        "item": "https://patty.saranmahadev.in/#privacy"
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": "Screenshots",
+        "item": "https://patty.saranmahadev.in/#screenshots"
+      },
+      {
+        "@type": "ListItem",
+        "position": 5,
+        "name": "FAQ",
+        "item": "https://patty.saranmahadev.in/#faq"
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    /* ─── MD3 Patty Tonal Palette ─────────────────────────────────── */
+    :root {
+      --seed: #5C7A6E;
+
+      /* Primary */
+      --md-primary:           #3D6B5C;
+      --md-on-primary:        #FFFFFF;
+      --md-primary-container: #BFEDE0;
+      --md-on-primary-container: #00201A;
+
+      /* Secondary */
+      --md-secondary:         #4C6359;
+      --md-on-secondary:      #FFFFFF;
+      --md-secondary-container: #CEE9DC;
+      --md-on-secondary-container: #081F17;
+
+      /* Tertiary */
+      --md-tertiary:          #3D6373;
+      --md-tertiary-container: #C1E8F6;
+
+      /* Neutral */
+      --md-surface:           #F5FAFA;
+      --md-on-surface:        #181D1C;
+      --md-surface-variant:   #DBE5E0;
+      --md-on-surface-variant: #3F4946;
+      --md-outline:           #6F7975;
+      --md-outline-variant:   #BFC9C4;
+      --md-background:        #F5FAFA;
+
+      /* Elevation surfaces */
+      --md-surface-1: color-mix(in srgb, var(--md-primary) 5%, var(--md-surface));
+      --md-surface-2: color-mix(in srgb, var(--md-primary) 8%, var(--md-surface));
+      --md-surface-3: color-mix(in srgb, var(--md-primary) 11%, var(--md-surface));
+
+      /* Shape */
+      --md-shape-xs:   4px;
+      --md-shape-sm:   8px;
+      --md-shape-md:   12px;
+      --md-shape-lg:   16px;
+      --md-shape-xl:   28px;
+      --md-shape-full: 9999px;
+
+      /* Typography */
+      --md-font: 'Roboto', system-ui, sans-serif;
+      --md-display: clamp(2.5rem, 6vw, 4rem);
+      --md-headline-lg: clamp(1.75rem, 4vw, 2.25rem);
+      --md-headline-md: clamp(1.35rem, 3vw, 1.75rem);
+      --md-headline-sm: 1.25rem;
+      --md-title-lg: 1.375rem;
+      --md-title-md: 1rem;
+      --md-body-lg: 1rem;
+      --md-body-md: 0.875rem;
+      --md-label-lg: 0.875rem;
+
+      /* Motion */
+      --md-duration-sm: 200ms;
+      --md-duration-md: 300ms;
+      --md-easing: cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --md-primary:           #A3D1C3;
+        --md-on-primary:        #00382D;
+        --md-primary-container: #1F5244;
+        --md-on-primary-container: #BFEDE0;
+
+        --md-secondary:         #B2CCBF;
+        --md-on-secondary:      #1E352C;
+        --md-secondary-container: #344C43;
+        --md-on-secondary-container: #CEE9DC;
+
+        --md-tertiary:          #A5CCDA;
+        --md-tertiary-container: #1F4B5A;
+
+        --md-surface:           #0E1513;
+        --md-on-surface:        #DCE5E1;
+        --md-surface-variant:   #3F4946;
+        --md-on-surface-variant: #BFC9C4;
+        --md-outline:           #899490;
+        --md-outline-variant:   #3F4946;
+        --md-background:        #0E1513;
+
+        --md-surface-1: color-mix(in srgb, var(--md-primary) 5%, var(--md-surface));
+        --md-surface-2: color-mix(in srgb, var(--md-primary) 8%, var(--md-surface));
+        --md-surface-3: color-mix(in srgb, var(--md-primary) 11%, var(--md-surface));
+      }
+    }
+
+    /* ─── Reset & Base ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--md-font);
+      font-size: var(--md-body-lg);
+      background: var(--md-background);
+      color: var(--md-on-surface);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: var(--md-primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    img { max-width: 100%; display: block; }
+
+    /* ─── Utility ─────────────────────────────────────────────────── */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin-inline: auto;
+      padding-inline: clamp(1.25rem, 5vw, 3rem);
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--md-shape-full);
+      font-size: var(--md-label-lg);
+      font-weight: 500;
+      background: var(--md-secondary-container);
+      color: var(--md-on-secondary-container);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: var(--md-shape-full);
+      font-family: var(--md-font);
+      font-size: var(--md-title-md);
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: transform var(--md-duration-sm) var(--md-easing),
+                  box-shadow var(--md-duration-sm) var(--md-easing);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      box-shadow: 0 2px 8px color-mix(in srgb, var(--md-primary) 40%, transparent);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px color-mix(in srgb, var(--md-primary) 45%, transparent);
+      text-decoration: none;
+    }
+    .btn-tonal {
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
+    }
+    .btn-tonal:hover { transform: translateY(-2px); text-decoration: none; }
+    .btn-outlined {
+      background: transparent;
+      border: 1.5px solid var(--md-outline);
+      color: var(--md-primary);
+    }
+    .btn-outlined:hover { background: var(--md-surface-1); text-decoration: none; }
+
+    /* ─── Nav ─────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: color-mix(in srgb, var(--md-surface) 90%, transparent);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--md-outline-variant);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo img {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--md-shape-sm);
+    }
+    .nav-logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--md-primary);
+      letter-spacing: -0.02em;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-links a:not(.btn) {
+      font-size: var(--md-label-lg);
+      font-weight: 500;
+      color: var(--md-on-surface-variant);
+      padding: 8px 14px;
+      border-radius: var(--md-shape-full);
+      transition: background var(--md-duration-sm);
+      text-decoration: none;
+    }
+    .nav-links a:not(.btn):hover { background: var(--md-surface-variant); color: var(--md-on-surface); }
+    /* ── Nav download button: always high-contrast ── */
+    .nav-links .btn-primary {
+      background: var(--md-primary);
+      color: #FFFFFF;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    @media (prefers-color-scheme: dark) {
+      .nav-links .btn-primary { background: #A3D1C3; color: #003324; }
+    }
+    @media (max-width: 640px) {
+      .nav-links .hide-mobile { display: none; }
+    }
+
+    /* ─── Hero ────────────────────────────────────────────────────── */
+    .hero {
+      padding-block: clamp(4rem, 10vh, 7rem);
+      overflow: hidden;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 80% 60% at 50% -10%,
+        color-mix(in srgb, var(--md-primary) 12%, transparent),
+        transparent 70%
+      );
+      pointer-events: none;
+    }
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hero-actions { justify-content: center; }
+      .hero-badges { justify-content: center; }
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--md-label-lg);
+      font-weight: 600;
+      color: var(--md-primary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .hero-eyebrow-dot {
+      width: 8px; height: 8px;
+      background: var(--md-primary);
+      border-radius: 50%;
+    }
+    .hero-title {
+      font-size: var(--md-display);
+      font-weight: 700;
+      color: var(--md-on-surface);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+    .hero-title .accent {
+      background: linear-gradient(130deg, var(--md-primary) 0%, #48B89F 50%, var(--md-tertiary) 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient-shift 5s ease-in-out infinite;
+    }
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .hero-tagline {
+      font-size: clamp(1rem, 2.5vw, 1.375rem);
+      color: var(--md-on-surface-variant);
+      font-weight: 400;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      max-width: 520px;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* ─── Phone Mockup ─────────────────────────────────────────────── */
+    .phone-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .phone {
+      width: 240px;
+      height: 480px;
+      background: var(--md-surface-1);
+      border-radius: 36px;
+      border: 2px solid var(--md-outline-variant);
+      box-shadow:
+        0 24px 64px color-mix(in srgb, var(--md-primary) 20%, transparent),
+        0 4px 16px color-mix(in srgb, #000 12%, transparent);
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .phone-notch {
+      width: 80px; height: 24px;
+      background: var(--md-on-surface);
+      border-radius: 0 0 18px 18px;
+      margin: 0 auto;
+      opacity: 0.9;
+    }
+    .phone-screen {
+      padding: 12px 14px;
+    }
+    .phone-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--md-primary);
+      margin-bottom: 10px;
+    }
+    .phone-stat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .phone-stat {
+      background: var(--md-primary-container);
+      border-radius: 12px;
+      padding: 10px 10px 8px;
+    }
+    .phone-stat-emoji { font-size: 18px; }
+    .phone-stat-val { font-size: 14px; font-weight: 700; color: var(--md-on-primary-container); margin-top: 2px; }
+    .phone-stat-label { font-size: 9px; color: var(--md-on-surface-variant); margin-top: 2px; }
+    .phone-ring {
+      display: flex;
+      justify-content: center;
+      margin: 8px 0;
+    }
+    .phone-ring svg { filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--md-primary) 30%, transparent)); }
+    .phone-section {
+      background: var(--md-surface-2);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+    }
+    .phone-section-label { font-size: 9px; font-weight: 600; color: var(--md-outline); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .phone-entry {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0;
+      font-size: 10px;
+      color: var(--md-on-surface);
+      border-bottom: 1px solid var(--md-outline-variant);
+    }
+    .phone-entry:last-child { border-bottom: none; }
+    .phone-entry-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--md-primary); flex-shrink: 0; }
+    .phone-tab-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 52px;
+      background: var(--md-surface-2);
+      border-top: 1px solid var(--md-outline-variant);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 12px;
+    }
+    .phone-tab { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 8px; color: var(--md-outline); }
+    .phone-tab.active { color: var(--md-primary); }
+    .phone-tab-icon { font-size: 16px; }
+    .phone-tab.active .phone-tab-icon-wrap {
+      background: var(--md-primary-container);
+      border-radius: var(--md-shape-full);
+      padding: 2px 14px;
+    }
+
+    /* Floating cards behind phone */
+    .phone-float {
+      position: absolute;
+      background: var(--md-surface);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--md-shape-xl);
+      padding: 12px 16px;
+      box-shadow: 0 8px 24px color-mix(in srgb, #000 8%, transparent);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .phone-float-1 {
+      top: 15%;
+      right: -20px;
+      animation: float-1 4s ease-in-out infinite;
+    }
+    .phone-float-2 {
+      bottom: 20%;
+      left: -30px;
+      animation: float-2 4.5s ease-in-out infinite;
+    }
+    @keyframes float-1 {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes float-2 {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(8px); }
+    }
+    .float-emoji { font-size: 20px; }
+    .float-label { font-size: 11px; color: var(--md-on-surface-variant); }
+    .float-val { font-size: 16px; font-weight: 700; color: var(--md-on-surface); }
+
+    /* ─── Section styles ──────────────────────────────────────────── */
+    section { padding-block: clamp(3rem, 8vh, 5.5rem); }
+
+    .section-eyebrow {
+      font-size: var(--md-label-lg);
+      font-weight: 600;
+      color: var(--md-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-size: var(--md-headline-lg);
+      font-weight: 700;
+      color: var(--md-on-surface);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+    .section-body {
+      font-size: var(--md-body-lg);
+      color: var(--md-on-surface-variant);
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    /* ─── Features ───────────────────────────────────────────────── */
+    .features-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .features-header .section-body { margin-inline: auto; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: var(--md-surface-1);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--md-shape-xl);
+      padding: 2rem;
+      transition: transform var(--md-duration-md) var(--md-easing),
+                  box-shadow var(--md-duration-md) var(--md-easing),
+                  border-color var(--md-duration-md);
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px color-mix(in srgb, var(--md-primary) 12%, transparent);
+      border-color: var(--md-primary-container);
+    }
+    .feature-icon-wrap {
+      width: 52px; height: 52px;
+      border-radius: var(--md-shape-lg);
+      background: var(--md-primary-container);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .feature-title {
+      font-size: var(--md-title-lg);
+      font-weight: 600;
+      color: var(--md-on-surface);
+      margin-bottom: 0.625rem;
+      letter-spacing: -0.01em;
+    }
+    .feature-body {
+      font-size: var(--md-body-md);
+      color: var(--md-on-surface-variant);
+      line-height: 1.7;
+    }
+    .feature-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 1rem;
+    }
+    .feature-tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: var(--md-shape-full);
+      background: var(--md-secondary-container);
+      color: var(--md-on-secondary-container);
+    }
+
+    /* ─── Stats banner ───────────────────────────────────────────── */
+    .stats-banner {
+      background: var(--md-primary-container);
+      border-radius: var(--md-shape-xl);
+      padding: clamp(2rem, 5vw, 3rem);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 2rem;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      color: var(--md-on-primary-container);
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: var(--md-body-md);
+      color: var(--md-on-surface-variant);
+      margin-top: 4px;
+    }
+
+    /* ─── How it works ──────────────────────────────────────────── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .step-card {
+      text-align: center;
+      padding: 2rem 1.5rem;
+    }
+    .step-num {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      font-size: 1.125rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      box-shadow: 0 4px 16px color-mix(in srgb, var(--md-primary) 35%, transparent);
+    }
+    .step-title { font-size: var(--md-title-lg); font-weight: 600; color: var(--md-on-surface); margin-bottom: 0.5rem; }
+    .step-body { font-size: var(--md-body-md); color: var(--md-on-surface-variant); line-height: 1.7; }
+
+    /* ─── Privacy callout ────────────────────────────────────────── */
+    .privacy-section {
+      background: var(--md-surface-1);
+      border-top: 1px solid var(--md-outline-variant);
+      border-bottom: 1px solid var(--md-outline-variant);
+    }
+    .privacy-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    @media (max-width: 768px) {
+      .privacy-inner { grid-template-columns: 1fr; gap: 2rem; }
+    }
+    .privacy-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .privacy-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .privacy-icon {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: var(--md-shape-md);
+      background: var(--md-primary-container);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .privacy-text-title { font-size: var(--md-title-md); font-weight: 600; color: var(--md-on-surface); }
+    .privacy-text-body { font-size: var(--md-body-md); color: var(--md-on-surface-variant); margin-top: 2px; }
+
+    /* Shield visual */
+    .shield-wrap {
+      display: flex;
+      justify-content: center;
+    }
+    .shield {
+      width: 220px; height: 260px;
+      background: var(--md-primary-container);
+      clip-path: polygon(50% 0%, 100% 18%, 100% 65%, 50% 100%, 0% 65%, 0% 18%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .shield-icon { font-size: 3rem; }
+    .shield-text { font-size: var(--md-title-md); font-weight: 600; color: var(--md-on-primary-container); }
+
+    /* ─── Screenshot cards shared styles ──────────────────────────── */
+    .screenshot-card {
+      border-radius: var(--md-shape-xl);
+      overflow: hidden;
+      border: 1.5px solid var(--md-outline-variant);
+      box-shadow: 0 4px 16px color-mix(in srgb, #000 8%, transparent);
+      transition: transform var(--md-duration-md) var(--md-easing),
+                  box-shadow var(--md-duration-md) var(--md-easing);
+      aspect-ratio: 9/19;
+      background: var(--md-surface);
+      display: flex;
+      flex-direction: column;
+    }
+    .screenshot-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 16px 40px color-mix(in srgb, var(--md-primary) 20%, transparent);
+    }
+    .screenshot-header-bar {
+      padding: 14px 16px 8px;
+      background: var(--md-surface-2);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--md-primary);
+    }
+    .screenshot-content {
+      flex: 1;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .screenshot-hero-num {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--md-on-surface);
+      letter-spacing: -0.04em;
+    }
+    .screenshot-hero-unit { font-size: 13px; color: var(--md-outline); font-weight: 500; }
+    .screenshot-bar {
+      height: 6px;
+      background: var(--md-outline-variant);
+      border-radius: var(--md-shape-full);
+      overflow: hidden;
+    }
+    .screenshot-bar-fill {
+      height: 100%;
+      background: var(--md-primary);
+      border-radius: var(--md-shape-full);
+    }
+    .screenshot-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: var(--md-surface-1);
+      border-radius: var(--md-shape-md);
+      font-size: 11px;
+      color: var(--md-on-surface);
+    }
+    .screenshot-emoji { font-size: 16px; }
+    .screenshot-caption {
+      text-align: center;
+      padding: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-primary);
+      border-top: 1px solid var(--md-outline-variant);
+    }
+
+    /* ─── CTA Section ─────────────────────────────────────────────── */
+    .cta-section {
+      text-align: center;
+      background: linear-gradient(
+        135deg,
+        var(--md-primary-container) 0%,
+        color-mix(in srgb, var(--md-tertiary-container) 60%, var(--md-primary-container)) 100%
+      );
+      border-radius: var(--md-shape-xl);
+      margin-inline: clamp(1rem, 5vw, 3rem);
+      padding: clamp(3rem, 8vw, 5rem);
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 70% 30%, color-mix(in srgb, var(--md-primary) 15%, transparent), transparent 60%);
+    }
+    .cta-section > * { position: relative; }
+    .cta-title { font-size: var(--md-headline-lg); font-weight: 700; color: var(--md-on-primary-container); letter-spacing: -0.02em; margin-bottom: 1rem; }
+    .cta-body { font-size: var(--md-body-lg); color: var(--md-on-surface-variant); max-width: 500px; margin: 0 auto 2rem; line-height: 1.7; }
+    .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .cta-version { font-size: var(--md-label-lg); color: var(--md-outline); margin-top: 1rem; }
+
+    /* ─── FAQ ─────────────────────────────────────────────────────── */
+    #faq { padding-block: clamp(3rem,8vh,6rem); }
+    .faq-item {
+      background: var(--md-surface-container);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--md-shape-lg);
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .faq-item[open] {
+      border-color: var(--md-primary);
+      box-shadow: 0 2px 12px color-mix(in srgb, var(--md-primary) 15%, transparent);
+    }
+    .faq-q {
+      list-style: none;
+      cursor: pointer;
+      padding: 1rem 1.25rem;
+      font-size: var(--md-body-lg);
+      font-weight: 600;
+      color: var(--md-on-surface);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .faq-q::after { content: '+'; font-size: 1.4rem; color: var(--md-primary); transition: transform 0.25s; }
+    .faq-item[open] .faq-q::after { transform: rotate(45deg); }
+    .faq-q::-webkit-details-marker { display: none; }
+    .faq-a {
+      padding: 0 1.25rem 1rem;
+      font-size: var(--md-body-md);
+      color: var(--md-on-surface-variant);
+      line-height: 1.65;
+      border-top: 1px solid var(--md-outline-variant);
+      padding-top: 0.75rem;
+    }
+    .faq-a a { color: var(--md-primary); }
+
+    /* ─── Footer ──────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--md-outline-variant);
+      padding-block: 3rem 2rem;
+      margin-top: clamp(3rem, 6vh, 5rem);
+    }
+    .footer-inner {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 2.5rem;
+    }
+    @media (max-width: 768px) {
+      .footer-inner { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    }
+    @media (max-width: 480px) {
+      .footer-inner { grid-template-columns: 1fr; }
+    }
+    .footer-brand p { font-size: var(--md-body-md); color: var(--md-on-surface-variant); line-height: 1.7; margin-top: 0.75rem; max-width: 280px; }
+    .footer-col-title { font-size: var(--md-label-lg); font-weight: 600; color: var(--md-on-surface); margin-bottom: 1rem; }
+    .footer-col-links { display: flex; flex-direction: column; gap: 8px; }
+    .footer-col-links a { font-size: var(--md-body-md); color: var(--md-on-surface-variant); transition: color var(--md-duration-sm); }
+    .footer-col-links a:hover { color: var(--md-primary); text-decoration: none; }
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--md-outline-variant);
+      font-size: var(--md-body-md);
+      color: var(--md-on-surface-variant);
+    }
+    .footer-bottom-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+
+    /* ─── Divider ─────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--md-outline-variant);
+      margin-block: 0;
+    }
+
+    /* ─── Animations ──────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up {
+      opacity: 0;
+      animation: fadeUp 0.6s var(--md-easing) forwards;
+    }
+    .fade-up-1 { animation-delay: 0.1s; }
+    .fade-up-2 { animation-delay: 0.2s; }
+    .fade-up-3 { animation-delay: 0.3s; }
+    .fade-up-4 { animation-delay: 0.4s; }
+
+    /* ─── Shimmer on primary buttons ──────────────────────────────── */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -80%;
+      width: 50%; height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.22), transparent);
+      transform: skewX(-20deg);
+      animation: btn-shimmer 3.5s ease-in-out infinite;
+    }
+    @keyframes btn-shimmer {
+      0% { left: -80%; }
+      60%, 100% { left: 130%; }
+    }
+
+    /* ─── Hero floating particles ──────────────────────────────────── */
+    .hero-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--md-primary);
+      opacity: 0;
+      animation: particle-rise linear infinite;
+    }
+    @keyframes particle-rise {
+      0%   { transform: translateY(110%) scale(0.4); opacity: 0; }
+      15%  { opacity: 0.15; }
+      85%  { opacity: 0.15; }
+      100% { transform: translateY(-10%) scale(1.2); opacity: 0; }
+    }
+
+    /* ─── Step connector line ──────────────────────────────────────── */
+    .steps-inner {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      position: relative;
+      margin-top: 3rem;
+    }
+    .steps-inner::before {
+      content: '';
+      position: absolute;
+      top: 23px;
+      left: calc(16.67% + 4px);
+      right: calc(16.67% + 4px);
+      height: 2px;
+      background: linear-gradient(to right, var(--md-primary-container), var(--md-primary), var(--md-primary-container));
+      z-index: 0;
+    }
+    @media (max-width: 640px) {
+      .steps-inner { grid-template-columns: 1fr; }
+      .steps-inner::before { display: none; }
+    }
+    .step-card { position: relative; z-index: 1; }
+    .step-num {
+      box-shadow: 0 0 0 6px color-mix(in srgb, var(--md-primary) 15%, transparent),
+                  0 4px 16px color-mix(in srgb, var(--md-primary) 35%, transparent);
+      transition: transform 0.3s var(--md-easing), box-shadow 0.3s var(--md-easing);
+    }
+    .step-card:hover .step-num {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 10px color-mix(in srgb, var(--md-primary) 12%, transparent),
+                  0 8px 24px color-mix(in srgb, var(--md-primary) 45%, transparent);
+    }
+
+    /* ─── Feature card 3D tilt ─────────────────────────────────────── */
+    .feature-card { transform-style: preserve-3d; will-change: transform; }
+    .feature-card:hover {
+      background: linear-gradient(var(--md-surface-1), var(--md-surface-1)) padding-box,
+                  linear-gradient(135deg, var(--md-primary), var(--md-tertiary)) border-box;
+      border-color: transparent;
+      box-shadow: 0 20px 48px color-mix(in srgb, var(--md-primary) 18%, transparent);
+    }
+    .feature-icon-wrap {
+      transition: transform 0.3s var(--md-easing);
+    }
+    .feature-card:hover .feature-icon-wrap { transform: scale(1.12) rotate(-3deg); }
+
+    /* ─── Chip pop on hover ────────────────────────────────────────── */
+    .chip { transition: transform var(--md-duration-sm) var(--md-easing); }
+    .chip:hover { transform: scale(1.08); }
+
+    /* ─── Privacy items slide in ───────────────────────────────────── */
+    .privacy-item {
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: opacity 0.5s var(--md-easing), transform 0.5s var(--md-easing);
+    }
+    .privacy-item.is-visible { opacity: 1; transform: none; }
+    .privacy-item:nth-child(2) { transition-delay: 0.1s; }
+    .privacy-item:nth-child(3) { transition-delay: 0.2s; }
+    .privacy-item:nth-child(4) { transition-delay: 0.3s; }
+
+    /* ─── Marquee ──────────────────────────────────────────────────── */
+    .marquee-outer {
+      overflow: hidden;
+      position: relative;
+      margin-top: 3rem;
+      cursor: grab;
+    }
+    .marquee-outer:active { cursor: grabbing; }
+    .marquee-outer::before,
+    .marquee-outer::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 140px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .marquee-outer::before {
+      left: 0;
+      background: linear-gradient(to right,
+        var(--md-surface-1),
+        color-mix(in srgb, var(--md-surface-1) 0%, transparent));
+    }
+    .marquee-outer::after {
+      right: 0;
+      background: linear-gradient(to left,
+        var(--md-surface-1),
+        color-mix(in srgb, var(--md-surface-1) 0%, transparent));
+    }
+    .marquee-track {
+      display: flex;
+      gap: 1.25rem;
+      width: max-content;
+      animation: marquee-scroll 36s linear infinite;
+      padding-block: 12px;
+    }
+    .marquee-track:hover { animation-play-state: paused; }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── Screenshot cards in marquee ──────────────────────────────── */
+    .screenshot-card {
+      width: 195px;
+      flex-shrink: 0;
+    }
+
+    /* ─── Stat counter pop ─────────────────────────────────────────── */
+    @keyframes stat-pop {
+      0%   { transform: scale(0.6); opacity: 0; }
+      70%  { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .stat-num.count-done { animation: stat-pop 0.5s var(--md-easing) forwards; }
+  </style>
+</head>
+<body>
+
+  <!-- ─── NAVIGATION ────────────────────────────────────────────── -->
+  <nav aria-label="Main navigation">
+    <div class="container nav-inner">
+      <a href="#" class="nav-logo" aria-label="Patty — Home">
+        <img src="assets/icon.png" alt="Patty app icon" width="32" height="32" />
+        <span class="nav-logo-text">Patty</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features" class="hide-mobile">Features</a>
+        <a href="#privacy" class="hide-mobile">Privacy</a>
+        <a href="#faq" class="hide-mobile">FAQ</a>
+        <a href="https://github.com/InflateHub/patty/releases/latest" class="btn btn-primary" style="padding: 10px 20px; font-size: 14px;" aria-label="Download Patty APK from GitHub Releases">
+          Download APK
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main-content">
+
+  <!-- ─── HERO ─────────────────────────────────────────────────── -->
+  <section class="hero">
+    <!-- Floating particles -->
+    <div class="hero-particles" id="heroParticles"></div>
+    <div class="container">
+      <div class="hero-inner">
+        <div>
+          <div class="hero-eyebrow fade-up fade-up-1">
+            <span class="hero-eyebrow-dot"></span>
+            Free · Open Source · Android
+          </div>
+          <h1 class="hero-title fade-up fade-up-2">
+            Free Health Tracker &amp;<br/>
+            <span class="accent">Meal Planner.</span>
+          </h1>
+          <p class="hero-tagline fade-up fade-up-3">
+            <strong>Desire. Commit. Achieve.</strong><br/>
+            Track weight, water, sleep &amp; food. Plan meals. Build streaks — all in one calm, low-friction Android app that closes the gap between <em>tracking</em> and <em>doing</em>.
+          </p>
+          <div class="hero-actions fade-up fade-up-4">
+            <a href="https://github.com/InflateHub/patty/releases/latest" class="btn btn-primary">
+              📦 Download APK
+            </a>
+            <a href="https://github.com/InflateHub/patty" class="btn btn-outlined">
+              ⭐ Star on GitHub
+            </a>
+          </div>
+          <div class="hero-badges fade-up fade-up-4">
+            <span class="chip">⚖️ Weight</span>
+            <span class="chip">💧 Water</span>
+            <span class="chip">😴 Sleep</span>
+            <span class="chip">🥗 Food</span>
+            <span class="chip">📅 Meal Plan</span>
+            <span class="chip">🏆 Achievements</span>
+          </div>
+        </div>
+
+        <!-- Phone mockup -->
+        <div class="phone-wrap">
+          <div class="phone-float phone-float-1">
+            <div class="float-emoji">🔥</div>
+            <div class="float-label">7-day streak</div>
+            <div class="float-val">Keep it up!</div>
+          </div>
+
+          <div class="phone">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="phone-header">Good morning, Alex 👋</div>
+              <div class="phone-stat-row">
+                <div class="phone-stat">
+                  <div class="phone-stat-emoji">⚖️</div>
+                  <div class="phone-stat-val">73.2 kg</div>
+                  <div class="phone-stat-label">Weight today</div>
+                </div>
+                <div class="phone-stat">
+                  <div class="phone-stat-emoji">😴</div>
+                  <div class="phone-stat-val">7h 40m</div>
+                  <div class="phone-stat-label">Sleep last night</div>
+                </div>
+              </div>
+              <!-- Water ring mockup -->
+              <div class="phone-ring">
+                <svg width="90" height="90" viewBox="0 0 90 90">
+                  <circle cx="45" cy="45" r="36" fill="none" stroke="var(--md-outline-variant)" stroke-width="8"/>
+                  <circle cx="45" cy="45" r="36" fill="none"
+                    stroke="var(--md-primary)" stroke-width="8"
+                    stroke-linecap="round"
+                    stroke-dasharray="226" stroke-dashoffset="72"
+                    transform="rotate(-90 45 45)"/>
+                  <text x="45" y="43" text-anchor="middle" font-size="13" font-weight="700" fill="var(--md-on-surface)">1.8L</text>
+                  <text x="45" y="54" text-anchor="middle" font-size="8" fill="var(--md-outline)">of 2.5L</text>
+                </svg>
+              </div>
+              <div class="phone-section">
+                <div class="phone-section-label">Today's Meals</div>
+                <div class="phone-entry"><span class="phone-entry-dot"></span>🌅 Overnight oats — 480 kcal</div>
+                <div class="phone-entry"><span class="phone-entry-dot"></span>🥗 Quinoa salad — 360 kcal</div>
+                <div class="phone-entry"><span class="phone-entry-dot"></span>🍵 Snack — 120 kcal</div>
+              </div>
+            </div>
+            <div class="phone-tab-bar">
+              <div class="phone-tab active">
+                <div class="phone-tab-icon-wrap"><span class="phone-tab-icon">🏠</span></div>
+                <span>Home</span>
+              </div>
+              <div class="phone-tab"><span class="phone-tab-icon">📊</span><span>Track</span></div>
+              <div class="phone-tab"><span class="phone-tab-icon">🍽️</span><span>Plan</span></div>
+              <div class="phone-tab"><span class="phone-tab-icon">🏆</span><span>Goals</span></div>
+            </div>
+          </div>
+
+          <div class="phone-float phone-float-2">
+            <div class="float-emoji">🏆</div>
+            <div class="float-label">Level 3 · Sprout</div>
+            <div class="float-val">420 XP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── STATS BANNER ───────────────────────────────────────────── -->
+  <section style="padding-block: 0 3rem;">
+    <div class="container">
+      <div class="stats-banner">
+        <div class="stats-grid">
+          <div>
+            <div class="stat-num">10+</div>
+            <div class="stat-label">Habits tracked</div>
+          </div>
+          <div>
+            <div class="stat-num">12</div>
+            <div class="stat-label">Seed recipes included</div>
+          </div>
+          <div>
+            <div class="stat-num">8</div>
+            <div class="stat-label">Notification channels</div>
+          </div>
+          <div>
+            <div class="stat-num">5</div>
+            <div class="stat-label">Gamification levels</div>
+          </div>
+          <div>
+            <div class="stat-num">100%</div>
+            <div class="stat-label">Local · No cloud required</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FEATURES ────────────────────────────────────────────────── -->
+  <section id="features">
+    <div class="container">
+      <div class="features-header">
+        <div class="section-eyebrow">Everything you need</div>
+        <h2 class="section-title">Built for consistency, not complexity.</h2>
+        <p class="section-body">Every feature is designed to reduce friction — not add to it. Log a meal in two taps. Plan the entire week in five minutes. See your streak and keep going.</p>
+      </div>
+
+      <div class="features-grid">
+
+        <!-- Health Tracking -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">📊</div>
+          <div class="feature-title">Health Tracking</div>
+          <div class="feature-body">
+            Four dedicated tabs — Weight, Water, Sleep, and Food — each with a stat card, entry history, and a contextual FAB that changes per tab. Log anything in two taps.
+          </div>
+          <div class="feature-tags">
+            <span class="feature-tag">⚖️ Weight chart</span>
+            <span class="feature-tag">💧 Water ring</span>
+            <span class="feature-tag">😴 Sleep quality</span>
+            <span class="feature-tag">🥗 Food + kcal</span>
+          </div>
+        </div>
+
+        <!-- Recipe Library & Meal Planning -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🍽️</div>
+          <div class="feature-title">Recipes & Meal Planning</div>
+          <div class="feature-body">
+            A library of 12 curated seed recipes (with ingredients, steps, nutrition) you can extend with your own. Drag recipes into a Mon–Sun meal grid and get a deduplicated grocery list instantly.
+          </div>
+          <div class="feature-tags">
+            <span class="feature-tag">📚 Recipe library</span>
+            <span class="feature-tag">📅 Week grid</span>
+            <span class="feature-tag">🛒 Grocery list</span>
+            <span class="feature-tag">➕ Custom recipes</span>
+          </div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🏆</div>
+          <div class="feature-title">Achievements & Gamification</div>
+          <div class="feature-body">
+            Earn XP for every habit logged. Level up from Seedling to Legend. Track current and best streaks. Unlock 8 badges. Share your progress as beautiful branded cards — Daily, Weekly, Monthly, Yearly, Lifetime.
+          </div>
+          <div class="feature-tags">
+            <span class="feature-tag">⚡ XP system</span>
+            <span class="feature-tag">🔥 Streaks</span>
+            <span class="feature-tag">🎖️ 8 Badges</span>
+            <span class="feature-tag">📸 Share cards</span>
+          </div>
+        </div>
+
+        <!-- Privacy & Security -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🔒</div>
+          <div class="feature-title">Privacy & Security</div>
+          <div class="feature-body">
+            All data stays on your device — zero tracking, no accounts required. Add a 4-digit PIN and biometric lock (Face ID / Fingerprint). Full data export and one-tap factory reset whenever you want.
+          </div>
+          <div class="feature-tags">
+            <span class="feature-tag">🔐 PIN lock</span>
+            <span class="feature-tag">👆 Biometric</span>
+            <span class="feature-tag">🗄️ Local SQLite</span>
+            <span class="feature-tag">🗑️ Danger Zone</span>
+          </div>
+        </div>
+
+        <!-- Personalisation -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🎨</div>
+          <div class="feature-title">Personalisation</div>
+          <div class="feature-body">
+            Pick any accent colour — 8 curated palettes or enter a custom hex — and the full Material Design 3 palette re-seeds in real time. Choose Light, Dark, or System mode and adjust font size.
+          </div>
+          <div class="feature-tags">
+            <span class="feature-tag">🎨 MD3 theming</span>
+            <span class="feature-tag">🌙 Dark mode</span>
+            <span class="feature-tag">🔤 Font scale</span>
+            <span class="feature-tag">🖌️ Custom hex</span>
+          </div>
+        </div>
+
+        <!-- Smart Notifications -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">🔔</div>
+          <div class="feature-title">Smart Reminders</div>
+          <div class="feature-body">
+            Fully configurable reminders across 8+ channels — weigh-in, water frequency (1–8/day), sleep log, meal logging, weekly check-in, and engagement nudges that fire 30 min after linked reminders.
+          </div>
+          <div class="feature-tags">
+            <span class="feature-tag">⏰ Exact alarms</span>
+            <span class="feature-tag">💧 Water frequency</span>
+            <span class="feature-tag">📅 Weekly check-in</span>
+            <span class="feature-tag">⚡ Engagement nudges</span>
+          </div>
+        </div>
+
+        <!-- Progress Photos -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">📸</div>
+          <div class="feature-title">Progress Photos</div>
+          <div class="feature-body">
+            Mandatory photo on every weigh-in creates a visual timeline. Hero marquee shows photos newest-to-oldest with weight delta chips. Tap to expand. Photos stored in device filesystem — never a cloud.
+          </div>
+          <div class="feature-tags">
+            <span class="feature-tag">📷 Camera / Gallery</span>
+            <span class="feature-tag">🖼️ Marquee scroll</span>
+            <span class="feature-tag">📉 Delta chips</span>
+            <span class="feature-tag">💾 Filesystem storage</span>
+          </div>
+        </div>
+
+        <!-- Health Metrics -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">📐</div>
+          <div class="feature-title">Derived Health Metrics</div>
+          <div class="feature-body">
+            Patty computes your BMI, BMR, and TDEE from your profile and displays them in a clear dashboard. Goal-aware calculations adjust for your activity level and fitness objective.
+          </div>
+          <div class="feature-tags">
+            <span class="feature-tag">🧮 BMI</span>
+            <span class="feature-tag">🔥 BMR</span>
+            <span class="feature-tag">⚡ TDEE</span>
+            <span class="feature-tag">🎯 Goal-aware</span>
+          </div>
+        </div>
+
+        <!-- Onboarding -->
+        <div class="feature-card">
+          <div class="feature-icon-wrap">✨</div>
+          <div class="feature-title">Smooth Onboarding</div>
+          <div class="feature-body">
+            Guided first-launch flow: Welcome → Name & DOB → Body Metrics → Goal → Activity & Hydration → Celebration with CSS confetti. The app is personalised from the very first tap.
+          </div>
+          <div class="feature-tags">
+            <span class="feature-tag">🎉 Confetti</span>
+            <span class="feature-tag">📍 4-step flow</span>
+            <span class="feature-tag">🏃 Activity level</span>
+            <span class="feature-tag">🎯 Goal picker</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ─────────────────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <div style="text-align:center;">
+        <div class="section-eyebrow">How it works</div>
+        <h2 class="section-title">Start in 60 seconds.</h2>
+        <p class="section-body" style="margin-inline:auto;">No account. No subscription. No complexity. Download, log, and level up — it's that simple.</p>
+      </div>
+      <div class="steps-inner">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <div class="step-title">Download & Set Up</div>
+          <div class="step-body">Install the APK, complete the 4-step onboarding — name, metrics, goal, activity — and Patty is instantly personalised. Takes under a minute.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <div class="step-title">Track, Plan & Prep</div>
+          <div class="step-body">Log weight, water, sleep and food in 2–3 taps each. Plan meals for the week, pick recipes from the library, and get a grocery list instantly.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <div class="step-title">Achieve & Share</div>
+          <div class="step-body">Earn XP, level up from Seedling to Legend, unlock badges, and share beautiful branded achievement cards with your streak and lifetime stats.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SCREENSHOTS ──────────────────────────────────────────────── -->
+  <section id="screenshots" style="background: var(--md-surface-1); border-top: 1px solid var(--md-outline-variant); overflow: hidden;">
+    <div class="container">
+      <div class="section-eyebrow">Screens</div>
+      <h2 class="section-title">Clean. Calm. Consistent.</h2>
+      <p class="section-body">Material Design 3 with a custom slate-green palette. Every screen — light or dark — uses the same tonal tokens so it always looks cohesive.</p>
+    </div>
+
+    <div class="marquee-outer">
+      <div class="marquee-track" id="marqueeTrack">
+        <!-- Home -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">🏠 Home</div>
+          <div class="screenshot-content">
+            <div class="screenshot-hero-num">73.2<span class="screenshot-hero-unit"> kg</span></div>
+            <div class="screenshot-bar"><div class="screenshot-bar-fill" style="width:72%"></div></div>
+            <div style="font-size:11px; color: var(--md-outline);">72% to weekly goal</div>
+            <div class="screenshot-row"><span class="screenshot-emoji">💧</span><span>1.8 L today</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">😴</span><span>7h 40m</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🔥</span><span>1 840 kcal</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">📐</span><span>BMI 24.1 — Normal</span></div>
+          </div>
+          <div class="screenshot-caption">Dashboard</div>
+        </div>
+
+        <!-- Track -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">📊 Track · Weight</div>
+          <div class="screenshot-content">
+            <div class="screenshot-hero-num">−1.4<span class="screenshot-hero-unit"> kg</span></div>
+            <div style="font-size:11px; color: var(--md-outline);">This month</div>
+            <div style="height:50px; background: var(--md-surface-2); border-radius:8px; display:flex; align-items:flex-end; padding:6px 8px; gap:4px;">
+              <div style="flex:1; background: color-mix(in srgb, var(--md-primary) 40%, transparent); border-radius:2px; height:60%"></div>
+              <div style="flex:1; background: color-mix(in srgb, var(--md-primary) 40%, transparent); border-radius:2px; height:80%"></div>
+              <div style="flex:1; background: color-mix(in srgb, var(--md-primary) 40%, transparent); border-radius:2px; height:70%"></div>
+              <div style="flex:1; background: color-mix(in srgb, var(--md-primary) 40%, transparent); border-radius:2px; height:65%"></div>
+              <div style="flex:1; background: var(--md-primary); border-radius:2px; height:55%"></div>
+            </div>
+            <div class="screenshot-row"><span class="screenshot-emoji">📷</span><span>Weigh-in photo</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">📅</span><span>7 entries this week</span></div>
+          </div>
+          <div class="screenshot-caption">Weight Tracking</div>
+        </div>
+
+        <!-- Water -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">💧 Track · Water</div>
+          <div class="screenshot-content">
+            <div style="display:flex; justify-content:center; margin:4px 0;">
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--md-outline-variant)" stroke-width="7"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--md-primary)" stroke-width="7" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="50" transform="rotate(-90 40 40)"/>
+                <text x="40" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="var(--md-on-surface)">1.8L</text>
+                <text x="40" y="48" text-anchor="middle" font-size="8" fill="var(--md-outline)">of 2.5L</text>
+              </svg>
+            </div>
+            <div class="screenshot-row"><span class="screenshot-emoji">➕</span><span>+250 ml</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">➕</span><span>+500 ml</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🎯</span><span>Goal: 2 500 ml</span></div>
+          </div>
+          <div class="screenshot-caption">Water Intake</div>
+        </div>
+
+        <!-- Recipes -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">📚 Recipes</div>
+          <div class="screenshot-content">
+            <div class="screenshot-row"><span class="screenshot-emoji">🥣</span><span>Overnight Oats</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🥗</span><span>Quinoa Salad</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🍝</span><span>Pasta Primavera</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🍲</span><span>Veggie Curry</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🥑</span><span>Avocado Toast</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">➕</span><span style="color:var(--md-primary); font-weight:600;">Add your own…</span></div>
+          </div>
+          <div class="screenshot-caption">Recipe Library</div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">🏆 Achievements</div>
+          <div class="screenshot-content">
+            <div style="background: linear-gradient(135deg, var(--md-primary-container), var(--md-secondary-container)); border-radius:10px; padding:10px; text-align:center;">
+              <div style="font-size:22px;">🌱</div>
+              <div style="font-size:13px; font-weight:700; color:var(--md-on-primary-container);">Level 3 · Sprout</div>
+              <div style="height:5px; background:var(--md-outline-variant); border-radius:99px; margin-top:6px;">
+                <div style="height:100%; width:62%; background:var(--md-primary); border-radius:99px;"></div>
+              </div>
+              <div style="font-size:9px; color:var(--md-outline); margin-top:3px;">420 / 680 XP</div>
+            </div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🔥</span><span style="font-weight:600;">7-day streak!</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🎖️</span><span>3 / 8 badges</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">📤</span><span>Share weekly card</span></div>
+          </div>
+          <div class="screenshot-caption">Achievements</div>
+        </div>
+
+        <!-- Profile -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">👤 Profile</div>
+          <div class="screenshot-content">
+            <div class="screenshot-row"><span class="screenshot-emoji">🎨</span><span>Slate Green theme</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🌙</span><span>System dark mode</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🔒</span><span>PIN + Biometric</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">📐</span><span>BMI 24.1 · Normal</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">⚡</span><span>TDEE 2 340 kcal</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🔔</span><span>8 reminders active</span></div>
+          </div>
+          <div class="screenshot-caption">Profile &amp; Settings</div>
+        </div>
+
+        <!-- ── Duplicate set for seamless loop ── -->
+        <!-- Home -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">🏠 Home</div>
+          <div class="screenshot-content">
+            <div class="screenshot-hero-num">73.2<span class="screenshot-hero-unit"> kg</span></div>
+            <div class="screenshot-bar"><div class="screenshot-bar-fill" style="width:72%"></div></div>
+            <div style="font-size:11px; color: var(--md-outline);">72% to weekly goal</div>
+            <div class="screenshot-row"><span class="screenshot-emoji">💧</span><span>1.8 L today</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">😴</span><span>7h 40m</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🔥</span><span>1 840 kcal</span></div>
+          </div>
+          <div class="screenshot-caption">Dashboard</div>
+        </div>
+        <!-- Track -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">📊 Track · Weight</div>
+          <div class="screenshot-content">
+            <div class="screenshot-hero-num">−1.4<span class="screenshot-hero-unit"> kg</span></div>
+            <div style="font-size:11px; color: var(--md-outline);">This month</div>
+            <div style="height:50px; background: var(--md-surface-2); border-radius:8px; display:flex; align-items:flex-end; padding:6px 8px; gap:4px;">
+              <div style="flex:1; background: color-mix(in srgb, var(--md-primary) 40%, transparent); border-radius:2px; height:60%"></div>
+              <div style="flex:1; background: color-mix(in srgb, var(--md-primary) 40%, transparent); border-radius:2px; height:80%"></div>
+              <div style="flex:1; background: var(--md-primary); border-radius:2px; height:55%"></div>
+            </div>
+            <div class="screenshot-row"><span class="screenshot-emoji">📷</span><span>Weigh-in photo</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">📅</span><span>7 entries this week</span></div>
+          </div>
+          <div class="screenshot-caption">Weight Tracking</div>
+        </div>
+        <!-- Water -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">💧 Track · Water</div>
+          <div class="screenshot-content">
+            <div style="display:flex; justify-content:center; margin:4px 0;">
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--md-outline-variant)" stroke-width="7"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--md-primary)" stroke-width="7" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="50" transform="rotate(-90 40 40)"/>
+                <text x="40" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="var(--md-on-surface)">1.8L</text>
+                <text x="40" y="48" text-anchor="middle" font-size="8" fill="var(--md-outline)">of 2.5L</text>
+              </svg>
+            </div>
+            <div class="screenshot-row"><span class="screenshot-emoji">➕</span><span>+250 ml</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🎯</span><span>Goal: 2 500 ml</span></div>
+          </div>
+          <div class="screenshot-caption">Water Intake</div>
+        </div>
+        <!-- Recipes -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">📚 Recipes</div>
+          <div class="screenshot-content">
+            <div class="screenshot-row"><span class="screenshot-emoji">🥣</span><span>Overnight Oats</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🥗</span><span>Quinoa Salad</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🍝</span><span>Pasta Primavera</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🍲</span><span>Veggie Curry</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">➕</span><span style="color:var(--md-primary); font-weight:600;">Add your own…</span></div>
+          </div>
+          <div class="screenshot-caption">Recipe Library</div>
+        </div>
+        <!-- Achievements -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">🏆 Achievements</div>
+          <div class="screenshot-content">
+            <div style="background: linear-gradient(135deg, var(--md-primary-container), var(--md-secondary-container)); border-radius:10px; padding:10px; text-align:center;">
+              <div style="font-size:22px;">🌱</div>
+              <div style="font-size:13px; font-weight:700; color:var(--md-on-primary-container);">Level 3 · Sprout</div>
+              <div style="height:5px; background:var(--md-outline-variant); border-radius:99px; margin-top:6px;"><div style="height:100%; width:62%; background:var(--md-primary); border-radius:99px;"></div></div>
+            </div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🔥</span><span style="font-weight:600;">7-day streak!</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🎖️</span><span>3 / 8 badges</span></div>
+          </div>
+          <div class="screenshot-caption">Achievements</div>
+        </div>
+        <!-- Profile -->
+        <div class="screenshot-card">
+          <div class="screenshot-header-bar">👤 Profile</div>
+          <div class="screenshot-content">
+            <div class="screenshot-row"><span class="screenshot-emoji">🎨</span><span>Slate Green theme</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🌙</span><span>System dark mode</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">🔒</span><span>PIN + Biometric</span></div>
+            <div class="screenshot-row"><span class="screenshot-emoji">📐</span><span>BMI 24.1 · Normal</span></div>
+          </div>
+          <div class="screenshot-caption">Profile &amp; Settings</div>
+        </div>
+
+      </div><!-- /.marquee-track -->
+    </div><!-- /.marquee-outer -->
+  </section>
+
+  <!-- ─── PRIVACY ──────────────────────────────────────────────────── -->
+  <section id="privacy" class="privacy-section">
+    <div class="container">
+      <div class="privacy-inner">
+        <div>
+          <div class="section-eyebrow">Privacy first</div>
+          <h2 class="section-title">Your data never leaves your device.</h2>
+          <p class="section-body">Patty was built with the belief that health data is deeply personal. There is no backend, no analytics, no account required — ever.</p>
+          <ul class="privacy-list">
+            <li class="privacy-item">
+              <div class="privacy-icon">🗄️</div>
+              <div>
+                <div class="privacy-text-title">SQLite-only storage</div>
+                <div class="privacy-text-body">Every entry — weight, meals, sleep, photos — is stored in a local SQLite database on your device. Nothing is transmitted anywhere.</div>
+              </div>
+            </li>
+            <li class="privacy-item">
+              <div class="privacy-icon">🔐</div>
+              <div>
+                <div class="privacy-text-title">PIN + Biometric lock</div>
+                <div class="privacy-text-body">Protect the app with a 4-digit PIN stored as a SHA-256 hash. Enable Face ID or Fingerprint for instant biometric unlock.</div>
+              </div>
+            </li>
+            <li class="privacy-item">
+              <div class="privacy-icon">🗑️</div>
+              <div>
+                <div class="privacy-text-title">Full data control</div>
+                <div class="privacy-text-body">Clear individual log categories or wipe everything with a factory reset — your data, your call, confirmed with one extra tap.</div>
+              </div>
+            </li>
+            <li class="privacy-item">
+              <div class="privacy-icon">🔓</div>
+              <div>
+                <div class="privacy-text-title">Open source</div>
+                <div class="privacy-text-body">Every line of Patty is on GitHub. Read the code, verify the claims, build it yourself. No black boxes.</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="shield-wrap">
+          <div class="shield">
+            <div class="shield-icon">🔒</div>
+            <div class="shield-text">100% Local</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── THEMING CALLOUT ──────────────────────────────────────────── -->
+  <section>
+    <div class="container">
+      <div class="privacy-inner">
+        <div class="shield-wrap" style="order: -1;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:280px;">
+            <div style="background:#3D6B5C; border-radius:16px; aspect-ratio:1; display:flex;align-items:center;justify-content:center; font-size:1.5rem; box-shadow:0 4px 12px rgba(61,107,92,.4);">🌿</div>
+            <div style="background:#6B4EA3; border-radius:16px; aspect-ratio:1; display:flex;align-items:center;justify-content:center; font-size:1.5rem; box-shadow:0 4px 12px rgba(107,78,163,.4);">💜</div>
+            <div style="background:#1A6895; border-radius:16px; aspect-ratio:1; display:flex;align-items:center;justify-content:center; font-size:1.5rem; box-shadow:0 4px 12px rgba(26,104,149,.4);">🌊</div>
+            <div style="background:#B5451E; border-radius:16px; aspect-ratio:1; display:flex;align-items:center;justify-content:center; font-size:1.5rem; box-shadow:0 4px 12px rgba(181,69,30,.4);">🔥</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-eyebrow">Make it yours</div>
+          <h2 class="section-title">A colour palette that's entirely yours.</h2>
+          <p class="section-body">Choose from 8 curated Material Design 3 palettes — or enter any hex colour — and watch every surface, button, chart, and ring update in real time. Light, dark, or system mode. Font size control. No restart required.</p>
+          <div style="margin-top:1.5rem; display:flex; gap:8px; flex-wrap:wrap;">
+            <span class="chip" style="background:color-mix(in srgb,#3D6B5C 20%,transparent);">🌿 Slate Green</span>
+            <span class="chip" style="background:color-mix(in srgb,#6B4EA3 20%,transparent);">💜 Violet</span>
+            <span class="chip" style="background:color-mix(in srgb,#1A6895 20%,transparent);">🌊 Ocean Blue</span>
+            <span class="chip" style="background:color-mix(in srgb,#2D7A3A 20%,transparent);">🌲 Forest</span>
+            <span class="chip" style="background:color-mix(in srgb,#B5451E 20%,transparent);">🏺 Terracotta</span>
+            <span class="chip" style="background:color-mix(in srgb,#8B6B8A 20%,transparent);">🪻 Mauve</span>
+            <span class="chip" style="background:color-mix(in srgb,#D4860D 20%,transparent);">🌻 Amber</span>
+            <span class="chip" style="background:color-mix(in srgb,#C2185B 20%,transparent);">🌸 Rose</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FAQ ─────────────────────────────────────────────────────── -->
+  <section id="faq" aria-label="Frequently Asked Questions">
+    <div class="container">
+      <div class="features-header">
+        <div class="section-eyebrow">FAQ</div>
+        <h2 class="section-title">Frequently asked questions.</h2>
+        <p class="section-body" style="margin-inline:auto;">Everything you need to know before downloading. Can’t find what you’re looking for? <a href="https://github.com/InflateHub/patty/issues">Open an issue</a> on GitHub.</p>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:1rem; max-width:900px; margin-inline:auto;" itemscope itemtype="https://schema.org/FAQPage">
+
+        <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="faq-q" itemprop="name">Is Patty free to download?</summary>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Yes. Patty is completely free — no in-app purchases, no subscription, no hidden costs. Download the APK directly from GitHub Releases.</p>
+          </div>
+        </details>
+
+        <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="faq-q" itemprop="name">Does it need an account or internet?</summary>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">No. Patty works 100% offline. All data is stored locally in SQLite on your device — no account, no cloud, no tracking ever.</p>
+          </div>
+        </details>
+
+        <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="faq-q" itemprop="name">What can I track with Patty?</summary>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Weight (with progress photos), daily water intake, sleep duration &amp; quality, and food intake with calorie estimates. Patty also computes your BMI, BMR and TDEE automatically.</p>
+          </div>
+        </details>
+
+        <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="faq-q" itemprop="name">Can I plan meals and get a grocery list?</summary>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Yes. The Meal Planner has a Mon–Sun grid, a library of 12 curated recipes you can extend with your own, and an automatic grocery list that deduplicates ingredients across the week.</p>
+          </div>
+        </details>
+
+        <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="faq-q" itemprop="name">How does the app lock work?</summary>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Patty supports a 4-digit PIN (stored as a SHA-256 hash, never plaintext) and biometric unlock via Face ID or Fingerprint. The lock triggers automatically on app resume from background.</p>
+          </div>
+        </details>
+
+        <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="faq-q" itemprop="name">Is Patty open source?</summary>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Yes — fully open source under the MIT licence. Every line is on <a href="https://github.com/InflateHub/patty" rel="noopener">GitHub</a>. Read the code, verify the claims, or contribute.</p>
+          </div>
+        </details>
+
+        <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="faq-q" itemprop="name">Which Android version does Patty support?</summary>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Patty supports Android 5.0 (API 21) and above, built with Ionic + React + Capacitor and targeting the latest Android SDK.</p>
+          </div>
+        </details>
+
+        <details class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="faq-q" itemprop="name">Can I change the colour theme?</summary>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Yes. Pick from 8 curated Material Design 3 palettes or enter any custom hex colour. The entire app re-themes instantly. Light, dark, and system modes are all supported.</p>
+          </div>
+        </details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CTA ──────────────────────────────────────────────────────── -->
+  <section style="padding-block: 1rem 4rem;">
+    <div class="cta-section">
+      <div class="cta-title">Ready to start your journey?</div>
+      <p class="cta-body">Free. No account. No subscription. Works offline. Your health data stays on your phone — always.</p>
+      <div class="cta-actions">
+        <a href="https://github.com/InflateHub/patty/releases/latest" class="btn btn-primary">
+          📦 Download APK
+        </a>
+        <a href="https://github.com/InflateHub/patty" class="btn btn-outlined">
+          📖 View Source
+        </a>
+      </div>
+      <div class="cta-version">Patty v1.8.0 · Android · Free & Open Source</div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- ─── FOOTER ────────────────────────────────────────────────────── -->
+  <footer aria-label="Site footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo" style="margin-bottom:0.5rem;">
+            <img src="assets/icon.png" alt="Patty health tracker app icon" style="width:28px;height:28px;border-radius:6px;" />
+            <span class="nav-logo-text" style="font-size:1.1rem;">Patty</span>
+          </a>
+          <p>Your minimal lifestyle companion. Track health, plan meals, and build habits that <em>stick</em> — all offline, all yours.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">App</div>
+          <div class="footer-col-links">
+            <a href="#features">Features</a>
+            <a href="#screenshots">Screenshots</a>
+            <a href="#privacy">Privacy</a>
+            <a href="https://github.com/InflateHub/patty/releases/latest">Download</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Project</div>
+          <div class="footer-col-links">
+            <a href="https://github.com/InflateHub/patty">GitHub</a>
+            <a href="https://github.com/InflateHub/patty/releases">Releases</a>
+            <a href="https://github.com/InflateHub/patty/blob/main/CHANGELOG.md">Changelog</a>
+            <a href="https://github.com/InflateHub/patty/blob/main/ROADMAP.md">Roadmap</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer-col-title">Legal</div>
+          <div class="footer-col-links">
+            <a href="https://github.com/InflateHub/patty/blob/main/LICENSE">License (MIT)</a>
+            <a href="https://github.com/InflateHub/patty/blob/main/README.md">README</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Patty · Built by <a href="https://github.com/InflateHub">Saran Mahadev</a></span>
+        <div class="footer-bottom-links">
+          <a href="https://github.com/InflateHub/patty">GitHub</a>
+          <a href="https://github.com/InflateHub/patty/releases/latest">Download</a>
+          <a href="https://github.com/InflateHub/patty/blob/main/LICENSE">MIT License</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ── Intersection observer: reveal cards on scroll ── */
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          const el = e.target;
+          const delay = el.dataset.delay || 0;
+          setTimeout(() => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0) rotateX(0deg)';
+          }, delay);
+          revealObs.unobserve(el);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.feature-card, .step-card').forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(28px) rotateX(4deg)';
+      el.style.transition = `opacity 0.6s cubic-bezier(0.2,0,0,1), transform 0.6s cubic-bezier(0.2,0,0,1)`;
+      el.dataset.delay = (i % 3) * 80;
+      revealObs.observe(el);
+    });
+
+    /* ── Section title slide-in ── */
+    const titleObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'none';
+          titleObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.2 });
+    document.querySelectorAll('.section-title, .section-eyebrow').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(16px)';
+      el.style.transition = 'opacity 0.7s cubic-bezier(0.2,0,0,1), transform 0.7s cubic-bezier(0.2,0,0,1)';
+      titleObs.observe(el);
+    });
+
+    /* ── Privacy items slide in ── */
+    const privObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.privacy-item').forEach((item, i) => {
+            setTimeout(() => item.classList.add('is-visible'), i * 100);
+          });
+          privObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.privacy-list').forEach(el => privObs.observe(el));
+
+    /* ── Counter animation for stat numbers ── */
+    const counterObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        const raw = el.textContent.trim();
+        const num = parseFloat(raw.replace(/[^0-9.]/g, ''));
+        const suffix = raw.replace(/[0-9.]/g, '');
+        if (isNaN(num)) return;
+        let start = 0, duration = 1200, startTime = null;
+        const easeOut = t => 1 - Math.pow(1 - t, 3);
+        function step(ts) {
+          if (!startTime) startTime = ts;
+          const p = Math.min((ts - startTime) / duration, 1);
+          const val = Math.round(easeOut(p) * num * 10) / 10;
+          el.textContent = (Number.isInteger(num) ? Math.round(val) : val) + suffix;
+          if (p < 1) requestAnimationFrame(step);
+          else { el.textContent = raw; el.classList.add('count-done'); }
+        }
+        requestAnimationFrame(step);
+        counterObs.unobserve(el);
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.stat-num').forEach(el => counterObs.observe(el));
+
+    /* ── 3D tilt on feature cards ── */
+    document.querySelectorAll('.feature-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width  - 0.5;
+        const y = (e.clientY - r.top)  / r.height - 0.5;
+        card.style.transform = `translateY(-4px) rotateY(${x * 8}deg) rotateX(${-y * 6}deg)`;
+      });
+      card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+
+    /* ── Hero floating particles ── */
+    const particleContainer = document.getElementById('heroParticles');
+    if (particleContainer) {
+      for (let i = 0; i < 18; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const size = Math.random() * 6 + 4;
+        p.style.cssText = [
+          `width:${size}px`, `height:${size}px`,
+          `left:${Math.random() * 100}%`,
+          `animation-duration:${Math.random() * 12 + 8}s`,
+          `animation-delay:${Math.random() * 10}s`
+        ].join(';');
+        particleContainer.appendChild(p);
+      }
+    }
+
+    /* ── Nav active link highlight ── */
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + current
+          ? 'var(--md-primary)' : '';
+      });
+    }, { passive: true });
+
+    /* ── Marquee drag-to-scroll ── */
+    const track = document.getElementById('marqueeTrack');
+    if (track) {
+      let isDragging = false, startX = 0, scrollLeft = 0;
+      track.addEventListener('mousedown', e => {
+        isDragging = true; startX = e.pageX; scrollLeft = track.parentElement.scrollLeft;
+        track.style.animationPlayState = 'paused';
+      });
+      document.addEventListener('mouseup', () => { isDragging = false; track.style.animationPlayState = ''; });
+      document.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        const dx = e.pageX - startX;
+        track.parentElement.scrollLeft = scrollLeft - dx;
+      });
+    }
+  </script>
+</body>
+</html>

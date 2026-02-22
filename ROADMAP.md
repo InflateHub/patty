@@ -1,7 +1,7 @@
 ﻿# Patty â€” Roadmap (Post-1.0.5)
 
 All versions prior to 1.1.0 are archived in [`ROADMAP/ROADMAP-v1.0.5.md`](ROADMAP/ROADMAP-v1.0.5.md).
-Current production version: **1.1.0**. This document plans the path to **2.0.0**.
+Current production version: **1.8.0**. This document plans the path to **2.0.0**.
 
 ---
 
@@ -84,27 +84,27 @@ Current production version: **1.1.0**. This document plans the path to **2.0.0**
 
 ---
 
-## 1.7.0 â€” App Landing Page (Design)
+## 1.7.0 — App Landing Page (Design)
 *Goal: a polished marketing webpage for Patty exists as a static site in the repo.*
 
-- [ ] Create `docs/` folder in the repository as the website source (GitHub Pages standard)
-- [ ] Single-page design: Hero (app name + tagline + mockup), Features, Screenshots, Download CTA, Footer
-- [ ] Built with plain HTML + CSS; MD3 tokens referenced via inline custom properties
-- [ ] Mobile-responsive layout (flexbox, 375px â†’ 1440px)
-- [ ] Dark-mode support via `prefers-color-scheme`
-- [ ] App screenshots embedded as static assets under `docs/assets/screenshots/`
-- [ ] Favicon and Open Graph meta tags matching the app brand
+- [x] Create `docs/` folder in the repository as the website source (GitHub Pages standard)
+- [x] Single-page design: Hero (app name + tagline + mockup), Features, Screenshots, Download CTA, Footer
+- [x] Built with plain HTML + CSS; MD3 tokens referenced via inline custom properties
+- [x] Mobile-responsive layout (flexbox, 375px → 1440px)
+- [x] Dark-mode support via `prefers-color-scheme`
+- [x] CSS phone mockups representing app screens (Home, Weight, Water, Recipes, Achievements, Profile)
+- [x] Favicon and Open Graph meta tags matching the app brand
 
 ---
 
-## 1.8.0 â€” Landing Page Deployed to GitHub Pages
-*Goal: `https://<username>.github.io/patty` (or custom domain) is live.*
+## 1.8.0 — Landing Page Deployed to GitHub Pages
+*Goal: `https://inflatehub.github.io/patty` is live.*
 
-- [ ] GitHub Actions workflow: on push to `main`, deploy `docs/` to `gh-pages` branch
-- [ ] `CNAME` file added if a custom domain is used
-- [ ] `sitemap.xml` and `robots.txt` added
-- [ ] Lighthouse score â‰¥ 90 (Performance, Accessibility, Best Practices, SEO)
-- [ ] Download button links to the latest GitHub Release APK asset
+- [x] GitHub Actions workflow (`.github/workflows/pages.yml`): on push to `main` (`docs/**`), deploys `docs/` via `actions/deploy-pages@v4`
+- [x] `CNAME` file added — custom domain `patty.saranmahadev.in`
+- [x] `sitemap.xml` and `robots.txt` added to `docs/`
+- [ ] Lighthouse score ≥ 90 (Performance, Accessibility, Best Practices, SEO)
+- [x] Download button links to the latest GitHub Release APK asset
 
 ---
 
