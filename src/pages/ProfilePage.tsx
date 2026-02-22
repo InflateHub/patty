@@ -1,5 +1,5 @@
 /* ProfilePage — 1.6.0 */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   IonAlert,
   IonBackButton,
@@ -72,6 +72,7 @@ const ProfilePage: React.FC = () => {
   // Custom hex input state (separate from swatch selection)
   const [customHex, setCustomHex] = useState<string>('');
   const [customHexError, setCustomHexError] = useState<boolean>(false);
+  const colorPickerRef = useRef<HTMLInputElement>(null);
   const [toast, setToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('Profile saved');
 
@@ -536,16 +537,62 @@ const ProfilePage: React.FC = () => {
                   fontWeight: 500,
                 }}>Custom hex</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    background: isHexValid(customHex.startsWith('#') ? customHex : `#${customHex}`)
-                      ? (customHex.startsWith('#') ? customHex : `#${customHex}`)
-                      : 'var(--md-surface-variant)',
-                    border: '2px solid var(--md-outline-variant)',
-                    flexShrink: 0,
-                  }} />
+
+                  {/* Clickable circle — opens native colour picker */}
+                  <button
+                    title="Open colour picker"
+                    onClick={() => colorPickerRef.current?.click()}
+                    style={{
+                      position: 'relative',
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: isHexValid(customHex.startsWith('#') ? customHex : `#${customHex}`)
+                        ? (customHex.startsWith('#') ? customHex : `#${customHex}`)
+                        : 'var(--md-surface-variant)',
+                      border: '2px solid var(--md-outline-variant)',
+                      flexShrink: 0,
+                      cursor: 'pointer',
+                      padding: 0,
+                      outline: 'none',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {/* Pencil overlay hint */}
+                    <span style={{
+                      fontSize: 13,
+                      lineHeight: 1,
+                      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))',
+                      pointerEvents: 'none',
+                    }}>✏️</span>
+
+                    {/* Hidden native colour picker */}
+                    <input
+                      ref={colorPickerRef}
+                      type="color"
+                      value={
+                        isHexValid(customHex.startsWith('#') ? customHex : `#${customHex}`)
+                          ? (customHex.startsWith('#') ? customHex : `#${customHex}`)
+                          : '#5C7A6E'
+                      }
+                      onChange={e => handleCustomHexChange(e.target.value)}
+                      style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        cursor: 'pointer',
+                        padding: 0,
+                        border: 'none',
+                        top: 0,
+                        left: 0,
+                      }}
+                    />
+                  </button>
+
                   <IonInput
                     value={customHex}
                     placeholder="#RRGGBB"
