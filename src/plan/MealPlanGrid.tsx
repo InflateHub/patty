@@ -47,6 +47,7 @@ const MealPlanGrid: React.FC<Props> = ({ dates, weekPlan, onAddSlot, onClearSlot
       {/* â”€â”€ Day strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div
         ref={stripRef}
+        className="scroll-no-bar"
         style={{
           display: 'flex',
           gap: 6,

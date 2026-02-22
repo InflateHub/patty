@@ -21,6 +21,9 @@ import {
   IonChip,
   IonSpinner,
   IonToast,
+  IonModal,
+  IonButtons,
+  IonButton,
   useIonViewWillEnter,
 } from '@ionic/react';
 import { IonIcon } from '@ionic/react';
@@ -58,7 +61,7 @@ const S = {
     textTransform: 'uppercase' as const,
   },
   card: {
-    margin: '0 8px 4px',
+    margin: '0 16px 8px',
     borderRadius: 'var(--md-shape-xl)',
     border: '1px solid var(--md-outline-variant)',
     boxShadow: 'none',
@@ -318,7 +321,7 @@ const ShareableSection: React.FC<ShareableSectionProps> = ({ cards }) => {
           overflowX: 'auto',
           scrollSnapType: 'x mandatory',
           gap: 12,
-          padding: '4px 16px 12px',
+          padding: '8px 16px 16px',
           scrollbarWidth: 'none',
         }}
       >
@@ -376,14 +379,7 @@ const ShareableSection: React.FC<ShareableSectionProps> = ({ cards }) => {
         ))}
       </div>
 
-      {/* Dot indicator */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 4 }}>
-        {CARD_LABELS.map((lbl, i) => (
-          <span key={lbl} style={{ fontSize: 10, color: 'var(--md-on-surface-variant)', letterSpacing: '0.04em' }}>
-            {lbl}
-          </span>
-        ))}
-      </div>
+
 
       <IonToast
         isOpen={!!toast}
@@ -399,6 +395,62 @@ const ShareableSection: React.FC<ShareableSectionProps> = ({ cards }) => {
 // ── Section: Gamification ─────────────────────────────────────────────────────
 
 const GamificationSection: React.FC<{ gam: ReturnType<typeof useGamification> }> = ({ gam }) => {
+  const [badgeOpen, setBadgeOpen] = useState(false);
+  const badgeGridRef = useRef<HTMLDivElement>(null);
+  const [selectedBadge, setSelectedBadge] = useState<typeof gam.badges[0] | null>(null);
+  const [badgeDetailOpen, setBadgeDetailOpen] = useState(false);
+  const badgeShareRef = useRef<HTMLDivElement>(null);
+  const [sharingOne, setSharingOne] = useState(false);
+  const [badgeToast, setBadgeToast] = useState<string | null>(null);
+
+  const openBadgeDetail = useCallback((badge: typeof gam.badges[0]) => {
+    setSelectedBadge(badge);
+    setBadgeDetailOpen(true);
+  }, []);
+
+  const closeBadgeDetail = useCallback(() => {
+    setBadgeDetailOpen(false);
+    setTimeout(() => setSelectedBadge(null), 300);
+  }, []);
+
+  const handleShareOneBadge = useCallback(async () => {
+    if (!badgeShareRef.current || !selectedBadge) return;
+    setSharingOne(true);
+    try {
+      const dataUrl = await toPng(badgeShareRef.current, { cacheBust: true, pixelRatio: 2 });
+      const base64 = dataUrl.split(',')[1];
+      const fileName = `patty-badge-${selectedBadge.id}-${Date.now()}.png`;
+      let shared = false;
+      try {
+        const { uri } = await Filesystem.writeFile({ path: fileName, data: base64, directory: Directory.Cache });
+        await Share.share({ title: `I earned the ${selectedBadge.label} badge on Patty!`, files: [uri] });
+        shared = true;
+        try { await Filesystem.deleteFile({ path: fileName, directory: Directory.Cache }); } catch { /* ok */ }
+      } catch {
+        if (navigator.share && navigator.canShare) {
+          try {
+            const res = await fetch(dataUrl);
+            const blob = await res.blob();
+            const file = new File([blob], fileName, { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({ title: `I earned the ${selectedBadge.label} badge on Patty!`, files: [file] });
+              shared = true;
+            }
+          } catch { /* fall through */ }
+        }
+        if (!shared) {
+          const a = document.createElement('a');
+          a.href = dataUrl;
+          a.download = fileName;
+          a.click();
+          setBadgeToast('Image downloaded!');
+        }
+      }
+    } catch { setBadgeToast('Could not generate badge image'); }
+    finally { setSharingOne(false); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBadge]);
+
   if (gam.loading) {
     return (
       <IonCard style={S.card}>
@@ -410,16 +462,13 @@ const GamificationSection: React.FC<{ gam: ReturnType<typeof useGamification> }>
   }
 
   const pct = gam.xpForLevel === Infinity ? 1 : gam.xpIntoLevel / gam.xpForLevel;
-  const milestones = [3, 7, 14, 30, 60, 100];
+  const milestones = [7, 14, 30, 100, 300, 500, 750, 1000, 2000, 5000, 10000];
+  const fmtM = (n: number) => n >= 1000 ? `${n / 1000}K` : `${n}d`;
+  const earnedCount = gam.badges.filter(b => b.earned).length;
 
   return (
+    <>
     <IonCard style={S.card}>
-      <IonListHeader>
-        <IonLabel style={S.sectionHeader}>
-          <IonIcon icon={trophyOutline} style={{ marginRight: 6, verticalAlign: 'middle', fontSize: 16 }} />
-          Gamification
-        </IonLabel>
-      </IonListHeader>
       <IonCardContent style={{ padding: '8px 16px 20px' }}>
 
         {/* Level + XP bar */}
@@ -488,7 +537,7 @@ const GamificationSection: React.FC<{ gam: ReturnType<typeof useGamification> }>
         </div>
 
         {/* Milestone dots */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
           {milestones.map(m => {
             const reached = gam.bestStreak >= m;
             return (
@@ -496,55 +545,465 @@ const GamificationSection: React.FC<{ gam: ReturnType<typeof useGamification> }>
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: 2,
+                gap: 3,
                 flex: '0 0 auto',
               }}>
-                <IonIcon
-                  icon={reached ? checkmarkCircle : ellipseOutline}
-                  style={{
-                    fontSize: 20,
-                    color: reached ? gam.level.color : 'var(--md-outline)',
-                  }}
-                />
-                <span style={{ fontSize: 10, color: 'var(--md-on-surface-variant)', fontFamily: 'var(--md-font)' }}>
-                  {m}d
+                <div style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: reached
+                    ? `linear-gradient(135deg, ${gam.level.color} 0%, ${gam.level.color}99 100%)`
+                    : 'var(--md-surface-container-high)',
+                  border: reached
+                    ? `2px solid ${gam.level.color}`
+                    : '2px solid var(--md-outline-variant)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: reached ? `0 0 8px ${gam.level.color}55` : 'none',
+                  transition: 'all 0.3s ease',
+                }}>
+                  {reached && (
+                    <IonIcon icon={checkmarkCircle} style={{ fontSize: 14, color: '#fff' }} />
+                  )}
+                </div>
+                <span style={{
+                  fontSize: 9,
+                  color: reached ? gam.level.color : 'var(--md-on-surface-variant)',
+                  fontFamily: 'var(--md-font)',
+                  fontWeight: reached ? 700 : 400,
+                }}>
+                  {fmtM(m)}
                 </span>
               </div>
             );
           })}
         </div>
 
-        {/* Badge shelf */}
-        <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-md)', color: 'var(--md-on-surface-variant)', marginBottom: 8 }}>
-          Badges
-        </div>
-        <div style={{
-          display: 'flex',
-          overflowX: 'auto',
-          gap: 8,
-          paddingBottom: 4,
-          scrollbarWidth: 'none',
-        }}>
-          {gam.badges.map(badge => (
-            <IonChip
-              key={badge.id}
+        {/* Badges preview row */}
+        <div style={{ marginTop: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: 'var(--md-on-surface)' }}>
+              Badges
+            </span>
+            <button
+              onClick={() => setBadgeOpen(true)}
               style={{
-                flexShrink: 0,
-                opacity: badge.earned ? 1 : 0.4,
-                background: badge.earned ? 'var(--md-secondary-container)' : 'var(--md-surface-container)',
-                color: badge.earned ? 'var(--md-on-secondary-container)' : 'var(--md-on-surface-variant)',
-                border: badge.earned ? 'none' : '1px solid var(--md-outline-variant)',
+                fontFamily: 'var(--md-font)',
                 fontSize: 'var(--md-label-sm)',
-                height: 32,
+                fontWeight: 600,
+                color: gam.level.color,
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 0',
               }}
             >
-              <span style={{ marginRight: 4 }}>{badge.emoji}</span>
-              <IonLabel style={{ fontSize: 'inherit' }}>{badge.label}</IonLabel>
-            </IonChip>
-          ))}
+              {earnedCount}/{gam.badges.length} See All →
+            </button>
+          </div>
+
+          {/* Earned badge pills horizontal scroll */}
+          {earnedCount === 0 ? (
+            <div style={{
+              padding: '14px 0',
+              textAlign: 'center',
+              fontFamily: 'var(--md-font)',
+              fontSize: 'var(--md-body-sm)',
+              color: 'var(--md-on-surface-variant)',
+            }}>
+              No badges yet — keep tracking to earn your first! 🏅
+            </div>
+          ) : (
+            <div style={{
+              display: 'flex',
+              gap: 10,
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              paddingBottom: 4,
+            }}>
+              {gam.badges.filter(b => b.earned).map(badge => (
+                <div
+                  key={badge.id}
+                  onClick={() => openBadgeDetail(badge)}
+                  style={{
+                    flexShrink: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 5,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: '50%',
+                    background: `radial-gradient(circle at 35% 35%, ${gam.level.color}44, ${gam.level.color}22)`,
+                    border: `2.5px solid ${gam.level.color}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 24,
+                    boxShadow: `0 0 12px ${gam.level.color}55`,
+                  }}>
+                    {badge.emoji}
+                  </div>
+                  <span style={{
+                    fontFamily: 'var(--md-font)',
+                    fontSize: 9,
+                    color: 'var(--md-on-surface-variant)',
+                    textAlign: 'center',
+                    maxWidth: 52,
+                    lineHeight: 1.2,
+                  }}>
+                    {badge.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </IonCardContent>
     </IonCard>
+
+    {/* ── Badge Modal ──────────────────────────────────────────────────────── */}
+    <IonModal isOpen={badgeOpen} onDidDismiss={() => setBadgeOpen(false)}>
+      <IonHeader>
+        <IonToolbar style={{ '--background': 'var(--md-surface-container)' }}>
+          <IonTitle style={{ fontFamily: 'var(--md-font)', fontWeight: 700 }}>My Badges</IonTitle>
+          <IonButtons slot="end">
+            <IonButton onClick={() => setBadgeOpen(false)} style={{ '--color': 'var(--md-on-surface-variant)' }}>
+              Close
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent style={{ '--background': 'var(--md-surface)' }}>
+
+        {/* Capture area */}
+        <div ref={badgeGridRef} style={{ background: 'var(--md-surface)', paddingBottom: 8 }}>
+
+          {/* Hero count banner */}
+          <div style={{
+            margin: '16px 16px 20px',
+            borderRadius: 'var(--md-shape-xl)',
+            background: `linear-gradient(135deg, ${gam.level.color}33 0%, ${gam.level.color}11 100%)`,
+            border: `1.5px solid ${gam.level.color}55`,
+            padding: '18px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+          }}>
+            {/* Ring progress */}
+            <div style={{ position: 'relative', flexShrink: 0, width: 64, height: 64 }}>
+              <svg width="64" height="64" style={{ transform: 'rotate(-90deg)' }}>
+                <circle cx="32" cy="32" r="26" fill="none" stroke="var(--md-surface-container-high)" strokeWidth="6" />
+                <circle
+                  cx="32" cy="32" r="26" fill="none"
+                  stroke={gam.level.color} strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 26}`}
+                  strokeDashoffset={`${2 * Math.PI * 26 * (1 - earnedCount / Math.max(1, gam.badges.length))}`}
+                  style={{ transition: 'stroke-dashoffset 0.8s ease' }}
+                />
+              </svg>
+              <div style={{
+                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'var(--md-font)', fontSize: 15, fontWeight: 700, color: 'var(--md-on-surface)',
+              }}>
+                {earnedCount}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-headline-sm)', fontWeight: 700, color: 'var(--md-on-surface)', lineHeight: 1.1 }}>
+                {earnedCount} / {gam.badges.length}
+              </div>
+              <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', marginTop: 2 }}>
+                {earnedCount === 0 ? 'Start logging to earn badges' :
+                 earnedCount === gam.badges.length ? '🎉 All badges earned!' :
+                 `${gam.badges.length - earnedCount} more to unlock`}
+              </div>
+              <div style={{
+                marginTop: 6,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                background: `${gam.level.color}22`,
+                border: `1px solid ${gam.level.color}55`,
+                borderRadius: 'var(--md-shape-full)',
+                padding: '2px 10px',
+              }}>
+                <span style={{ fontSize: 14 }}>{gam.level.emoji}</span>
+                <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', fontWeight: 600, color: gam.level.color }}>
+                  {gam.level.name}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Earned section */}
+          {earnedCount > 0 && (
+            <>
+              <div style={{ padding: '0 16px 10px', fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: gam.level.color, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
+                Earned
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, padding: '0 16px 20px' }}>
+                {gam.badges.filter(b => b.earned).map(badge => (
+                  <div
+                    key={badge.id}
+                    onClick={() => openBadgeDetail(badge)}
+                    style={{
+                      borderRadius: 'var(--md-shape-xl)',
+                      background: `linear-gradient(145deg, ${gam.level.color}28 0%, var(--md-surface-container) 100%)`,
+                      border: `1.5px solid ${gam.level.color}66`,
+                      padding: '16px 14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      boxShadow: `0 2px 12px ${gam.level.color}22`,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: '50%',
+                      background: `radial-gradient(circle at 35% 30%, ${gam.level.color}55, ${gam.level.color}22)`,
+                      border: `2px solid ${gam.level.color}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                      flexShrink: 0,
+                      boxShadow: `0 0 14px ${gam.level.color}44`,
+                    }}>
+                      {badge.emoji}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: 'var(--md-on-surface)', lineHeight: 1.2 }}>
+                        {badge.label}
+                      </div>
+                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 10, color: 'var(--md-on-surface-variant)', marginTop: 2, lineHeight: 1.3 }}>
+                        {badge.description}
+                      </div>
+                      <div style={{
+                        marginTop: 5,
+                        display: 'inline-block',
+                        background: `${gam.level.color}33`,
+                        color: gam.level.color,
+                        borderRadius: 'var(--md-shape-full)',
+                        padding: '1px 8px',
+                        fontSize: 9,
+                        fontFamily: 'var(--md-font)',
+                        fontWeight: 700,
+                        letterSpacing: '0.06em',
+                      }}>
+                        ✓ EARNED
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Locked section */}
+          {gam.badges.filter(b => !b.earned).length > 0 && (
+            <>
+              <div style={{ padding: '0 16px 10px', fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: 'var(--md-on-surface-variant)', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
+                Locked
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, padding: '0 16px 24px' }}>
+                {gam.badges.filter(b => !b.earned).map(badge => (
+                  <div
+                    key={badge.id}
+                    style={{
+                      borderRadius: 'var(--md-shape-xl)',
+                      background: 'var(--md-surface-container)',
+                      border: '1px solid var(--md-outline-variant)',
+                      padding: '16px 14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      opacity: 0.55,
+                    }}
+                  >
+                    <div style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: '50%',
+                      background: 'var(--md-surface-container-high)',
+                      border: '2px solid var(--md-outline-variant)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                      flexShrink: 0,
+                      filter: 'grayscale(1)',
+                    }}>
+                      {badge.emoji}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: 'var(--md-on-surface)', lineHeight: 1.2 }}>
+                        {badge.label}
+                      </div>
+                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 10, color: 'var(--md-on-surface-variant)', marginTop: 2, lineHeight: 1.3 }}>
+                        {badge.description}
+                      </div>
+                      <div style={{
+                        marginTop: 5,
+                        display: 'inline-block',
+                        background: 'var(--md-surface-container-high)',
+                        color: 'var(--md-on-surface-variant)',
+                        borderRadius: 'var(--md-shape-full)',
+                        padding: '1px 8px',
+                        fontSize: 9,
+                        fontFamily: 'var(--md-font)',
+                        fontWeight: 700,
+                        letterSpacing: '0.06em',
+                      }}>
+                        🔒 LOCKED
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+      </IonContent>
+    </IonModal>
+
+    {/* ── Per-Badge Share Modal ─────────────────────────────────────────────── */}
+    <IonModal
+      isOpen={badgeDetailOpen}
+      onDidDismiss={closeBadgeDetail}
+    >
+      <IonHeader>
+        <IonToolbar style={{ '--background': 'var(--md-surface-container)' }}>
+          <IonTitle style={{ fontFamily: 'var(--md-font)', fontWeight: 700 }}>
+            {selectedBadge?.label ?? 'Badge'}
+          </IonTitle>
+          <IonButtons slot="end">
+            <IonButton onClick={closeBadgeDetail} style={{ '--color': 'var(--md-on-surface-variant)' }}>
+              Close
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent style={{ '--background': 'var(--md-surface)' }}>
+        {selectedBadge && (
+          <div style={{ padding: '28px 24px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+
+            {/* Capture area — this is what gets rendered into the share image */}
+            <div
+              ref={badgeShareRef}
+              style={{
+                width: '100%',
+                borderRadius: 'var(--md-shape-xl)',
+                background: `linear-gradient(160deg, ${gam.level.color}22 0%, var(--md-surface-container) 100%)`,
+                border: `1.5px solid ${gam.level.color}55`,
+                padding: '32px 24px 24px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 12,
+                boxShadow: `0 4px 24px ${gam.level.color}22`,
+                marginBottom: 24,
+              }}
+            >
+              {/* Badge circle */}
+              <div style={{
+                width: 96,
+                height: 96,
+                borderRadius: '50%',
+                background: `radial-gradient(circle at 35% 30%, ${gam.level.color}66, ${gam.level.color}22)`,
+                border: `3px solid ${gam.level.color}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 46,
+                boxShadow: `0 0 28px ${gam.level.color}55`,
+                marginBottom: 4,
+              }}>
+                {selectedBadge.emoji}
+              </div>
+              {/* Badge name */}
+              <div style={{
+                fontFamily: 'var(--md-font)',
+                fontSize: 'var(--md-title-lg)',
+                fontWeight: 700,
+                color: 'var(--md-on-surface)',
+                textAlign: 'center',
+                lineHeight: 1.2,
+              }}>
+                {selectedBadge.label}
+              </div>
+              {/* Description */}
+              <div style={{
+                fontFamily: 'var(--md-font)',
+                fontSize: 'var(--md-body-sm)',
+                color: 'var(--md-on-surface-variant)',
+                textAlign: 'center',
+                maxWidth: 240,
+                lineHeight: 1.4,
+              }}>
+                {selectedBadge.description}
+              </div>
+              {/* Earned chip */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: `${gam.level.color}22`,
+                border: `1px solid ${gam.level.color}55`,
+                borderRadius: 'var(--md-shape-full)',
+                padding: '4px 14px',
+                marginTop: 4,
+              }}>
+                <span style={{ fontSize: 14 }}>{gam.level.emoji}</span>
+                <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', fontWeight: 600, color: gam.level.color }}>
+                  {gam.level.name} · Patty
+                </span>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <IonButton
+                expand="block"
+                onClick={handleShareOneBadge}
+                disabled={sharingOne}
+                style={{
+                  '--border-radius': 'var(--md-shape-full)',
+                  '--background': gam.level.color,
+                  '--background-activated': gam.level.color,
+                  '--color': '#fff',
+                  '--color-activated': '#fff',
+                }}
+              >
+                {sharingOne
+                  ? <IonSpinner name="crescent" style={{ width: 20, height: 20 }} />
+                  : <><IonIcon icon={shareOutline} slot="start" />Share This Badge</>
+                }
+              </IonButton>
+            </div>
+          </div>
+        )}
+      </IonContent>
+    </IonModal>
+
+    <IonToast
+      isOpen={!!badgeToast}
+      message={badgeToast ?? ''}
+      duration={2500}
+      onDidDismiss={() => setBadgeToast(null)}
+      position="top"
+    />
+    </>
   );
 };
 
@@ -564,12 +1023,7 @@ const HabitRings: React.FC<HabitRingsProps> = ({ ring, loading }) => {
   ];
 
   return (
-    <IonCard style={{ ...S.card, marginBottom: 16 }}>
-      <IonListHeader>
-        <IonLabel style={S.sectionHeader}>
-          Habit Rings
-        </IonLabel>
-      </IonListHeader>
+    <IonCard style={{ ...S.card, marginTop: 4, marginBottom: 24 }}>
       <IonCardContent style={{ padding: '8px 16px 20px' }}>
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: 16 }}>
@@ -676,9 +1130,10 @@ const Achievements: React.FC = () => {
   });
 
   // Entries with computed deltas (entries are newest-first from hook)
+  // First (newest) entry has no delta; subsequent entries show change vs their predecessor
   const marqueeEntries = entries.map((e, i) => {
     const prev = entries[i + 1] ?? null;
-    const delta = prev !== null ? +(e.value - prev.value).toFixed(2) : null;
+    const delta = (i === 0 || prev === null) ? null : +(e.value - prev.value).toFixed(2);
     return { ...e, delta };
   });
 
@@ -692,10 +1147,16 @@ const Achievements: React.FC = () => {
         </IonToolbar>
       </IonHeader>
 
-      <IonContent>
+      <IonContent style={{ '--padding-bottom': '40px' }}>
 
-        {/* ── 1. Weight Photo Marquee ─────────────────────────────────────── */}
+        {/* ── 1. Habit Rings ───────────────────────────────────────────── */}
         <IonListHeader style={{ paddingTop: 12 }}>
+          <IonLabel style={S.sectionHeader}>Habit Rings</IonLabel>
+        </IonListHeader>
+        <HabitRings ring={cards.habitRing} loading={cards.loading} />
+
+        {/* ── 2. Weight Journey ───────────────────────────────────────────── */}
+        <IonListHeader style={{ paddingTop: 20 }}>
           <IonLabel style={S.sectionHeader}>Weight Journey</IonLabel>
         </IonListHeader>
 
@@ -740,8 +1201,16 @@ const Achievements: React.FC = () => {
           </div>
         )}
 
-        {/* ── 2. Shareable Achievement Cards ─────────────────────────────── */}
-        <IonListHeader style={{ paddingTop: 4 }}>
+        {/* ── 3. Gamification (Badges) ───────────────────────────────────────── */}
+        <IonListHeader style={{ paddingTop: 20 }}>
+          <IonLabel style={S.sectionHeader}>Badges</IonLabel>
+        </IonListHeader>
+        <div style={{ marginTop: 4 }}>
+          <GamificationSection gam={gam} />
+        </div>
+
+        {/* ── 4. Shareable Achievement Cards ─────────────────────────────── */}
+        <IonListHeader style={{ paddingTop: 20 }}>
           <IonLabel style={S.sectionHeader}>
             <IonIcon icon={shareOutline} style={{ marginRight: 6, verticalAlign: 'middle', fontSize: 16 }} />
             Share Achievements
@@ -749,16 +1218,6 @@ const Achievements: React.FC = () => {
         </IonListHeader>
 
         <ShareableSection cards={cards} />
-
-        {/* ── 3. Gamification ─────────────────────────────────────────────── */}
-        <GamificationSection gam={gam} />
-
-        {/* ── 4. Habit Rings ──────────────────────────────────────────────── */}
-        <IonListHeader>
-          <IonLabel style={S.sectionHeader}>7-Day Habits</IonLabel>
-        </IonListHeader>
-
-        <HabitRings ring={cards.habitRing} loading={cards.loading} />
 
       </IonContent>
     </IonPage>

@@ -1,4 +1,4 @@
-/* ProfilePage — 1.8.0 */
+/* ProfilePage — 1.8.1 */
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   IonAlert,
@@ -762,7 +762,7 @@ const ProfilePage: React.FC = () => {
             <IonList lines="none" style={{ background: 'transparent' }}>
               <IonItem style={transparentItem}>
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">1.8.0</IonNote>
+                <IonNote slot="end">1.8.1</IonNote>
               </IonItem>
               <IonItem style={transparentItem}>
                 <IonLabel>Built by</IonLabel>

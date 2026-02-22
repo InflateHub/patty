@@ -431,6 +431,15 @@ input[type="number"] {
   border-radius: var(--md-shape-full);
 }
 
+/* ── Utility: Hide scrollbar ─────────────────────────────────────────────── */
+.scroll-no-bar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-no-bar::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Utility: Skeleton loader ────────────────────────────────────────────── */
 .md-skeleton {
   background: linear-gradient(

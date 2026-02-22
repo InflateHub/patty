@@ -269,7 +269,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
 
       {!loading && entries.length === 0 && (
         <div style={{ textAlign: 'center', padding: '48px 32px', color: 'var(--md-on-surface-variant)' }}>
-          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>âš–ï¸</div>
+          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>{'\u2696\uFE0F'}</div>
           <p style={{ margin: 0, fontSize: 'var(--md-body-lg)', fontWeight: 500, fontFamily: 'var(--md-font)' }}>No entries yet</p>
           <p style={{ margin: '8px 0 0', fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)' }}>Tap + to log your first weight entry.</p>
         </div>

@@ -2,6 +2,18 @@
 
 ---
 
+## [1.8.1] — Achievements Reorder, Badge Modal & Week Plan Fix
+*Goal: rearrange the Achievements page for a better flow, give badges their own shareable modal, and remove the visible scrollbar in the Week Plan.*
+
+- [x] **Section order**: Habit Rings → Weight Journey → Share Achievements → Gamification
+- [x] **Habit Rings**: removed external "7-Day Habits" section title (card's own header retained)
+- [x] **Weight Journey**: first (newest) photo card shows no delta; delta (± change) only appears from the second entry onward
+- [x] **Share Achievements**: removed the label row (Daily / Weekly / Monthly / Yearly / Lifetime) below the card carousel
+- [x] **Gamification**: removed "Gamification" card title; badges moved into a dedicated full-screen modal with a Share Badges button (captures badge grid as image)
+- [x] **Fix – Week Plan scrollbar**: day-strip horizontal scrollbar hidden on all platforms via `.scroll-no-bar` CSS utility class (webkit + Firefox)
+
+---
+
 ## [1.8.0] — Landing Page Deployed to GitHub Pages
 *Goal: `https://inflatehub.github.io/patty` is live and auto-deployed on every push to `main`.*
 

@@ -31,6 +31,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import OnboardingPage from './pages/OnboardingPage';
 import { getDb } from './db/database';
 import LockScreen from './components/LockScreen';
+import SplashOverlay from './components/SplashOverlay';
 import { useAppLock } from './hooks/useAppLock';
 import { useTheme } from './hooks/useTheme';
 
@@ -233,9 +234,12 @@ const AppContent: React.FC = () => {
 // ── Root app ──────────────────────────────────────────────────────────────────────────────
 
 const App: React.FC = () => (
-  <IonApp>
-    <AppContent />
-  </IonApp>
+  <>
+    <SplashOverlay />
+    <IonApp>
+      <AppContent />
+    </IonApp>
+  </>
 );
 
 export default App;

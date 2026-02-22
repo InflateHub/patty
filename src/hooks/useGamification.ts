@@ -171,10 +171,10 @@ export function useGamification(): GamificationData & { reload: () => void } {
       const sortedDatesDesc = Array.from(allDatesSet).sort((a, b) => b.localeCompare(a));
       const { current: currentStreak, best: bestStreak } = computeStreak(sortedDatesDesc);
 
-      // Streak XP bonuses (7-day milestones)
-      const milestones = [7, 14, 21, 30, 60, 100];
+      // Streak XP bonuses
+      const milestones = [7, 14, 30, 100, 300, 500, 750, 1000, 2000, 5000, 10000];
       for (const m of milestones) {
-        if (bestStreak >= m) xp += 25;
+        if (bestStreak >= m) xp += 50;
       }
 
       // ── Level ──────────────────────────────────────────────────────────────
@@ -184,33 +184,13 @@ export function useGamification(): GamificationData & { reload: () => void } {
 
       // ── Badges ────────────────────────────────────────────────────────────
       const badges: Badge[] = [
+        // ── Streak badges ────────────────────────────────────────────────────
         {
-          id: 'first_step',
-          label: 'First Step',
-          emoji: '\uD83D\uDC63',
-          description: 'Log your first weight entry',
-          earned: weightDates.length >= 1,
-        },
-        {
-          id: 'photo_journalist',
-          label: 'Photo Journalist',
-          emoji: '\uD83D\uDCF8',
-          description: 'Log 10 weight entries with photos',
-          earned: weightPhotos >= 10,
-        },
-        {
-          id: 'hydration_hero',
-          label: 'Hydration Hero',
-          emoji: '\uD83D\uDCA7',
-          description: 'Hit your water goal 7 days',
-          earned: waterGoalDays >= 7,
-        },
-        {
-          id: 'night_owl',
-          label: 'Night Owl',
-          emoji: '\uD83C\uDF19',
-          description: 'Log sleep 7 times',
-          earned: sleepDates.length >= 7,
+          id: 'consistent',
+          label: 'Consistent',
+          emoji: '\u2B50',
+          description: '7-day logging streak',
+          earned: bestStreak >= 7,
         },
         {
           id: 'on_a_roll',
@@ -234,11 +214,185 @@ export function useGamification(): GamificationData & { reload: () => void } {
           earned: bestStreak >= 100,
         },
         {
-          id: 'consistent',
-          label: 'Consistent',
-          emoji: '\u2B50',
-          description: '7-day logging streak',
-          earned: bestStreak >= 7,
+          id: 'tri_centurion',
+          label: 'Tri-Centurion',
+          emoji: '\uD83D\uDC8E',
+          description: '300-day logging streak',
+          earned: bestStreak >= 300,
+        },
+        {
+          id: 'half_millennium',
+          label: 'Half Millennium',
+          emoji: '\uD83C\uDF0C',
+          description: '500-day logging streak',
+          earned: bestStreak >= 500,
+        },
+        {
+          id: 'gold_standard',
+          label: 'Gold Standard',
+          emoji: '\uD83E\uDD47',
+          description: '750-day logging streak',
+          earned: bestStreak >= 750,
+        },
+        {
+          id: 'millennium',
+          label: 'Millennium',
+          emoji: '\uD83D\uDCA0',
+          description: '1,000-day logging streak',
+          earned: bestStreak >= 1000,
+        },
+        {
+          id: 'double_millennium',
+          label: 'Double Millennium',
+          emoji: '\uD83D\uDD2E',
+          description: '2,000-day logging streak',
+          earned: bestStreak >= 2000,
+        },
+        {
+          id: 'legend_forever',
+          label: 'Legend Forever',
+          emoji: '\uD83C\uDF20',
+          description: '5,000-day logging streak',
+          earned: bestStreak >= 5000,
+        },
+        {
+          id: 'eternal',
+          label: 'Eternal',
+          emoji: '\u267E\uFE0F',
+          description: '10,000-day logging streak',
+          earned: bestStreak >= 10000,
+        },
+        // ── Weight badges ─────────────────────────────────────────────────────
+        {
+          id: 'first_step',
+          label: 'First Step',
+          emoji: '\uD83D\uDC63',
+          description: 'Log your first weight entry',
+          earned: weightDates.length >= 1,
+        },
+        {
+          id: 'scale_master',
+          label: 'Scale Master',
+          emoji: '\u2696\uFE0F',
+          description: 'Log 50 weight entries',
+          earned: weightDates.length >= 50,
+        },
+        {
+          id: 'weight_warrior',
+          label: 'Weight Warrior',
+          emoji: '\uD83E\uDD4A',
+          description: 'Log 100 weight entries',
+          earned: weightDates.length >= 100,
+        },
+        {
+          id: 'transformation',
+          label: 'Transformation',
+          emoji: '\uD83E\uDD8B',
+          description: 'Log 365 weight entries',
+          earned: weightDates.length >= 365,
+        },
+        // ── Photo badges ──────────────────────────────────────────────────────
+        {
+          id: 'photo_journalist',
+          label: 'Photo Journalist',
+          emoji: '\uD83D\uDCF8',
+          description: 'Log 10 weight entries with photos',
+          earned: weightPhotos >= 10,
+        },
+        {
+          id: 'photo_pro',
+          label: 'Photo Pro',
+          emoji: '\uD83C\uDFA5',
+          description: 'Log 50 weight entries with photos',
+          earned: weightPhotos >= 50,
+        },
+        // ── Water badges ──────────────────────────────────────────────────────
+        {
+          id: 'hydration_hero',
+          label: 'Hydration Hero',
+          emoji: '\uD83D\uDCA7',
+          description: 'Hit your water goal 7 days',
+          earned: waterGoalDays >= 7,
+        },
+        {
+          id: 'hydration_king',
+          label: 'Hydration King',
+          emoji: '\uD83C\uDF0A',
+          description: 'Hit your water goal 30 days',
+          earned: waterGoalDays >= 30,
+        },
+        {
+          id: 'water_warrior',
+          label: 'Water Warrior',
+          emoji: '\uD83C\uDFCA',
+          description: 'Hit your water goal 100 days',
+          earned: waterGoalDays >= 100,
+        },
+        {
+          id: 'ocean_drinker',
+          label: 'Ocean Drinker',
+          emoji: '\uD83C\uDF0D',
+          description: 'Hit your water goal 365 days',
+          earned: waterGoalDays >= 365,
+        },
+        // ── Sleep badges ──────────────────────────────────────────────────────
+        {
+          id: 'night_owl',
+          label: 'Night Owl',
+          emoji: '\uD83C\uDF19',
+          description: 'Log sleep 7 times',
+          earned: sleepDates.length >= 7,
+        },
+        {
+          id: 'sleep_tracker',
+          label: 'Sleep Tracker',
+          emoji: '\uD83D\uDE34',
+          description: 'Log sleep 30 times',
+          earned: sleepDates.length >= 30,
+        },
+        {
+          id: 'dream_logger',
+          label: 'Dream Logger',
+          emoji: '\uD83D\uDCAB',
+          description: 'Log sleep 100 times',
+          earned: sleepDates.length >= 100,
+        },
+        // ── Food badges ───────────────────────────────────────────────────────
+        {
+          id: 'foodie',
+          label: 'Foodie',
+          emoji: '\uD83C\uDF7D\uFE0F',
+          description: 'Log 10 food entries',
+          earned: foodCount >= 10,
+        },
+        {
+          id: 'meal_planner',
+          label: 'Meal Planner',
+          emoji: '\uD83D\uDDD3\uFE0F',
+          description: 'Log 50 food entries',
+          earned: foodCount >= 50,
+        },
+        {
+          id: 'chefs_log',
+          label: "Chef's Log",
+          emoji: '\uD83D\uDC68\u200D\uD83C\uDF73',
+          description: 'Log 200 food entries',
+          earned: foodCount >= 200,
+        },
+        // ── XP badges ─────────────────────────────────────────────────────────
+        {
+          id: 'power_user',
+          label: 'Power User',
+          emoji: '\u26A1',
+          description: 'Reach 500 XP',
+          earned: xp >= 500,
+        },
+        {
+          id: 'dedicated',
+          label: 'Dedicated',
+          emoji: '\uD83C\uDF1F',
+          description: 'Reach 2,000 XP',
+          earned: xp >= 2000,
         },
       ];
 
@@ -264,3 +418,4 @@ export function useGamification(): GamificationData & { reload: () => void } {
 
   return { ...data, loading: data.loading, reload: compute };
 }
+
