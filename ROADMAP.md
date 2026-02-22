@@ -75,12 +75,12 @@ Current production version: **1.1.0**. This document plans the path to **2.0.0**
 ## 1.6.0 â€” Personalisation Theming
 *Goal: users can pick their own accent colour; the entire MD3 palette re-seeds dynamically.*
 
-- [ ] Colour picker in ProfilePage â†’ Preferences: 8 curated seed colours (slate-green default) + custom hex input
-- [ ] Selected seed colour stored in `settings` (`pref_theme_seed`)
-- [ ] On change: MD3 tonal palette recalculated in-app and written as CSS custom properties on `:root`
-- [ ] Dark / light mode manual override toggle (currently follows system; add explicit "Light", "Dark", "System" option)
-- [ ] Font size setting: Default / Large / Extra Large (scales `--md-body-lg` base size; affects all type-scale tokens)
-- [ ] Theme preview card in the picker showing a sample card + FAB with the live palette
+- [x] Colour picker in ProfilePage → Preferences: 8 curated seed colours (slate-green default) + custom hex input
+- [x] Selected seed colour stored in `settings` (`pref_theme_seed`)
+- [x] On change: MD3 tonal palette recalculated in-app and written as CSS custom properties on `:root`
+- [x] Dark / light mode manual override toggle (currently follows system; add explicit "Light", "Dark", "System" option)
+- [x] Font size setting: Default / Large / Extra Large (scales `--md-body-lg` base size; affects all type-scale tokens)
+- [x] Theme preview card in the picker showing a sample card + FAB with the live palette
 
 ---
 

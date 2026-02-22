@@ -30,6 +30,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import { getDb } from './db/database';
 import LockScreen from './components/LockScreen';
 import { useAppLock } from './hooks/useAppLock';
+import { useTheme } from './hooks/useTheme';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -163,6 +164,7 @@ const TabShell: React.FC = () => (
 
 const AppContent: React.FC = () => {
   const { isLocked, biometricAvailable, biometricEnabled, unlock, unlockBiometric } = useAppLock();
+  useTheme();
 
   return (
     <>

@@ -48,5 +48,6 @@ declare module 'ionicons/icons' {
   export const lockClosedOutline: string;
   export const trashOutline: string;
   export const warningOutline: string;
+  export const brushOutline: string;
   export default icons;
 }

@@ -4,7 +4,8 @@
  *
  * Profile keys:   profile_name, profile_dob, profile_sex,
  *                 profile_height_cm, profile_activity, profile_goal
- * Preference keys: pref_weight_unit, pref_water_goal_ml
+ * Preference keys: pref_weight_unit, pref_water_goal_ml,
+ *                  pref_theme_seed, pref_theme_mode, pref_font_size
  */
 
 import { useEffect, useState, useCallback } from 'react';
@@ -21,6 +22,8 @@ export type Goal =
   | 'improve_sleep'
   | 'general_wellness';
 export type WeightUnit = 'kg' | 'lb';
+export type ThemeMode  = 'system' | 'light' | 'dark';
+export type FontSize   = 'default' | 'large' | 'xl';
 
 export interface UserProfile {
   name: string;          // display name
@@ -34,6 +37,9 @@ export interface UserProfile {
 export interface UserPrefs {
   weightUnit: WeightUnit;
   waterGoalMl: number;
+  themeSeed: string;      // hex colour, e.g. '#5C7A6E'
+  themeMode: ThemeMode;
+  fontSize: FontSize;
 }
 
 // ── Metric helpers (pure, exported for use in components) ────────────────────
@@ -101,6 +107,9 @@ export function kgToLb(kg: number): number {
 const DEFAULT_PREFS: UserPrefs = {
   weightUnit: 'kg',
   waterGoalMl: 2000,
+  themeSeed: '#5C7A6E',
+  themeMode: 'system',
+  fontSize: 'default',
 };
 
 const DEFAULT_PROFILE: UserProfile = {
@@ -143,10 +152,11 @@ function rowsToProfile(rows: Record<string, string>): UserProfile {
 
 function rowsToPrefs(rows: Record<string, string>): UserPrefs {
   return {
-    weightUnit: (rows['pref_weight_unit'] as WeightUnit) ?? 'kg',
-    waterGoalMl: rows['pref_water_goal_ml']
-      ? Number(rows['pref_water_goal_ml'])
-      : 2000,
+    weightUnit:  (rows['pref_weight_unit'] as WeightUnit) ?? 'kg',
+    waterGoalMl: rows['pref_water_goal_ml'] ? Number(rows['pref_water_goal_ml']) : 2000,
+    themeSeed:   rows['pref_theme_seed']  ?? '#5C7A6E',
+    themeMode:   (rows['pref_theme_mode'] as ThemeMode) ?? 'system',
+    fontSize:    (rows['pref_font_size']  as FontSize)  ?? 'default',
   };
 }
 
@@ -182,8 +192,11 @@ export function useProfile() {
   }, []);
 
   const savePrefs = useCallback(async (next: UserPrefs) => {
-    await upsert('pref_weight_unit', next.weightUnit);
+    await upsert('pref_weight_unit',  next.weightUnit);
     await upsert('pref_water_goal_ml', String(next.waterGoalMl));
+    await upsert('pref_theme_seed',   next.themeSeed);
+    await upsert('pref_theme_mode',   next.themeMode);
+    await upsert('pref_font_size',    next.fontSize);
     setPrefs(next);
   }, []);
 

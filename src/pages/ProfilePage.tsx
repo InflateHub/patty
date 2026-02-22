@@ -1,4 +1,4 @@
-/* ProfilePage — 1.5.0 */
+/* ProfilePage — 1.6.0 */
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   IonAlert,
@@ -26,7 +26,7 @@ import {
   IonToolbar,
   IonToast,
 } from '@ionic/react';
-import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline } from 'ionicons/icons';
+import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline } from 'ionicons/icons';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
 import {
@@ -36,6 +36,7 @@ import {
   ageFromDob,
 } from '../hooks/useProfile';
 import { useAppLock } from '../hooks/useAppLock';
+import { applyTheme, SEED_COLOURS } from '../hooks/useTheme';
 import PinSetupModal from '../components/PinSetupModal';
 import { getDb } from '../db/database';
 
@@ -64,7 +65,13 @@ const ProfilePage: React.FC = () => {
   const [prefForm, setPrefForm] = useState<UserPrefs>({
     weightUnit: 'kg',
     waterGoalMl: 2000,
+    themeSeed: '#5C7A6E',
+    themeMode: 'system',
+    fontSize: 'default',
   });
+  // Custom hex input state (separate from swatch selection)
+  const [customHex, setCustomHex] = useState<string>('');
+  const [customHexError, setCustomHexError] = useState<boolean>(false);
   const [toast, setToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('Profile saved');
 
@@ -81,6 +88,9 @@ const ProfilePage: React.FC = () => {
     if (!loading) {
       setForm(profile);
       setPrefForm(prefs);
+      // Pre-fill custom hex if the saved seed is not one of the curated swatches
+      const isCurated = SEED_COLOURS.some(c => c.hex.toUpperCase() === prefs.themeSeed.toUpperCase());
+      if (!isCurated) setCustomHex(prefs.themeSeed);
     }
   }, [loading, profile, prefs]);
 
@@ -89,8 +99,46 @@ const ProfilePage: React.FC = () => {
   const handleSave = async () => {
     await saveProfile(form);
     await savePrefs(prefForm);
+    // Apply theme immediately so changes are visible without restart
+    applyTheme(prefForm.themeSeed, prefForm.themeMode, prefForm.fontSize);
     setToastMsg('Profile saved');
     setToast(true);
+  };
+
+  // ── Theme helpers
+  const isHexValid = (hex: string) => /^#[0-9A-Fa-f]{6}$/.test(hex);
+
+  const handleSwatchPick = (hex: string) => {
+    setCustomHex('');
+    setCustomHexError(false);
+    const next = { ...prefForm, themeSeed: hex };
+    setPrefForm(next);
+    applyTheme(hex, next.themeMode, next.fontSize);
+  };
+
+  const handleCustomHexChange = (raw: string) => {
+    setCustomHex(raw);
+    const hex = raw.startsWith('#') ? raw : `#${raw}`;
+    if (isHexValid(hex)) {
+      setCustomHexError(false);
+      const next = { ...prefForm, themeSeed: hex };
+      setPrefForm(next);
+      applyTheme(hex, next.themeMode, next.fontSize);
+    } else {
+      setCustomHexError(raw.length > 0);
+    }
+  };
+
+  const handleModeChange = (mode: UserPrefs['themeMode']) => {
+    const next = { ...prefForm, themeMode: mode };
+    setPrefForm(next);
+    applyTheme(next.themeSeed, mode, next.fontSize);
+  };
+
+  const handleFontChange = (size: UserPrefs['fontSize']) => {
+    const next = { ...prefForm, fontSize: size };
+    setPrefForm(next);
+    applyTheme(next.themeSeed, next.themeMode, size);
   };
 
   // ── Lock toggle
@@ -376,6 +424,193 @@ const ProfilePage: React.FC = () => {
           </IonCardContent>
         </IonCard>
 
+        {/* ── Theme ─────────────────────────────────────────────────────── */}
+        <IonCard>
+          <IonListHeader style={hdr}>
+            <IonIcon icon={brushOutline} style={{ marginRight: 8, color: 'var(--md-primary)', fontSize: 16 }} />
+            Appearance
+          </IonListHeader>
+          <IonCardContent style={{ padding: '4px 0 20px' }}>
+
+            {/* ── Live preview card ──────────────────────────────────── */}
+            <div style={{
+              margin: '8px 16px 20px',
+              borderRadius: 'var(--md-shape-xl)',
+              padding: '16px',
+              background: 'var(--md-primary-container)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+            }}>
+              {/* FAB preview circle */}
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: '50%',
+                background: 'var(--md-primary)',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <span style={{ fontSize: 22, lineHeight: 1 }}>🌿</span>
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{
+                  margin: '0 0 4px',
+                  fontSize: 'var(--md-title-sm)',
+                  fontWeight: 600,
+                  color: 'var(--md-on-primary-container)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  Theme Preview
+                </p>
+                <p style={{
+                  margin: 0,
+                  fontSize: 'var(--md-body-sm)',
+                  color: 'var(--md-on-primary-container)',
+                  opacity: 0.8,
+                }}>Live — changes are applied instantly</p>
+              </div>
+              <div style={{
+                width: 20,
+                height: 20,
+                borderRadius: '50%',
+                background: prefForm.themeSeed,
+                border: '2px solid var(--md-outline)',
+                flexShrink: 0,
+              }} />
+            </div>
+
+            {/* ── Seed colour swatches ───────────────────────────────── */}
+            <div style={{ padding: '0 16px 4px' }}>
+              <p style={{
+                margin: '0 0 12px',
+                fontSize: 'var(--md-label-lg)',
+                color: 'var(--md-on-surface-variant)',
+                fontWeight: 500,
+              }}>Accent colour</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {SEED_COLOURS.map(({ hex, label }) => {
+                  const isActive = prefForm.themeSeed.toUpperCase() === hex.toUpperCase();
+                  return (
+                    <button
+                      key={hex}
+                      title={label}
+                      onClick={() => handleSwatchPick(hex)}
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        background: hex,
+                        border: isActive ? `3px solid var(--md-on-surface)` : '3px solid transparent',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 0,
+                        outline: 'none',
+                        boxShadow: isActive ? '0 0 0 2px var(--md-surface), 0 0 0 4px var(--md-on-surface)' : 'none',
+                        transition: 'box-shadow 0.15s',
+                      }}
+                    >
+                      {isActive && (
+                        <IonIcon
+                          icon={checkmarkOutline}
+                          style={{ color: '#fff', fontSize: 16, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom hex input */}
+              <div style={{ marginTop: 14 }}>
+                <p style={{
+                  margin: '0 0 8px',
+                  fontSize: 'var(--md-label-lg)',
+                  color: 'var(--md-on-surface-variant)',
+                  fontWeight: 500,
+                }}>Custom hex</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '50%',
+                    background: isHexValid(customHex.startsWith('#') ? customHex : `#${customHex}`)
+                      ? (customHex.startsWith('#') ? customHex : `#${customHex}`)
+                      : 'var(--md-surface-variant)',
+                    border: '2px solid var(--md-outline-variant)',
+                    flexShrink: 0,
+                  }} />
+                  <IonInput
+                    value={customHex}
+                    placeholder="#RRGGBB"
+                    maxlength={7}
+                    style={{
+                      '--background': 'var(--md-surface-variant)',
+                      '--color': 'var(--md-on-surface)',
+                      '--border-radius': 'var(--md-shape-sm)',
+                      '--padding-start': '10px',
+                      '--padding-end': '10px',
+                      fontSize: 'var(--md-body-md)',
+                      flex: 1,
+                    } as React.CSSProperties}
+                    onIonInput={e => handleCustomHexChange((e.detail.value ?? '') as string)}
+                  />
+                  {customHexError && (
+                    <IonNote style={{ color: 'var(--md-error)', fontSize: 'var(--md-body-sm)' }}>
+                      Invalid
+                    </IonNote>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Appearance mode ───────────────────────────────────── */}
+            <div style={{ padding: '20px 16px 0' }}>
+              <p style={{
+                margin: '0 0 10px',
+                fontSize: 'var(--md-label-lg)',
+                color: 'var(--md-on-surface-variant)',
+                fontWeight: 500,
+              }}>Mode</p>
+              <IonSegment
+                value={prefForm.themeMode}
+                onIonChange={e => handleModeChange(e.detail.value as UserPrefs['themeMode'])}
+                style={{ width: '100%' }}
+              >
+                <IonSegmentButton value="system"><IonLabel>System</IonLabel></IonSegmentButton>
+                <IonSegmentButton value="light"><IonLabel>Light</IonLabel></IonSegmentButton>
+                <IonSegmentButton value="dark"><IonLabel>Dark</IonLabel></IonSegmentButton>
+              </IonSegment>
+            </div>
+
+            {/* ── Text size ─────────────────────────────────────────── */}
+            <div style={{ padding: '20px 16px 4px' }}>
+              <p style={{
+                margin: '0 0 10px',
+                fontSize: 'var(--md-label-lg)',
+                color: 'var(--md-on-surface-variant)',
+                fontWeight: 500,
+              }}>Text size</p>
+              <IonSegment
+                value={prefForm.fontSize}
+                onIonChange={e => handleFontChange(e.detail.value as UserPrefs['fontSize'])}
+                style={{ width: '100%' }}
+              >
+                <IonSegmentButton value="default"><IonLabel>Default</IonLabel></IonSegmentButton>
+                <IonSegmentButton value="large"><IonLabel>Large</IonLabel></IonSegmentButton>
+                <IonSegmentButton value="xl"><IonLabel>XL</IonLabel></IonSegmentButton>
+              </IonSegment>
+            </div>
+
+          </IonCardContent>
+        </IonCard>
+
         {/* ── Privacy & Security ────────────────────────────────────────── */}
         <IonCard>
           <IonListHeader style={hdr}>
@@ -480,7 +715,7 @@ const ProfilePage: React.FC = () => {
             <IonList lines="none" style={{ background: 'transparent' }}>
               <IonItem style={transparentItem}>
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">1.5.0</IonNote>
+                <IonNote slot="end">1.6.0</IonNote>
               </IonItem>
               <IonItem style={transparentItem}>
                 <IonLabel>Built by</IonLabel>

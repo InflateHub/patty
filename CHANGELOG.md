@@ -2,6 +2,21 @@
 
 ---
 
+## [1.6.0] — Personalisation Theming
+*Goal: users pick their own accent colour and the entire MD3 palette re-seeds dynamically; light/dark/system mode toggle; font size control.*
+
+- [x] **`useTheme.ts`** (new hook): `applyTheme(seed, mode, fontSize)` generates a full MD3 tonal palette via `@material/material-color-utilities` and writes all `--md-*` + Ionic tokens inline to `document.documentElement`
+- [x] **`SEED_COLOURS`**: 8 curated swatches (Slate Green, Violet, Ocean Blue, Forest, Terracotta, Mauve, Amber, Rose) + freeform custom hex input with live colour preview dot
+- [x] **System mode**: injects a `<style id="patty-theme">` with both `:root` light and `@media (prefers-color-scheme: dark)` dark variants — custom seed works correctly in either OS appearance
+- [x] **Light / Dark mode**: writes inline styles on `<html>` that beat any `@media` rule — instant forced mode without OS change
+- [x] **Font size**: Default (1 rem) / Large (1.0625 rem) / XL (1.125 rem) — scales `--md-body-lg`; all type tokens inherit
+- [x] **ProfilePage → Appearance card**: replaces the old single Preferences card with a split Preferences + Appearance card; contains live preview banner, 8 swatches, custom hex input, Mode segment, Text size segment
+- [x] **Live preview**: all picker interactions call `applyTheme` immediately without saving; Save button persists to DB
+- [x] **`useProfile`** extended: `UserPrefs` gains `themeSeed`, `themeMode`, `fontSize`; `savePrefs` persists all three to `settings` KV
+- [x] **App root**: `useTheme()` called in `AppContent` to restore saved theme on every cold start
+
+---
+
 ## [1.5.0] — Privacy & Security
 *Goal: protect personal health data with PIN / biometric app lock and give users full control over their stored data.*
 
