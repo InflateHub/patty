@@ -376,6 +376,102 @@ const ProfilePage: React.FC = () => {
           </IonCardContent>
         </IonCard>
 
+        {/* ── Privacy & Security ────────────────────────────────────────── */}
+        <IonCard>
+          <IonListHeader style={hdr}>
+            <IonIcon icon={lockClosedOutline} style={{ marginRight: 8, color: 'var(--md-primary)', fontSize: 16 }} />
+            Privacy &amp; Security
+          </IonListHeader>
+          <IonCardContent style={{ padding: '4px 0 12px' }}>
+            <IonList lines="inset" style={{ background: 'transparent' }}>
+
+              {/* App Lock toggle */}
+              <IonItem style={transparentItem}>
+                <IonLabel>
+                  <h3>App Lock</h3>
+                  <p style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
+                    {lockEnabled ? 'Lock with PIN on background' : 'Disabled'}
+                  </p>
+                </IonLabel>
+                <IonToggle
+                  slot="end"
+                  checked={lockEnabled}
+                  onIonChange={e => handleLockToggle(e.detail.checked)}
+                />
+              </IonItem>
+
+              {/* Biometric toggle — only when lock enabled and biometrics available */}
+              {lockEnabled && biometricAvailable && (
+                <IonItem style={transparentItem}>
+                  <IonIcon icon={fingerPrintOutline} slot="start" style={{ color: 'var(--md-primary)', fontSize: 20 }} />
+                  <IonLabel>
+                    <h3>Biometric Unlock</h3>
+                    <p style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
+                      Face ID / Fingerprint
+                    </p>
+                  </IonLabel>
+                  <IonToggle
+                    slot="end"
+                    checked={biometricEnabled}
+                    onIonChange={e => handleBiometricToggle(e.detail.checked)}
+                  />
+                </IonItem>
+              )}
+
+              {/* Change PIN — only when lock enabled */}
+              {lockEnabled && (
+                <IonItem style={transparentItem} lines="none" button onClick={() => setChangePinOpen(true)}>
+                  <IonLabel style={{ color: 'var(--md-primary)' }}>Change PIN</IonLabel>
+                </IonItem>
+              )}
+
+            </IonList>
+          </IonCardContent>
+        </IonCard>
+
+        {/* ── Danger Zone ───────────────────────────────────────────────── */}
+        <IonCard>
+          <IonListHeader style={{ ...hdr, color: 'var(--md-error)' }}>
+            <IonIcon icon={warningOutline} style={{ marginRight: 8, fontSize: 16 }} />
+            Danger Zone
+          </IonListHeader>
+          <IonCardContent style={{ padding: '4px 0 12px' }}>
+            <IonList lines="none" style={{ background: 'transparent' }}>
+
+              <IonItem style={transparentItem} button onClick={() => setDangerAction('logs')}>
+                <IonIcon icon={trashOutline} slot="start" style={{ color: 'var(--md-error)', fontSize: 20 }} />
+                <IonLabel>
+                  <h3 style={{ color: 'var(--md-error)' }}>Clear Logs</h3>
+                  <p style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
+                    Delete all weight, water, sleep &amp; food entries
+                  </p>
+                </IonLabel>
+              </IonItem>
+
+              <IonItem style={transparentItem} button onClick={() => setDangerAction('photos')}>
+                <IonIcon icon={trashOutline} slot="start" style={{ color: 'var(--md-error)', fontSize: 20 }} />
+                <IonLabel>
+                  <h3 style={{ color: 'var(--md-error)' }}>Clear Photos</h3>
+                  <p style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
+                    Delete all progress photos from storage
+                  </p>
+                </IonLabel>
+              </IonItem>
+
+              <IonItem style={transparentItem} button onClick={() => setDangerAction('reset')}>
+                <IonIcon icon={refreshOutline} slot="start" style={{ color: 'var(--md-error)', fontSize: 20 }} />
+                <IonLabel>
+                  <h3 style={{ color: 'var(--md-error)' }}>Factory Reset</h3>
+                  <p style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
+                    Erase all data and restart onboarding
+                  </p>
+                </IonLabel>
+              </IonItem>
+
+            </IonList>
+          </IonCardContent>
+        </IonCard>
+
         {/* ── App Info ──────────────────────────────────────────────────── */}
         <IonCard style={{ margin: '12px 16px 32px' }}>
           <IonListHeader style={hdr}>App Info</IonListHeader>
