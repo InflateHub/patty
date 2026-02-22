@@ -152,7 +152,7 @@ const OnboardingPage: React.FC = () => {
 
   const canProceed = (): boolean => {
     if (step === 1) return name.trim().length > 0 && dob !== '';
-    if (step === 2) return parseFloat(heightCm) > 0 && parseFloat(weight) > 0 && sex !== '';
+    if (step === 2) return parseFloat(heightCm) > 0 && parseFloat(weight) > 0 && sex !== '' && obPhoto !== null;
     if (step === 3) return goal !== '';
     if (step === 4) return activity !== '';
     return true;
@@ -493,7 +493,7 @@ const OnboardingPage: React.FC = () => {
         Used to calculate BMI, BMR and your daily calorie target.
       </p>
 
-      {/* Starting photo */}
+      {/* Starting photo (required) */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 20 }}>
         <div
           onClick={() => setShowPhotoSheet(true)}
@@ -558,7 +558,7 @@ const OnboardingPage: React.FC = () => {
             textAlign: 'center',
           }}
         >
-          Optional — tap to add your starting photo
+          Tap to take your starting photo
         </p>
       </div>
 
