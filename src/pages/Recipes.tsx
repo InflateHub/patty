@@ -161,7 +161,7 @@ const Recipes: React.FC = () => {
       )}
 
       {/* Speed-dial container */}
-      <div style={{ position: 'fixed', bottom: 96, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
+      <div style={{ position: 'fixed', bottom: 72, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
         {/* Manual arm */}
         {dialOpen && (
           <div

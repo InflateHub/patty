@@ -58,7 +58,7 @@ const SpeedDial: React.FC<SpeedDialProps> = ({ onSelect }) => {
       <div
         style={{
           position: 'fixed',
-          bottom: 96,
+          bottom: 72,
           right: 16,
           zIndex: 1000,
           display: 'flex',
