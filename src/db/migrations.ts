@@ -184,4 +184,33 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
+  {
+    version: 15,
+    // 2.5.0 — habits tracking (good & bad habit types)
+    statements: [
+      `CREATE TABLE IF NOT EXISTS habit_definitions (
+        id         TEXT    PRIMARY KEY NOT NULL,
+        name       TEXT    NOT NULL,
+        emoji      TEXT    NOT NULL DEFAULT '✅',
+        colour     TEXT    NOT NULL DEFAULT '#5C7A6E',
+        type       TEXT    NOT NULL DEFAULT 'good',
+        is_default INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT    NOT NULL
+      );`,
+      `CREATE TABLE IF NOT EXISTS habit_completions (
+        id         TEXT    PRIMARY KEY NOT NULL,
+        habit_id   TEXT    NOT NULL,
+        date       TEXT    NOT NULL,
+        created_at TEXT    NOT NULL,
+        UNIQUE(habit_id, date)
+      );`,
+      `CREATE TABLE IF NOT EXISTS habit_relapses (
+        id         TEXT    PRIMARY KEY NOT NULL,
+        habit_id   TEXT    NOT NULL,
+        date       TEXT    NOT NULL,
+        created_at TEXT    NOT NULL,
+        UNIQUE(habit_id, date)
+      );`,
+    ],
+  },
 ];

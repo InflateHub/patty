@@ -50,5 +50,9 @@ declare module 'ionicons/icons' {
   export const warningOutline: string;
   export const brushOutline: string;
   export const barbellOutline: string;
+  export const shieldCheckmark: string;
+  export const shieldCheckmarkOutline: string;
+  export const sparkles: string;
+  export const sparklesOutline: string;
   export default icons;
 }

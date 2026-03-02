@@ -16,17 +16,17 @@ import { App as CapApp } from '@capacitor/app';
 import { IonReactRouter } from '@ionic/react-router';
 import {
   calendarOutline,
+  flameOutline,
   homeOutline,
   pulseOutline,
   restaurantOutline,
-  trophyOutline,
 } from 'ionicons/icons';
 
 import Home from './pages/Home';
 import Track from './pages/Track';
 import Recipes from './pages/Recipes';
 import Plan from './pages/Plan';
-import Achievements from './pages/Achievements';
+import HabitsPage from './pages/HabitsPage';
 import ProfilePage from './pages/ProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -161,8 +161,8 @@ const TabShell: React.FC = () => (
       <Route exact path="/tabs/plan">
         <Plan />
       </Route>
-      <Route exact path="/tabs/progress">
-        <Achievements />
+      <Route exact path="/tabs/habits">
+        <HabitsPage />
       </Route>
       <Route exact path="/tabs/profile">
         <ProfilePage />
@@ -192,9 +192,9 @@ const TabShell: React.FC = () => (
         <IonIcon icon={calendarOutline} />
         <IonLabel>Plan</IonLabel>
       </IonTabButton>
-      <IonTabButton tab="progress" href="/tabs/progress">
-        <IonIcon icon={trophyOutline} />
-        <IonLabel>Achievements</IonLabel>
+      <IonTabButton tab="habits" href="/tabs/habits">
+        <IonIcon icon={flameOutline} />
+        <IonLabel>Habits</IonLabel>
       </IonTabButton>
     </IonTabBar>
   </IonTabs>

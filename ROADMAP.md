@@ -65,26 +65,42 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 2.5.0 — Habits Page (replaces Achievements route)
-*Goal: a gamified daily habit streak system that replaces the Achievements page.*
+## 2.5.0 — Habits Page (replaces Achievements route) ✅
+*Goal: a gamified daily habit system with good/bad habit categories, infinite dynamic milestones, and locked past-day history.*
 
 ### Routing & Navigation
-- [ ] `/tabs/habits` route replaces `/tabs/progress` (Achievements); the tab icon changes to a flame/streak icon
-- [ ] Old `Achievements.tsx` is archived; Weight Journey + shareable card content moves into the new Habits page
+- [x] `/tabs/habits` route replaces `/tabs/progress` (Achievements); tab icon is `flameOutline`; tab label is "Habits"
+- [x] `Achievements.tsx` is preserved but removed from routing — not deleted
 
-### Habit System
-- [ ] **Default habits (auto-created on first launch):** Weight Logging, Sleep Logging, Meal Logging
-- [ ] **Addable habits:** Water Intake, Workout, Meditation; plus a fully Custom habit (name + icon + target description)
-- [ ] Each habit tracks: current streak (days), best streak, total completions, XP accumulated
-- [ ] **XP rules:** +10 XP on completion; −5 XP on a missed day (floor: 0); daily completion checked at midnight rollover
-- [ ] **Milestone badges** per habit at streaks: 3, 7, 14, 30, 60, 100 days — badge image + unlock toast notification
-- [ ] **Habits page layout:** hero streak summary card (current longest streak, total XP, level); habit card list (each card: icon, name, current streak flame counter, today's status toggle, XP bar); badges shelf (most recent 8 unlocked badges)
-- [ ] **Add Habit sheet:** name, icon picker (emoji or Ionicons), target description, colour tag
-- [ ] **Leaderboard tab** (device-local): ranks all habits by current streak; "Your best" highlighted; placeholder for future cloud leaderboard with a "Coming soon" chip
+### Habit Types
+- [x] **Good habits** — streak grows every day you complete them; tap the row to mark done/undo today
+- [x] **Bad habits** — streak grows every clean day you resist; tapping logs a slip (confirm alert, resets streak); no toggle — a slip cannot be un-done
+- [x] Past days are **permanently locked** — `toggleGoodHabit` and `logRelapse` only accept `date === today`; past rows render with a padlock visual
 
-### Achievements Integration
-- [ ] Weight Journey photo marquee (from old Achievements page) lives as a card on the Habits page below the habit list
-- [ ] Shareable card generator moved to a floating action on the photo marquee card
+### Data Layer
+- [x] Migration v15: `habit_definitions` (id, name, emoji, colour, type 'good'|'bad', is_default), `habit_completions` (good habits), `habit_relapses` (bad habits); both event tables enforce `UNIQUE(habit_id, date)`
+- [x] `useHabits` hook: `toggleGoodHabit` / `logRelapse` / `addHabit` / `deleteHabit`; `computeStreaks` walks dates set for accurate gap detection
+- [x] **Default seeded habits (good):** Log Weight · Log Sleep · Log Water · Log a Meal · Log a Workout — auto-inserted on first load if missing
+
+### Dynamic Milestone System (infinite — never exhausts)
+- [x] Era ≤ 30 days: fixed milestones 3, 7, 14, 21, 30
+- [x] Era 31–364 days: every 30 days (60, 90, 120 … 360)
+- [x] Era 365–999 days: every 100 days (365, 465, 565 …)
+- [x] Era 1000+ days: every 365 days (1000, 1365, 1730 …)
+- [x] `getNextMilestone(streak)` is a pure function; milestone toast fires with badge tier label + XP bonus
+
+### XP & Level System
+- [x] Daily XP = `10 + floor(streak / 7)` — grows by +1 per week of streak; milestone day adds +50 flat bonus
+- [x] Relapse penalty: −15 XP for bad habit slip; miss penalty: −5 XP for missed good habit (consumers enforce floor 0)
+- [x] Level = `floor(log₂(totalXP / 50) + 1)` — logarithmic, slows down at high XP; names: Beginner → Consistent → Dedicated → Relentless → Legendary → Unstoppable
+- [x] Badge tiers: ⭐ Starter (≤ 30), 🔥 Consistent (31–364), 💎 Dedicated (365–999), 🏆 Legend (1000+)
+
+### Page Layout
+- [x] **Hero card** — longest active streak + "X / Y on track today" + XP bar + level chip + recent badges shelf (horizontal scroll, last 8)
+- [x] **Good Habits section** — each row: emoji avatar · name · streak info · next milestone · checkmark/flame toggle; done = tinted border + colour
+- [x] **Bad Habits section** (amber/warning) — each row: emoji · name · clean-days streak · tap to log slip; clean = shield icon; slipped = red tint + warning icon
+- [x] **Add Habit FAB** → bottom-sheet modal: name field · emoji grid picker (30 options) · colour chip row (8 MD3-derived colours) · large Good/Bad segment toggle with explanatory copy
+- [x] Swipe-to-delete on non-default habits with confirm alert
 
 ---
 
