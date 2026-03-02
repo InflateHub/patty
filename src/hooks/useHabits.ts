@@ -118,16 +118,6 @@ export function badgeTier(streak: number): { label: string; emoji: string; colou
   return               { label: 'Legend',     emoji: '🏆', colour: '#7B2FBE' };
 }
 
-// ── Default seeds ─────────────────────────────────────────────────────────────
-
-const DEFAULT_HABITS: Omit<HabitDefinition, 'created_at'>[] = [
-  { id: 'default-weight',  name: 'Log Weight',   emoji: '⚖️',  colour: '#5C7A6E', type: 'good', is_default: true },
-  { id: 'default-sleep',   name: 'Log Sleep',    emoji: '😴',  colour: '#5C7A6E', type: 'good', is_default: true },
-  { id: 'default-water',   name: 'Log Water',    emoji: '💧',  colour: '#5C7A6E', type: 'good', is_default: true },
-  { id: 'default-meal',    name: 'Log a Meal',   emoji: '🍽️', colour: '#5C7A6E', type: 'good', is_default: true },
-  { id: 'default-workout', name: 'Log a Workout',emoji: '💪',  colour: '#5C7A6E', type: 'good', is_default: true },
-];
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function generateId(): string {
@@ -192,22 +182,7 @@ export function useHabits() {
       const db = getDb();
       const today = todayStr();
 
-      // 1. Ensure default habits are seeded
-      for (const h of DEFAULT_HABITS) {
-        const exists = await db.query(
-          'SELECT id FROM habit_definitions WHERE id = ?;',
-          [h.id]
-        );
-        if (!exists.values || exists.values.length === 0) {
-          await db.run(
-            `INSERT INTO habit_definitions (id, name, emoji, colour, type, is_default, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?);`,
-            [h.id, h.name, h.emoji, h.colour, h.type, h.is_default ? 1 : 0, new Date().toISOString()]
-          );
-        }
-      }
-
-      // 2. Load all habit definitions
+      // 1. Load all habit definitions
       const defResult = await db.query(
         'SELECT * FROM habit_definitions ORDER BY is_default DESC, created_at ASC;'
       );

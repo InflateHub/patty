@@ -27,6 +27,7 @@ import Track from './pages/Track';
 import Recipes from './pages/Recipes';
 import Plan from './pages/Plan';
 import HabitsPage from './pages/HabitsPage';
+import AchievementsPage from './pages/Achievements';
 import ProfilePage from './pages/ProfilePage';
 import NotificationsPage from './pages/NotificationsPage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -163,6 +164,9 @@ const TabShell: React.FC = () => (
       </Route>
       <Route exact path="/tabs/habits">
         <HabitsPage />
+      </Route>
+      <Route exact path="/tabs/achievements">
+        <AchievementsPage />
       </Route>
       <Route exact path="/tabs/profile">
         <ProfilePage />

@@ -22,7 +22,7 @@ import {
   IonToolbar,
   useIonViewWillEnter,
 } from '@ionic/react';
-import { personCircleOutline, notificationsOutline } from 'ionicons/icons';
+import { personCircleOutline, notificationsOutline, trophyOutline } from 'ionicons/icons';
 
 import { useWeightLog } from '../hooks/useWeightLog';
 import { useWaterLog } from '../hooks/useWaterLog';
@@ -101,6 +101,9 @@ const Home: React.FC = () => {
           <IonButtons slot="end">
             <IonButton onClick={() => history.push('/tabs/notifications')}>
               <IonIcon icon={notificationsOutline} style={{ fontSize: 24, color: 'var(--md-on-surface-variant)' }} />
+            </IonButton>
+            <IonButton onClick={() => history.push('/tabs/achievements')}>
+              <IonIcon icon={trophyOutline} style={{ fontSize: 22, color: 'var(--md-on-surface-variant)' }} />
             </IonButton>
             <IonButton onClick={() => history.push('/tabs/profile')}>
               <IonIcon icon={personCircleOutline} style={{ fontSize: 26, color: 'var(--md-on-surface-variant)' }} />
