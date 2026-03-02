@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   IonButton,
   IonButtons,
@@ -16,7 +16,6 @@ import {
   IonItemSliding,
   IonLabel,
   IonList,
-  IonListHeader,
   IonModal,
   IonNote,
   IonSkeletonText,
@@ -32,12 +31,60 @@ import { useWeightLog } from '../hooks/useWeightLog';
 import type { WeightEntry } from '../hooks/useWeightLog';
 import { S, today, formatDate, formatTime, isToday } from './trackUtils';
 
+/* ── PhotoMarquee ────────────────────────────────────────────────── */
+const PhotoMarquee: React.FC<{
+  entries: WeightEntry[];
+  onTap: (uri: string) => void;
+}> = ({ entries, onTap }) => {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const recent = useMemo(() => [...entries].slice(0, 7).reverse(), [entries]);
+  if (recent.length === 0) return null;
+  return (
+    <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '4px 2px 8px', scrollbarWidth: 'none' } as React.CSSProperties}>
+      {recent.map((entry) => {
+        const isEntryToday = entry.date === todayStr;
+        return (
+          <div
+            key={entry.id}
+            style={{
+              flex: '0 0 auto', width: 72, height: 72,
+              borderRadius: 'var(--md-shape-md)',
+              overflow: 'hidden', position: 'relative',
+              outline: isEntryToday ? '2.5px solid var(--md-primary)' : 'none',
+              outlineOffset: isEntryToday ? 2 : 0,
+              background: 'var(--md-surface-container)',
+              cursor: entry.photo_uri ? 'pointer' : 'default',
+            }}
+            onClick={() => entry.photo_uri && onTap(entry.photo_uri)}
+          >
+            {entry.photo_uri ? (
+              <img src={entry.photo_uri} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            ) : (
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, opacity: 0.3 }}>
+                &#9878;&#65039;
+              </div>
+            )}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0,
+              background: 'rgba(0,0,0,0.52)', padding: '2px 4px',
+              textAlign: 'center', fontSize: 10, fontFamily: 'var(--md-font)',
+              color: '#fff', fontWeight: 600,
+            }}>
+              {entry.value} {entry.unit}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 interface WeightTabProps {
   openTrigger?: number;
 }
 
 export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
-  const { entries, todayEntries, loading, addEntry, deleteEntry } = useWeightLog();
+  const { entries, latestEntry, loading, addEntry, deleteEntry } = useWeightLog();
   const modal = useRef<HTMLIonModalElement>(null);
   const dateModal = useRef<HTMLIonModalElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -49,9 +96,10 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(30);
-  /** Two-step modal: 'entry' â†’ fill weight; 'photo' â†’ take / pick photo */
   const [step, setStep] = useState<'entry' | 'photo'>('entry');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [photoViewUri, setPhotoViewUri] = useState<string | null>(null);
 
   const [presentAlert] = useIonAlert();
 
@@ -157,65 +205,77 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
     });
   }
 
-  const todayLatest = todayEntries[0] ?? null;
+  const delta = useMemo(() => {
+    if (!latestEntry || entries.length < 2) return null;
+    const prev = entries[1];
+    if (!prev || prev.unit !== latestEntry.unit) return null;
+    return Math.round((latestEntry.value - prev.value) * 10) / 10;
+  }, [latestEntry, entries]);
 
   return (
     <>
       {/* â”€â”€ Loading skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Loading skeleton */}
       {loading && (
         <IonCard>
           <IonCardContent>
-            <div style={{ textAlign: 'center', padding: '20px 0 12px' }}>
-              <IonSkeletonText animated style={{ width: 120, height: 52, margin: '0 auto 12px', borderRadius: 8 }} />
-              <IonSkeletonText animated style={{ width: 80, height: 14, margin: '0 auto' }} />
-            </div>
+            <IonSkeletonText animated style={{ width: 140, height: 56, margin: '16px auto 12px', borderRadius: 8 }} />
+            <IonSkeletonText animated style={{ width: '100%', height: 72, borderRadius: 8 }} />
           </IonCardContent>
         </IonCard>
       )}
-      {loading && (
-        <IonList>
-          {[1, 2, 3].map((i) => (
-            <IonItem key={i}>
-              <IonLabel>
-                <IonSkeletonText animated style={{ width: '35%' }} />
-              </IonLabel>
-              <IonNote slot="end"><IonSkeletonText animated style={{ width: 60 }} /></IonNote>
-            </IonItem>
-          ))}
-        </IonList>
-      )}
 
       {/* â”€â”€ Today stat card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Hero stat card */}
       {!loading && (
-        <IonCard
-          onClick={() => setModalOpen(true)}
-          style={{ cursor: 'pointer' } as React.CSSProperties}
-        >
+        <IonCard>
           <IonCardContent>
-            <div style={{ textAlign: 'center', padding: '24px 0 16px' }}>
-              <div style={{
-                fontSize: 56,
-                fontWeight: 300,
-                fontFamily: 'var(--md-font)',
-                color: todayLatest ? 'var(--md-on-surface)' : 'var(--md-outline)',
-                lineHeight: 1.1,
-                letterSpacing: '-0.5px',
-              }}>
-                {todayLatest ? `${todayLatest.value}` : '—'}
-              </div>
-              <div style={{
-                marginTop: 8,
-                fontSize: 'var(--md-body-sm)',
-                fontFamily: 'var(--md-font)',
-                color: 'var(--md-on-surface-variant)',
-                textTransform: 'uppercase',
-                letterSpacing: '.08em',
-              }}>
-                {todayLatest
-                  ? `${todayLatest.unit} · Today${todayEntries.length > 1 ? ` · ${todayEntries.length} entries` : ''}`
-                  : 'No entry today'}
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <span style={{ fontSize: 'var(--md-label-lg)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '.08em' }}>
+                Weight
+              </span>
+              <button
+                onClick={() => setModalOpen(true)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: 'var(--md-surface-variant)', border: 'none',
+                  borderRadius: 'var(--md-shape-full)', padding: '6px 14px',
+                  fontSize: 'var(--md-label-md)', fontFamily: 'var(--md-font)',
+                  color: 'var(--md-on-surface-variant)', cursor: 'pointer',
+                }}
+              >
+                <IonIcon icon={createOutline} style={{ fontSize: 14 }} />
+                {latestEntry ? 'Log / Edit' : 'Log weight'}
+              </button>
             </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
+              <span style={{ fontSize: 56, fontWeight: 300, fontFamily: 'var(--md-font)', color: latestEntry ? 'var(--md-on-surface)' : 'var(--md-outline)', lineHeight: 1 }}>
+                {latestEntry ? `${latestEntry.value}` : '\u2014'}
+              </span>
+              {latestEntry && (
+                <div style={{ paddingBottom: 6 }}>
+                  <span style={{ fontSize: 'var(--md-body-md)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>
+                    {latestEntry.unit}
+                  </span>
+                  {delta !== null && (
+                    <div style={{ fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', fontWeight: 600, color: delta > 0 ? 'var(--md-error)' : delta < 0 ? 'var(--md-primary)' : 'var(--md-on-surface-variant)' }}>
+                      {delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)} {latestEntry.unit}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            {latestEntry && (
+              <div style={{ marginTop: 6, fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>
+                {isToday(latestEntry.date) ? 'Today' : formatDate(latestEntry.date)}
+                {latestEntry.note && <span> &middot; {latestEntry.note}</span>}
+              </div>
+            )}
+            {entries.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <PhotoMarquee entries={entries} onTap={(uri) => setPhotoViewUri(uri)} />
+              </div>
+            )}
           </IonCardContent>
         </IonCard>
       )}
@@ -229,69 +289,78 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
         </IonCard>
       )}
 
+      {/* Collapsible history */}
       {!loading && entries.length > 0 && (
-        <>
-          <IonListHeader style={{ paddingInlineStart: 20, marginTop: 8 }}>History</IonListHeader>
-          <IonList>
-            {entries.slice(0, visibleCount).map((entry: WeightEntry) => (
-              <IonItemSliding key={entry.id}>
-                <IonItem>
-                  {entry.photo_uri && (
-                    <img
-                      slot="start"
-                      src={entry.photo_uri}
-                      alt=""
-                      style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }}
-                    />
-                  )}
-                  <IonLabel>
-                    <h3>{entry.value} {entry.unit}</h3>
-                    {entry.note && <p>{entry.note}</p>}
-                  </IonLabel>
-                  <IonNote slot="end" style={{ textAlign: 'right' }}>
-                    <div>{isToday(entry.date) ? 'Today' : formatDate(entry.date)}</div>
-                    {entry.created_at && (
-                      <div style={{ fontSize: 'var(--md-label-sm)', opacity: 0.7 }}>{formatTime(entry.created_at)}</div>
-                    )}
-                  </IonNote>
-                </IonItem>
-                <IonItemOptions side="end">
-                  <IonItemOption color="danger" onClick={() => handleWeightDelete(entry.id)}>
-                    <IonIcon slot="icon-only" icon={trash} />
-                  </IonItemOption>
-                </IonItemOptions>
-              </IonItemSliding>
-            ))}
-          </IonList>
-          <IonInfiniteScroll
-            disabled={visibleCount >= entries.length}
-            onIonInfinite={(ev) => {
-              setVisibleCount((c) => c + 30);
-              setTimeout(() => (ev.target as HTMLIonInfiniteScrollElement).complete(), 300);
-            }}
-          >
-            <IonInfiniteScrollContent loadingText="Loading more…" />
-          </IonInfiniteScroll>
-        </>
+        <IonCard style={{ marginBottom: 80 }}>
+          <IonCardContent style={{ padding: '0 0 4px' }}>
+            <button
+              onClick={() => setShowHistory((h) => !h)}
+              style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', padding: '14px 16px', fontSize: 'var(--md-label-lg)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '.08em', cursor: 'pointer' }}
+            >
+              All History ({entries.length})
+              <span style={{ fontSize: 18, display: 'inline-block', transition: 'transform 200ms', transform: showHistory ? 'rotate(180deg)' : 'none' }}>&#8964;</span>
+            </button>
+            {showHistory && (
+              <>
+                <IonList lines="inset" style={{ margin: 0, padding: 0 }}>
+                  {entries.slice(0, visibleCount).map((entry: WeightEntry) => (
+                    <IonItemSliding key={entry.id}>
+                      <IonItem>
+                        {entry.photo_uri ? (
+                          <img slot="start" src={entry.photo_uri} alt="" onClick={(e) => { e.stopPropagation(); if (entry.photo_uri) setPhotoViewUri(entry.photo_uri); }} style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', cursor: 'pointer' }} />
+                        ) : (
+                          <div slot="start" style={{ width: 40, height: 40, borderRadius: 6, background: 'var(--md-surface-container)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, opacity: 0.4 }}>&#9878;&#65039;</div>
+                        )}
+                        <IonLabel>
+                          <h3 style={{ fontFamily: 'var(--md-font)' }}>{entry.value} {entry.unit}</h3>
+                          {entry.note && <p style={{ fontFamily: 'var(--md-font)' }}>{entry.note}</p>}
+                        </IonLabel>
+                        <IonNote slot="end" style={{ textAlign: 'right' }}>
+                          <div style={{ fontFamily: 'var(--md-font)' }}>{isToday(entry.date) ? 'Today' : formatDate(entry.date)}</div>
+                          {entry.created_at && <div style={{ fontSize: 'var(--md-label-sm)', opacity: 0.7, fontFamily: 'var(--md-font)' }}>{formatTime(entry.created_at)}</div>}
+                        </IonNote>
+                      </IonItem>
+                      <IonItemOptions side="end">
+                        <IonItemOption color="danger" onClick={() => handleWeightDelete(entry.id)}>
+                          <IonIcon slot="icon-only" icon={trash} />
+                        </IonItemOption>
+                      </IonItemOptions>
+                    </IonItemSliding>
+                  ))}
+                </IonList>
+                <IonInfiniteScroll disabled={visibleCount >= entries.length} onIonInfinite={(ev) => { setVisibleCount((c) => c + 30); setTimeout(() => (ev.target as HTMLIonInfiniteScrollElement).complete(), 300); }}>
+                  <IonInfiniteScrollContent loadingText="Loading more..." />
+                </IonInfiniteScroll>
+              </>
+            )}
+          </IonCardContent>
+        </IonCard>
       )}
 
       {!loading && entries.length === 0 && (
         <div style={{ textAlign: 'center', padding: '48px 32px', color: 'var(--md-on-surface-variant)' }}>
-          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>{'\u2696\uFE0F'}</div>
+          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>&#9878;&#65039;</div>
           <p style={{ margin: 0, fontSize: 'var(--md-body-lg)', fontWeight: 500, fontFamily: 'var(--md-font)' }}>No entries yet</p>
           <p style={{ margin: '8px 0 0', fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)' }}>Tap + to log your first weight entry.</p>
         </div>
       )}
 
-      <IonToast
-        isOpen={!!errorMsg}
-        message={errorMsg ?? ''}
-        duration={3500}
-        color="danger"
-        onDidDismiss={() => setErrorMsg(null)}
-      />
+      <IonToast isOpen={!!errorMsg} message={errorMsg ?? ''} duration={3500} color="danger" onDidDismiss={() => setErrorMsg(null)} />
 
-      {/* â”€â”€ Weight entry modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Full-screen photo viewer */}
+      <IonModal isOpen={!!photoViewUri} onDidDismiss={() => setPhotoViewUri(null)}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Photo</IonTitle>
+            <IonButtons slot="end"><IonButton onClick={() => setPhotoViewUri(null)}>Done</IonButton></IonButtons>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+            {photoViewUri && <img src={photoViewUri} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: 8 }} />}
+          </div>
+        </IonContent>
+      </IonModal>
       <IonModal
         ref={modal}
         isOpen={modalOpen}

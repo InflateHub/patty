@@ -2,6 +2,20 @@
 
 ---
 
+## [2.3.2] — Water & Weight Tab Redesign
+*Goal: redesign Water and Weight tabs to match the Sleep tab's rich, card-based pattern with week visualisations.*
+
+- [x] **Water — 7-day mini rings row** — `WeekRings` sub-component renders 7 small SVG progress rings (one per day); today ring is larger and uses `--md-primary`; past days use `--md-secondary`; goal-reached days show a checkmark; tapping any ring opens a day-detail bottom sheet
+- [x] **Water — collapsible today's log** — "Today's Log" section is hidden by default behind a toggle chevron
+- [x] **Water — day detail modal** — bottom sheet shows all entries for a tapped past day with per-entry values and a total
+- [x] **Water — `useWaterLog` weekEntries** — new `weekEntries` state + `loadWeek` callback queries the last 7 days; called on mount and after every mutation
+- [x] **Weight — photo marquee strip** — `PhotoMarquee` sub-component shows up to 7 most-recent entries as 72×72 px tiles (oldest → newest); today's tile has a `--md-primary` outline; placeholder scale emoji for entries without a photo; tapping a photo tile opens full-screen viewer
+- [x] **Weight — hero stat card** — replaces old minimal card; shows latest weight + unit, trend delta badge (red if gained, primary if lost), date + note, and the photo marquee
+- [x] **Weight — collapsible history** — "All History (n)" toggle card with chevron; rows include 40 px photo thumbnail (or placeholder) and swipe-to-delete
+- [x] **Weight — full-screen photo viewer modal** — tapping any photo (marquee or history row) opens it in a full-screen `IonModal` with a "Done" button
+
+---
+
 ## [2.3.1] — Sleep Tab Redesign
 *Goal: replace the minimal single-log sleep tab with a rich, always-editable experience.*
 

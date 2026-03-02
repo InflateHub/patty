@@ -21,6 +21,7 @@ function todayStr(): string {
 
 export function useWaterLog() {
   const [todayEntries, setTodayEntries] = useState<WaterEntry[]>([]);
+  const [weekEntries, setWeekEntries] = useState<WaterEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [dailyGoal, setDailyGoalState] = useState<number>(DEFAULT_GOAL);
 
@@ -61,10 +62,33 @@ export function useWaterLog() {
     }
   }, []);
 
+  const loadWeek = useCallback(async () => {
+    try {
+      const db = getDb();
+      const d = new Date();
+      d.setDate(d.getDate() - 6);
+      const since = d.toISOString().slice(0, 10);
+      const result = await db.query(
+        'SELECT * FROM water_entries WHERE date >= ? ORDER BY date ASC, created_at ASC;',
+        [since]
+      );
+      const rows: WaterEntry[] = (result.values ?? []).map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        date: r.date as string,
+        amount_ml: r.amount_ml as number,
+        created_at: r.created_at as string,
+      }));
+      setWeekEntries(rows);
+    } catch (err) {
+      console.error('Failed to load week water entries:', err);
+    }
+  }, []);
+
   useEffect(() => {
     loadGoal();
     loadToday();
-  }, [loadGoal, loadToday]);
+    loadWeek();
+  }, [loadGoal, loadToday, loadWeek]);
 
   const addEntry = useCallback(
     async (amountMl: number, date?: string) => {
@@ -78,12 +102,13 @@ export function useWaterLog() {
           [id, entryDate, amountMl, createdAt]
         );
         await loadToday();
+        await loadWeek();
       } catch (err) {
         console.error('Failed to add water entry:', err);
         throw err;
       }
     },
-    [loadToday]
+    [loadToday, loadWeek]
   );
 
   const deleteEntry = useCallback(
@@ -92,12 +117,13 @@ export function useWaterLog() {
         const db = getDb();
         await db.run('DELETE FROM water_entries WHERE id = ?;', [id]);
         await loadToday();
+        await loadWeek();
       } catch (err) {
         console.error('Failed to delete water entry:', err);
         throw err;
       }
     },
-    [loadToday]
+    [loadToday, loadWeek]
   );
 
   const setDailyGoal = useCallback(async (ml: number) => {
@@ -118,6 +144,7 @@ export function useWaterLog() {
 
   return {
     todayEntries,
+    weekEntries,
     todayTotal,
     dailyGoal,
     loading,
