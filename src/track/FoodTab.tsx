@@ -32,10 +32,10 @@ import { formatTime, today } from './trackUtils';
 
 const MEALS: { id: MealType; label: string; emoji: string }[] = [
   { id: 'breakfast',     label: 'Breakfast',     emoji: '🌅' },
+  { id: 'brunch',        label: 'Brunch',        emoji: '🥞' },
   { id: 'lunch',         label: 'Lunch',         emoji: '🥗' },
   { id: 'snack',         label: 'Snack',         emoji: '🍎' },
   { id: 'dinner',        label: 'Dinner',        emoji: '🍽️' },
-  { id: 'brunch',        label: 'Brunch',        emoji: '🥞' },
   { id: 'midnight_meal', label: 'Midnight Meal', emoji: '🌙' },
 ];
 
