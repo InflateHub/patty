@@ -2,6 +2,24 @@
 
 ---
 
+## [2.5.0] — Habits Page
+*Goal: a gamified daily habit system with good vs bad habit categories, infinite dynamic milestones, and permanently locked past-day history.*
+
+- [x] **Achievements tab removed** — `Achievements.tsx` preserved but removed from routing; fifth tab is now 🔥 Habits at `/tabs/habits`
+- [x] **Good habits** — tap to mark done today (toggles); streak grows every completion day; row tinted + checkmark when done
+- [x] **Bad habits** — every clean day grows the streak; tap to log a slip (confirm alert, resets streak, cannot be un-done); past days are permanently locked
+- [x] **Infinite milestone system** — `getNextMilestone(streak)` pure function: fixed 3/7/14/21/30 → every 30 days → every 100 days → every 365 days; never exhausts
+- [x] **Badge tiers** — ⭐ Starter (≤30) · 🔥 Consistent (31–364) · 💎 Dedicated (365–999) · 🏆 Legend (1000+); milestone toast with XP bonus on unlock
+- [x] **Streak-weighted XP** — `10 + floor(streak/7)` per completion; grows indefinitely; +50 XP milestone bonus; −15 XP relapse / −5 XP miss penalties
+- [x] **Logarithmic levels** — `floor(log₂(totalXP/50)+1)`; names: Beginner → Consistent → Dedicated → Relentless → Legendary → Unstoppable
+- [x] **Hero card** — longest active streak, today's progress count, XP bar, level chip, last-8 badges shelf (horizontal scroll)
+- [x] **Add Habit FAB** — bottom-sheet modal with name field, 30-emoji grid, 8-colour chip picker, large Good/Bad segment toggle with explanatory copy
+- [x] **Default habits seeded** — Log Weight · Log Sleep · Log Water · Log a Meal · Log a Workout (good, auto-insert on first load)
+- [x] **Swipe-to-delete** on non-default habits with confirm alert
+- [x] **Migration v15** — `habit_definitions`, `habit_completions`, `habit_relapses` with `UNIQUE(habit_id, date)` constraints
+
+---
+
 ## [2.4.0] — Custom Colour Picker
 *Goal: replace the browser-native `<input type="color">` with a fully custom, branded in-app picker.*
 
