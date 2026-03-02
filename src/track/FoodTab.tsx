@@ -35,11 +35,14 @@ import { formatTime, today } from './trackUtils';
 const MEALS: { id: MealType; label: string; emoji: string }[] = [
   { id: 'breakfast',     label: 'Breakfast',     emoji: '🌅' },
   { id: 'lunch',         label: 'Lunch',         emoji: '🥗' },
-  { id: 'dinner',        label: 'Dinner',        emoji: '🍽️' },
   { id: 'snack',         label: 'Snack',         emoji: '🍎' },
+  { id: 'dinner',        label: 'Dinner',        emoji: '🍽️' },
   { id: 'brunch',        label: 'Brunch',        emoji: '🥞' },
   { id: 'midnight_meal', label: 'Midnight Meal', emoji: '🌙' },
 ];
+
+/** Meals always shown; optional meals only appear when they have entries */
+const OPTIONAL_MEALS: MealType[] = ['brunch', 'midnight_meal'];
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -274,8 +277,8 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
       <IonCard style={{ borderRadius: 'var(--md-shape-xl)', margin: '8px 16px 16px' }}>
         <IonCardContent style={{ padding: '8px 0 12px' }}>
           {loading ? (
-            <>
-              {[1, 2, 3, 4, 5, 6].map((i) => (
+            <>  
+              {[1, 2, 3, 4].map((i) => (
                 <React.Fragment key={i}>
                   <IonListHeader style={{ '--color': 'var(--md-primary)', fontSize: 'var(--md-label-lg)' } as React.CSSProperties}>
                     <IonSkeletonText animated style={{ width: 80 }} />
@@ -287,7 +290,9 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
               ))}
             </>
           ) : (
-            MEALS.map(renderCategory)
+            MEALS.filter(m =>
+              !OPTIONAL_MEALS.includes(m.id) || (grouped[m.id]?.length ?? 0) > 0
+            ).map(renderCategory)
           )}
         </IonCardContent>
       </IonCard>
