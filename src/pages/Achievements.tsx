@@ -33,7 +33,7 @@ import { toPng } from 'html-to-image';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
-import { useGamification, LEVELS } from '../hooks/useGamification';
+import { useGamification, getNextLevel } from '../hooks/useGamification';
 import { useAchievementCards } from '../hooks/useAchievementCards';
 import {
   DailyShareCard,
@@ -724,8 +724,8 @@ const AchievementsPage: React.FC = () => {
   });
 
   const totalBadges = CATEGORIES.reduce((sum, cat) => sum + earnedMilestones(cat.value(gam.counts)).length, 0);
-  const pct = gam.xpForLevel === Infinity ? 1 : gam.xpIntoLevel / gam.xpForLevel;
-  const nextLevel = LEVELS[Math.min(LEVELS.length - 1, LEVELS.indexOf(gam.level) + 1)];
+  const pct = gam.xpIntoLevel / gam.xpForLevel;
+  const nextLevel = getNextLevel(gam.xp);
 
   return (
     <IonPage>
@@ -772,11 +772,9 @@ const AchievementsPage: React.FC = () => {
                         transition: 'width 0.6s ease',
                       }} />
                     </div>
-                    {gam.xpForLevel !== Infinity && gam.level !== nextLevel && (
-                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 10, color: 'var(--md-on-surface-variant)', marginTop: 2 }}>
-                        {gam.xpIntoLevel} / {gam.xpForLevel} to {nextLevel.name}
-                      </div>
-                    )}
+                    <div style={{ fontFamily: 'var(--md-font)', fontSize: 10, color: 'var(--md-on-surface-variant)', marginTop: 2 }}>
+                      {gam.xpIntoLevel} / {gam.xpForLevel} to {nextLevel.name}
+                    </div>
                   </div>
                 </div>
 

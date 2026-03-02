@@ -7,37 +7,90 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getDb } from '../db/database';
 
-// ── Level thresholds ─────────────────────────────────────────────────────────
+// ── Infinite level system ────────────────────────────────────────────────────
+//
+// 5 named tiers cycle infinitely across eras. Each era costs 2× XP.
+//
+//  Era 1: 0 → 1 500 XP   (tier widths ×1)
+//  Era 2: 1 500 → 4 500  (tier widths ×2)
+//  Era 3: 4 500 → 10 500 (tier widths ×4)  … and so on forever.
+//
+// Tier names repeat (Seedling → Sprout → Achiever → Champion → Legend).
+// Era suffix added from era 2 onward: "Sprout II", "Legend III" …
+// Color cycles through 7 era palettes so the same tier looks different each time.
+
 export interface Level {
-  name: string;
+  name: string;   // e.g. "Sprout" or "Legend III"
   emoji: string;
   minXp: number;
-  maxXp: number; // exclusive; Infinity for Legend
-  color: string; // CSS color for badge accent
+  maxXp: number;  // always finite
+  color: string;
+  era: number;    // 1-based
+  tier: number;   // 0-based index within the 5-tier cycle
 }
 
-export const LEVELS: Level[] = [
-  { name: 'Seedling',  emoji: '\uD83C\uDF31', minXp: 0,    maxXp: 100,  color: '#9ECA7F' },
-  { name: 'Sprout',    emoji: '\uD83C\uDF3F', minXp: 100,  maxXp: 300,  color: '#5C7A6E' },
-  { name: 'Achiever',  emoji: '\uD83D\uDCA1', minXp: 300,  maxXp: 700,  color: '#F5A623' },
-  { name: 'Champion',  emoji: '\uD83C\uDFC6', minXp: 700,  maxXp: 1500, color: '#E8584F' },
-  { name: 'Legend',    emoji: '\uD83D\uDD25', minXp: 1500, maxXp: Infinity, color: '#9B59B6' },
+const TIER_NAMES   = ['Seedling', 'Sprout', 'Achiever', 'Champion', 'Legend'];
+const TIER_EMOJIS  = ['\uD83C\uDF31', '\uD83C\uDF3F', '\uD83D\uDCA1', '\uD83C\uDFC6', '\uD83D\uDD25'];
+// XP offsets from era start (unscaled — multiply by 2^(era-1))
+const TIER_OFFSETS = [0, 100, 300, 700, 1200];
+const ERA_BASE     = 1500; // total XP span of era 1
+
+// 7 accent colors — one per era, cycling
+const ERA_COLORS = [
+  '#9B59B6', // violet   (era 1)
+  '#3A6B8A', // ocean    (era 2)
+  '#2D6B44', // forest   (era 3)
+  '#C0392B', // crimson  (era 4)
+  '#B8860B', // gold     (era 5)
+  '#1A7A8A', // teal     (era 6)
+  '#8A4A2E', // bronze   (era 7)
 ];
 
-export function getLevel(xp: number): Level {
-  for (let i = LEVELS.length - 1; i >= 0; i--) {
-    if (xp >= LEVELS[i].minXp) return LEVELS[i];
-  }
-  return LEVELS[0];
+const ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+function romanNumeral(n: number): string {
+  return n <= ROMAN.length ? ROMAN[n - 1] : `E${n}`;
 }
 
-// ── Badge definitions ─────────────────────────────────────────────────────────
-export interface Badge {
-  id: string;
-  label: string;
-  emoji: string;
-  description: string;
-  earned: boolean;
+/** XP total at which era `n` (1-based) begins. */
+function eraStart(n: number): number {
+  // Sum of ERA_BASE × 2^0 + … + 2^(n-2) = ERA_BASE × (2^(n-1) - 1)
+  return ERA_BASE * (Math.pow(2, n - 1) - 1);
+}
+
+export function getLevel(xp: number): Level {
+  const safeXp = Math.max(0, xp);
+  // Determine era
+  let era = 1;
+  while (eraStart(era + 1) <= safeXp) era++;
+
+  const scale = Math.pow(2, era - 1);
+  const rel   = safeXp - eraStart(era); // XP within this era
+
+  // Determine tier (highest whose scaled offset ≤ rel)
+  let tier = 0;
+  for (let t = TIER_OFFSETS.length - 1; t >= 0; t--) {
+    if (rel >= TIER_OFFSETS[t] * scale) { tier = t; break; }
+  }
+
+  const tierMinXp = eraStart(era)  + TIER_OFFSETS[tier] * scale;
+  const tierMaxXp = tier < TIER_OFFSETS.length - 1
+    ? eraStart(era) + TIER_OFFSETS[tier + 1] * scale
+    : eraStart(era + 1);
+
+  return {
+    name:  era === 1 ? TIER_NAMES[tier] : `${TIER_NAMES[tier]} ${romanNumeral(era)}`,
+    emoji: TIER_EMOJIS[tier],
+    minXp: tierMinXp,
+    maxXp: tierMaxXp,
+    color: ERA_COLORS[(era - 1) % ERA_COLORS.length],
+    era,
+    tier,
+  };
+}
+
+/** Returns the Level that immediately follows the one for `xp`. */
+export function getNextLevel(xp: number): Level {
+  return getLevel(getLevel(Math.max(0, xp)).maxXp);
 }
 
 // ── Return shape ──────────────────────────────────────────────────────────────
@@ -45,10 +98,9 @@ export interface GamificationData {
   xp: number;
   level: Level;
   xpIntoLevel: number; // xp within current level band
-  xpForLevel: number;  // total width of current level band (Infinity for Legend)
+  xpForLevel: number;  // total width of current level band
   currentStreak: number;
   bestStreak: number;
-  badges: Badge[];
   loading: boolean;
   // per-category counts used by the Achievements badge shelves
   counts: {
@@ -113,12 +165,11 @@ function computeStreak(sortedDatesDesc: string[]): { current: number; best: numb
 export function useGamification(): GamificationData & { reload: () => void } {
   const [data, setData] = useState<GamificationData>({
     xp: 0,
-    level: LEVELS[0],
+    level: getLevel(0),
     xpIntoLevel: 0,
     xpForLevel: 100,
     currentStreak: 0,
     bestStreak: 0,
-    badges: [],
     loading: true,
     counts: {
       weightDays: 0,
@@ -136,11 +187,10 @@ export function useGamification(): GamificationData & { reload: () => void } {
 
       // ── Weight entries ────────────────────────────────────────────────────
       const wRes = await db.query(
-        `SELECT date, photo_path FROM weight_entries ORDER BY date ASC;`
+        `SELECT date FROM weight_entries ORDER BY date ASC;`
       );
-      const weightRows = wRes.values ?? [];
+      const weightRows  = wRes.values ?? [];
       const weightDates: string[] = weightRows.map((r: Record<string, unknown>) => r.date as string);
-      const weightPhotos = weightRows.filter((r: Record<string, unknown>) => !!r.photo_path).length;
 
       // ── Water entries + goal ──────────────────────────────────────────────
       const waterGoalRes = await db.query(
@@ -201,223 +251,9 @@ export function useGamification(): GamificationData & { reload: () => void } {
       }
 
       // ── Level ──────────────────────────────────────────────────────────────
-      const level = getLevel(xp);
+      const level       = getLevel(xp);
       const xpIntoLevel = xp - level.minXp;
-      const xpForLevel = level.maxXp === Infinity ? 500 : level.maxXp - level.minXp;
-
-      // ── Badges ────────────────────────────────────────────────────────────
-      const badges: Badge[] = [
-        // ── Streak badges ────────────────────────────────────────────────────
-        {
-          id: 'consistent',
-          label: 'Consistent',
-          emoji: '\u2B50',
-          description: '7-day logging streak',
-          earned: bestStreak >= 7,
-        },
-        {
-          id: 'on_a_roll',
-          label: 'On a Roll',
-          emoji: '\uD83D\uDD25',
-          description: '14-day logging streak',
-          earned: bestStreak >= 14,
-        },
-        {
-          id: 'month_strong',
-          label: 'Month Strong',
-          emoji: '\uD83D\uDCAA',
-          description: '30-day logging streak',
-          earned: bestStreak >= 30,
-        },
-        {
-          id: 'centurion',
-          label: 'Centurion',
-          emoji: '\uD83C\uDFC6',
-          description: '100-day logging streak',
-          earned: bestStreak >= 100,
-        },
-        {
-          id: 'tri_centurion',
-          label: 'Tri-Centurion',
-          emoji: '\uD83D\uDC8E',
-          description: '300-day logging streak',
-          earned: bestStreak >= 300,
-        },
-        {
-          id: 'half_millennium',
-          label: 'Half Millennium',
-          emoji: '\uD83C\uDF0C',
-          description: '500-day logging streak',
-          earned: bestStreak >= 500,
-        },
-        {
-          id: 'gold_standard',
-          label: 'Gold Standard',
-          emoji: '\uD83E\uDD47',
-          description: '750-day logging streak',
-          earned: bestStreak >= 750,
-        },
-        {
-          id: 'millennium',
-          label: 'Millennium',
-          emoji: '\uD83D\uDCA0',
-          description: '1,000-day logging streak',
-          earned: bestStreak >= 1000,
-        },
-        {
-          id: 'double_millennium',
-          label: 'Double Millennium',
-          emoji: '\uD83D\uDD2E',
-          description: '2,000-day logging streak',
-          earned: bestStreak >= 2000,
-        },
-        {
-          id: 'legend_forever',
-          label: 'Legend Forever',
-          emoji: '\uD83C\uDF20',
-          description: '5,000-day logging streak',
-          earned: bestStreak >= 5000,
-        },
-        {
-          id: 'eternal',
-          label: 'Eternal',
-          emoji: '\u267E\uFE0F',
-          description: '10,000-day logging streak',
-          earned: bestStreak >= 10000,
-        },
-        // ── Weight badges ─────────────────────────────────────────────────────
-        {
-          id: 'first_step',
-          label: 'First Step',
-          emoji: '\uD83D\uDC63',
-          description: 'Log your first weight entry',
-          earned: weightDates.length >= 1,
-        },
-        {
-          id: 'scale_master',
-          label: 'Scale Master',
-          emoji: '\u2696\uFE0F',
-          description: 'Log 50 weight entries',
-          earned: weightDates.length >= 50,
-        },
-        {
-          id: 'weight_warrior',
-          label: 'Weight Warrior',
-          emoji: '\uD83E\uDD4A',
-          description: 'Log 100 weight entries',
-          earned: weightDates.length >= 100,
-        },
-        {
-          id: 'transformation',
-          label: 'Transformation',
-          emoji: '\uD83E\uDD8B',
-          description: 'Log 365 weight entries',
-          earned: weightDates.length >= 365,
-        },
-        // ── Photo badges ──────────────────────────────────────────────────────
-        {
-          id: 'photo_journalist',
-          label: 'Photo Journalist',
-          emoji: '\uD83D\uDCF8',
-          description: 'Log 10 weight entries with photos',
-          earned: weightPhotos >= 10,
-        },
-        {
-          id: 'photo_pro',
-          label: 'Photo Pro',
-          emoji: '\uD83C\uDFA5',
-          description: 'Log 50 weight entries with photos',
-          earned: weightPhotos >= 50,
-        },
-        // ── Water badges ──────────────────────────────────────────────────────
-        {
-          id: 'hydration_hero',
-          label: 'Hydration Hero',
-          emoji: '\uD83D\uDCA7',
-          description: 'Hit your water goal 7 days',
-          earned: waterGoalDays >= 7,
-        },
-        {
-          id: 'hydration_king',
-          label: 'Hydration King',
-          emoji: '\uD83C\uDF0A',
-          description: 'Hit your water goal 30 days',
-          earned: waterGoalDays >= 30,
-        },
-        {
-          id: 'water_warrior',
-          label: 'Water Warrior',
-          emoji: '\uD83C\uDFCA',
-          description: 'Hit your water goal 100 days',
-          earned: waterGoalDays >= 100,
-        },
-        {
-          id: 'ocean_drinker',
-          label: 'Ocean Drinker',
-          emoji: '\uD83C\uDF0D',
-          description: 'Hit your water goal 365 days',
-          earned: waterGoalDays >= 365,
-        },
-        // ── Sleep badges ──────────────────────────────────────────────────────
-        {
-          id: 'night_owl',
-          label: 'Night Owl',
-          emoji: '\uD83C\uDF19',
-          description: 'Log sleep 7 times',
-          earned: sleepDates.length >= 7,
-        },
-        {
-          id: 'sleep_tracker',
-          label: 'Sleep Tracker',
-          emoji: '\uD83D\uDE34',
-          description: 'Log sleep 30 times',
-          earned: sleepDates.length >= 30,
-        },
-        {
-          id: 'dream_logger',
-          label: 'Dream Logger',
-          emoji: '\uD83D\uDCAB',
-          description: 'Log sleep 100 times',
-          earned: sleepDates.length >= 100,
-        },
-        // ── Food badges ───────────────────────────────────────────────────────
-        {
-          id: 'foodie',
-          label: 'Foodie',
-          emoji: '\uD83C\uDF7D\uFE0F',
-          description: 'Log 10 food entries',
-          earned: foodCount >= 10,
-        },
-        {
-          id: 'meal_planner',
-          label: 'Meal Planner',
-          emoji: '\uD83D\uDDD3\uFE0F',
-          description: 'Log 50 food entries',
-          earned: foodCount >= 50,
-        },
-        {
-          id: 'chefs_log',
-          label: "Chef's Log",
-          emoji: '\uD83D\uDC68\u200D\uD83C\uDF73',
-          description: 'Log 200 food entries',
-          earned: foodCount >= 200,
-        },
-        // ── XP badges ─────────────────────────────────────────────────────────
-        {
-          id: 'power_user',
-          label: 'Power User',
-          emoji: '\u26A1',
-          description: 'Reach 500 XP',
-          earned: xp >= 500,
-        },
-        {
-          id: 'dedicated',
-          label: 'Dedicated',
-          emoji: '\uD83C\uDF1F',
-          description: 'Reach 2,000 XP',
-          earned: xp >= 2000,
-        },
-      ];
+      const xpForLevel  = level.maxXp - level.minXp;
 
       setData({
         xp,
@@ -426,7 +262,6 @@ export function useGamification(): GamificationData & { reload: () => void } {
         xpForLevel,
         currentStreak,
         bestStreak,
-        badges,
         loading: false,
         counts: {
           weightDays: weightDates.length,
