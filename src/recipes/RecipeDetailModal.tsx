@@ -21,10 +21,12 @@ import type { Recipe } from './recipeData';
 import type { MealType } from '../hooks/useFoodLog';
 
 const LOG_MEALS: { id: MealType; label: string; emoji: string }[] = [
-  { id: 'breakfast', label: 'Breakfast', emoji: '\uD83C\uDF05' },
-  { id: 'lunch',     label: 'Lunch',     emoji: '\uD83E\uDD57' },
-  { id: 'dinner',    label: 'Dinner',    emoji: '\uD83C\uDF7D\uFE0F' },
-  { id: 'snack',     label: 'Snack',     emoji: '\uD83C\uDF4E' },
+  { id: 'breakfast',     label: 'Breakfast',     emoji: '\uD83C\uDF05' },
+  { id: 'lunch',         label: 'Lunch',         emoji: '\uD83E\uDD57' },
+  { id: 'dinner',        label: 'Dinner',        emoji: '\uD83C\uDF7D\uFE0F' },
+  { id: 'snack',         label: 'Snack',         emoji: '\uD83C\uDF4E' },
+  { id: 'brunch',        label: 'Brunch',        emoji: '\uD83E\uDD5E' },
+  { id: 'midnight_meal', label: 'Midnight Meal', emoji: '\uD83C\uDF19' },
 ];
 
 interface Props {

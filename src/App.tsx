@@ -8,6 +8,7 @@ import {
   IonTabBar,
   IonTabButton,
   IonTabs,
+  useIonAlert,
   useIonRouter,
   setupIonicReact,
 } from '@ionic/react';
@@ -72,6 +73,7 @@ setupIonicReact();
  */
 const BackButtonHandler: React.FC = () => {
   const ionRouter = useIonRouter();
+  const [presentAlert] = useIonAlert();
 
   useEffect(() => {
     let listenerHandle: Awaited<ReturnType<typeof CapApp.addListener>> | null = null;
@@ -80,14 +82,20 @@ const BackButtonHandler: React.FC = () => {
       if (ionRouter.canGoBack()) {
         ionRouter.goBack();
       } else {
-        CapApp.exitApp();
+        presentAlert({
+          header: 'Exit Patty?',
+          buttons: [
+            { text: 'Cancel', role: 'cancel' },
+            { text: 'Exit', role: 'confirm', handler: () => CapApp.exitApp() },
+          ],
+        });
       }
     }).then(h => { listenerHandle = h; });
 
     return () => {
       listenerHandle?.remove();
     };
-  }, [ionRouter]);
+  }, [ionRouter, presentAlert]);
 
   return null;
 };

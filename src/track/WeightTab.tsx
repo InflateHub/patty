@@ -187,7 +187,10 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
 
       {/* â”€â”€ Today stat card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {!loading && (
-        <IonCard>
+        <IonCard
+          onClick={() => setModalOpen(true)}
+          style={{ cursor: 'pointer' } as React.CSSProperties}
+        >
           <IonCardContent>
             <div style={{ textAlign: 'center', padding: '24px 0 16px' }}>
               <div style={{

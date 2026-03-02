@@ -33,10 +33,12 @@ import { formatTime, today } from './trackUtils';
 /* ── Constants ───────────────────────────────────────────────────────── */
 
 const MEALS: { id: MealType; label: string; emoji: string }[] = [
-  { id: 'breakfast', label: 'Breakfast', emoji: '🌅' },
-  { id: 'lunch',     label: 'Lunch',     emoji: '🥗' },
-  { id: 'dinner',    label: 'Dinner',    emoji: '🍽️' },
-  { id: 'snack',     label: 'Snack',     emoji: '🍎' },
+  { id: 'breakfast',     label: 'Breakfast',     emoji: '🌅' },
+  { id: 'lunch',         label: 'Lunch',         emoji: '🥗' },
+  { id: 'dinner',        label: 'Dinner',        emoji: '🍽️' },
+  { id: 'snack',         label: 'Snack',         emoji: '🍎' },
+  { id: 'brunch',        label: 'Brunch',        emoji: '🥞' },
+  { id: 'midnight_meal', label: 'Midnight Meal', emoji: '🌙' },
 ];
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
@@ -118,8 +120,8 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
 
   /* ── Handlers ────────────────────────────────────────────────────── */
 
-  function openModal() {
-    setSelectedMeal('breakfast');
+  function openModal(prefillMeal?: MealType) {
+    setSelectedMeal(prefillMeal ?? 'breakfast');
     setPhotoUri(undefined);
     setNote('');
     setKcal('');
@@ -209,7 +211,10 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
     const items = grouped[meal.id];
     return (
       <React.Fragment key={meal.id}>
-        <IonListHeader style={{ '--color': 'var(--md-primary)', fontSize: 'var(--md-label-lg)', letterSpacing: '0.08em', textTransform: 'uppercase' } as React.CSSProperties}>
+        <IonListHeader
+          onClick={() => openModal(meal.id)}
+          style={{ '--color': 'var(--md-primary)', fontSize: 'var(--md-label-lg)', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' } as React.CSSProperties}
+        >
           {meal.emoji} {meal.label}
         </IonListHeader>
         <IonList style={{ background: 'transparent', paddingBottom: 4 }}>
@@ -270,7 +275,7 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
         <IonCardContent style={{ padding: '8px 0 12px' }}>
           {loading ? (
             <>
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <React.Fragment key={i}>
                   <IonListHeader style={{ '--color': 'var(--md-primary)', fontSize: 'var(--md-label-lg)' } as React.CSSProperties}>
                     <IonSkeletonText animated style={{ width: 80 }} />

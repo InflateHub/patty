@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { getDb } from '../db/database';
 import { savePhotoFile, loadPhotoFile, deletePhotoFile } from '../utils/photoStorage';
 
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'brunch' | 'midnight_meal';
 
 export interface FoodEntry {
   id: string;
@@ -127,10 +127,12 @@ export function useFoodLog() {
     (date: string): Record<MealType, FoodEntry[]> => {
       const all = entriesForDate(date);
       return {
-        breakfast: all.filter((e) => e.meal === 'breakfast'),
-        lunch: all.filter((e) => e.meal === 'lunch'),
-        dinner: all.filter((e) => e.meal === 'dinner'),
-        snack: all.filter((e) => e.meal === 'snack'),
+        breakfast:    all.filter((e) => e.meal === 'breakfast'),
+        lunch:        all.filter((e) => e.meal === 'lunch'),
+        dinner:       all.filter((e) => e.meal === 'dinner'),
+        snack:        all.filter((e) => e.meal === 'snack'),
+        brunch:       all.filter((e) => e.meal === 'brunch'),
+        midnight_meal: all.filter((e) => e.meal === 'midnight_meal'),
       };
     },
     [entriesForDate]

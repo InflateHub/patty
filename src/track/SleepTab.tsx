@@ -201,7 +201,10 @@ export const SleepTab: React.FC<SleepTabProps> = ({ openTrigger, onAlreadyLogged
 
       {/* ── Last Night stat card ───────────────────────────────────── */}
       {!loading && (
-      <IonCard>
+      <IonCard
+        onClick={openModal}
+        style={{ cursor: 'pointer' } as React.CSSProperties}
+      >
         <IonCardContent>
             <div style={{ textAlign: 'center', padding: '24px 0 16px' }}>
             <div style={{

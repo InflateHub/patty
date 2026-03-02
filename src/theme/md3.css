@@ -379,12 +379,12 @@ ion-segment {
 
 ion-segment-button {
   --background: transparent;
-  --background-checked: var(--md-surface-container-lowest);
+  --background-checked: var(--md-primary-container);
   --color: var(--md-on-surface-variant);
-  --color-checked: var(--md-on-surface);
+  --color-checked: var(--md-on-primary-container);
   --border-radius: var(--md-shape-full);
   --indicator-box-shadow: none;
-  --indicator-color: var(--md-surface-container-lowest);
+  --indicator-color: var(--md-primary-container);
   --indicator-height: 100%;
   --indicator-border-radius: var(--md-shape-full);
   --indicator-transition: transform var(--md-duration-md) var(--md-easing-spring);
@@ -393,6 +393,24 @@ ion-segment-button {
   font-weight: 500;
   letter-spacing: .00625em;
   transition: color var(--md-duration-sm) var(--md-easing-standard);
+}
+
+/* ── Focus rings — border-radius-aware (replaces rectangular browser outline) */
+ion-segment-button::part(native):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--md-primary);
+  border-radius: var(--md-shape-full);
+}
+
+ion-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--md-primary);
+}
+
+ion-button::part(native):focus-visible,
+ion-fab-button::part(native):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--md-primary);
 }
 
 /* ── Datetime ────────────────────────────────────────────────────────────── */

@@ -2,6 +2,20 @@
 
 ---
 
+## [2.1.0] — UX Fixes & Polish
+*Goal: resolve the most visible friction points and interaction gaps found in the 2.0.0 build.*
+
+- [x] **Exit confirmation** — Android hardware back button on root tab views now shows an `IonAlert` ("Exit Patty?" / Cancel / Exit) via `useIonAlert` in `BackButtonHandler`
+- [x] **Weight stat card clickable** — tapping the "Today" stat card on the Weight tab opens the Add Weight modal directly
+- [x] **Sleep stat card clickable** — tapping the "Last Night" stat card on the Sleep tab opens the Add Sleep modal directly
+- [x] **Meal section headers clickable** — each meal section heading (Breakfast / Lunch / Dinner / Snack / Brunch / Midnight Meal) opens the Add Food modal pre-filled with that meal type
+- [x] **Brunch & Midnight Meal** — `MealType` extended with `'brunch'` and `'midnight_meal'`; both appear in the food log modal chip row, the food tab grouped list (`FoodTab.tsx`), and the recipe log-meal picker (`RecipeDetailModal.tsx`)
+- [x] **Segment pill theme colour** — active segment indicator and label now use `--md-primary-container` / `--md-on-primary-container` tokens; follows the user's chosen seed colour automatically
+- [x] **Recipe deletion confirmation** — deleting a recipe (seed or custom) shows an `IonAlert` with the recipe name and a destructive Delete button before the delete executes
+- [x] **Curved button focus ring** — rectangular browser `outline` removed from `IonSegmentButton`, `IonChip`, and `IonButton`/`IonFabButton`; replaced with a 2 px `box-shadow` ring in `--md-primary` that respects `border-radius`
+
+---
+
 ## [2.0.0] — Stable Release & Codebase Cleanup
 *Goal: mark the app as stable 2.0.0, eliminate all lint errors/warnings, and bump all version strings.*
 

@@ -12,6 +12,7 @@ import {
   IonSearchbar,
   IonTitle,
   IonToolbar,
+  useIonAlert,
 } from '@ionic/react';
 import { add, timeOutline } from 'ionicons/icons';
 import type { Recipe } from '../recipes/recipeData';
@@ -30,6 +31,7 @@ const Recipes: React.FC = () => {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<AnyRecipe | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [presentAlert] = useIonAlert();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -41,14 +43,30 @@ const Recipes: React.FC = () => {
     );
   }, [query, allRecipes]);
 
-  async function handleDelete() {
+  function handleDelete() {
     if (!selected) return;
-    if (selected.custom) {
-      await deleteRecipe(selected.id);
-    } else {
-      await deleteSeedRecipe(selected.id);
-    }
-    setSelected(null);
+    const name = selected.name;
+    const id = selected.id;
+    const isCustom = selected.custom;
+    presentAlert({
+      header: 'Delete recipe?',
+      message: name,
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: async () => {
+            if (isCustom) {
+              await deleteRecipe(id);
+            } else {
+              await deleteSeedRecipe(id);
+            }
+            setSelected(null);
+          },
+        },
+      ],
+    });
   }
 
   async function handleLogMeal(meal: MealType, kcal?: number) {
