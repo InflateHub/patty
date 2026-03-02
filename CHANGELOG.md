@@ -2,6 +2,20 @@
 
 ---
 
+## [2.3.1] — Sleep Tab Redesign
+*Goal: replace the minimal single-log sleep tab with a rich, always-editable experience.*
+
+- [x] **24 h SVG arc card** — circular clock face (midnight at top) showing the sleep window as a coloured arc with filled bedtime dot and hollow wake dot; duration + score label centred inside
+- [x] **Sleep score** — composite label (Great / Good / Fair / Poor) derived from duration vs 8-hour goal and star quality rating; shown inside the arc and as bar colour in the 7-night chart
+- [x] **Goal progress bar** — thin bar below the arc showing proportion of the 8-hour goal met; animated fill
+- [x] **7-night bar chart** — `WeekBars` sub-component; Mon–Sun bars coloured by sleep score; today highlighted with an outline ring; empty days shown in muted surface-variant colour
+- [x] **Edit mode** — FAB always enabled; tapping it opens the modal pre-filled with today's entry if one exists (edit) or blank (log new); `updateEntry` SQL UPDATE added to `useSleepLog`
+- [x] **Collapsible history** — "All history" section hidden by default; toggle button reveals the full swipe-to-delete IonItemSliding list
+- [x] **`useSleepLog` — `updateEntry`** — new callback performs SQL UPDATE on `sleep_entries` and reloads the list
+- [x] **`Track.tsx` cleanup** — removed `sleepAlreadyLogged` state and `disabled` prop on FAB; removed `onAlreadyLoggedChange` prop from `SleepTab`
+
+---
+
 ## [2.3.0] — Workout Tab
 *Goal: add a fifth Track tab for logging exercise, with a full variety of workout types.*
 

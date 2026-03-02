@@ -85,6 +85,27 @@ export function useSleepLog() {
     [loadAll]
   );
 
+  const updateEntry = useCallback(
+    async (id: string, bedtime: string, waketime: string, quality: number, note?: string) => {
+      const date = bedtime.slice(0, 10);
+      const durationMin = Math.round(
+        (new Date(waketime).getTime() - new Date(bedtime).getTime()) / 60_000
+      );
+      try {
+        const db = getDb();
+        await db.run(
+          'UPDATE sleep_entries SET date = ?, bedtime = ?, waketime = ?, duration_min = ?, quality = ?, note = ? WHERE id = ?;',
+          [date, bedtime, waketime, durationMin, quality, note ?? null, id]
+        );
+        await loadAll();
+      } catch (err) {
+        console.error('Failed to update sleep entry:', err);
+        throw err;
+      }
+    },
+    [loadAll]
+  );
+
   const deleteEntry = useCallback(
     async (id: string) => {
       try {
@@ -106,5 +127,5 @@ export function useSleepLog() {
 
   const lastNightEntry = entries[0] ?? null;
 
-  return { entries, lastNightEntry, loading, addEntry, deleteEntry, avgDurationMin, reload: loadAll };
+  return { entries, lastNightEntry, loading, addEntry, updateEntry, deleteEntry, avgDurationMin, reload: loadAll };
 }

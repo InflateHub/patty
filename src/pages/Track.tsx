@@ -32,11 +32,10 @@ const TAB_META: Record<TabId, { icon: string; label: string }> = {
 const Track: React.FC = () => {
   const [tab, setTab] = useState<TabId>('weight');
   const [fabTrigger, setFabTrigger] = useState(0);
-  const [sleepAlreadyLogged, setSleepAlreadyLogged] = useState(false);
 
   function handleTabChange(next: TabId) {
     setTab(next);
-    setFabTrigger(0); // reset so the new tab doesn't open its modal on mount
+    setFabTrigger(0);
   }
 
   return (
@@ -64,19 +63,13 @@ const Track: React.FC = () => {
       <IonContent fullscreen>
         {tab === 'weight'  && <WeightTab  openTrigger={fabTrigger} />}
         {tab === 'water'   && <WaterTab   openTrigger={fabTrigger} />}
-        {tab === 'sleep'   && (
-          <SleepTab
-            openTrigger={fabTrigger}
-            onAlreadyLoggedChange={setSleepAlreadyLogged}
-          />
-        )}
+        {tab === 'sleep'   && <SleepTab openTrigger={fabTrigger} />}
         {tab === 'food'    && <FoodTab    openTrigger={fabTrigger} />}
         {tab === 'workout' && <WorkoutTab openTrigger={fabTrigger} />}
 
         {/* Single contextual FAB — icon and disabled state follow active tab */}
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
           <IonFabButton
-            disabled={tab === 'sleep' && sleepAlreadyLogged}
             onClick={() => setFabTrigger((n) => n + 1)}
             style={{ '--background': 'var(--md-primary-container)', '--color': 'var(--md-on-primary-container)' } as React.CSSProperties}
           >
