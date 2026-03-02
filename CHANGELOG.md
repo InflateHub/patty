@@ -2,6 +2,19 @@
 
 ---
 
+## [2.7.0] — Achievements Page Complete Redesign
+*Goal: replace the old Achievements page with a pure achievement collection driven by logging activity.*
+
+- [x] **Delete Progress.tsx** — old dead photo-gallery + trend-charts page removed
+- [x] **Hero card** — XP, level, progress bar, total badges earned, current + best streak
+- [x] **Infinite badge shelves** — six categories (Weight / Water / Sleep / Food / Workout / App Streak) each generating badges from the same infinite milestone ladder as Habits
+- [x] **Earned badges** are tappable; opens a share modal to share the badge as an image
+- [x] **Next-locked badge** shows a 🔒 overlay + "X more" nudge; one ghost preview beyond
+- [x] **Shareable cards** — Daily / Weekly / Monthly / Yearly / Lifetime; unearned show lock overlay with the unlock condition text
+- [x] `useGamification` extended with `counts` object (per-category totals) used by badge shelves
+
+---
+
 ## [2.6.0] — Notifications & Profile Polish
 *Goal: clean up the Notifications page footer and add production-grade tappable links to the App Info card.*
 

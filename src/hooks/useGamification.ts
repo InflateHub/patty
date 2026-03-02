@@ -50,6 +50,15 @@ export interface GamificationData {
   bestStreak: number;
   badges: Badge[];
   loading: boolean;
+  // per-category counts used by the Achievements badge shelves
+  counts: {
+    weightDays: number;       // unique dates with a weight entry
+    waterGoalDays: number;    // days where water goal was met
+    sleepDays: number;        // unique dates with a sleep entry
+    foodEntries: number;      // total food log rows
+    workoutDays: number;      // unique dates with a workout entry
+    appStreakBest: number;    // same as bestStreak (any-log activity)
+  };
 }
 
 // ── Helper ────────────────────────────────────────────────────────────────────
@@ -111,6 +120,14 @@ export function useGamification(): GamificationData & { reload: () => void } {
     bestStreak: 0,
     badges: [],
     loading: true,
+    counts: {
+      weightDays: 0,
+      waterGoalDays: 0,
+      sleepDays: 0,
+      foodEntries: 0,
+      workoutDays: 0,
+      appStreakBest: 0,
+    },
   });
 
   const compute = useCallback(async () => {
@@ -154,6 +171,12 @@ export function useGamification(): GamificationData & { reload: () => void } {
         `SELECT COUNT(*) as cnt FROM food_entries;`
       );
       const foodCount = (foodRes.values?.[0]?.cnt as number) ?? 0;
+
+      // ── Workout entries ───────────────────────────────────────────────────
+      const workoutRes = await db.query(
+        `SELECT DISTINCT date FROM workout_entries ORDER BY date ASC;`
+      );
+      const workoutDates: string[] = (workoutRes.values ?? []).map((r: Record<string, unknown>) => r.date as string);
 
       // ── XP calculation ────────────────────────────────────────────────────
       let xp = 0;
@@ -405,6 +428,14 @@ export function useGamification(): GamificationData & { reload: () => void } {
         bestStreak,
         badges,
         loading: false,
+        counts: {
+          weightDays: weightDates.length,
+          waterGoalDays,
+          sleepDays: sleepDates.length,
+          foodEntries: foodCount,
+          workoutDays: workoutDates.length,
+          appStreakBest: bestStreak,
+        },
       });
     } catch (err) {
       console.error('useGamification error:', err);

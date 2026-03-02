@@ -123,15 +123,16 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 2.7.0 — Progress Page Redesign
-*Goal: strip the Achievements/progress page to its most valuable content and give it a fresh layout.*
+## 2.7.0 — Achievements Page Complete Redesign ✅
+*Goal: replace the old Achievements page with a pure achievement collection: infinite per-category badge shelves + locked shareable cards.*
 
-- [ ] **Remove Habit Rings** — the 7-day × 4-habit dot grid is removed entirely
-- [ ] **Remove badge shelf** from this page (badges live on the Habits page)
-- [ ] **Retained:** Weight Journey photo marquee (hero); Gamification XP/level card
-- [ ] **New layout:** full-bleed photo marquee at top → XP/level card → shareable card carousel → empty state if no data
-- [ ] Weight Journey empty state: illustrated prompt "Log your first weigh-in to start your journey"
-- [ ] Shareable cards: Daily / Weekly / Monthly / Yearly — tapping opens a preview modal with a Share and Download button
+- [x] **Delete Progress.tsx** — the old dead photo-gallery + trend-charts page removed entirely
+- [x] **Delete photo marquee & habit rings** — removed from Achievements page
+- [x] **Hero card** — XP · level · progress bar · total badges earned · current + best streak
+- [x] **Infinite badge shelves** — one shelf per category (Weight / Water / Sleep / Food / Workout / App Streak); uses same milestone ladder as Habits (3 → 7 → 14 → 21 → 30 → every 30 → every 100 → every 365)
+- [x] **Earned badges** coloured + tappable → share modal; **next locked** shows 🔒 + "X more" nudge; **+1 ghost** preview beyond that
+- [x] **Shareable cards** — Daily / Weekly / Monthly / Yearly / Lifetime; unearned cards show lock overlay with unlock condition; earned cards show share button
+- [x] `useGamification` extended with `counts` (per-category log totals) to drive all badge shelves without a new hook
 
 ---
 

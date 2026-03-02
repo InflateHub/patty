@@ -1,11 +1,13 @@
 /**
- * Achievements — the redesigned Progress tab (v2.0.0)
+ * Achievements — 2.7.0
  *
- * Sections:
- *  1. Weight Photo Marquee   — horizontal hero, newest→oldest, delta chips
- *  2. Shareable Cards        — page-snap: Daily / Weekly / Monthly / Yearly
- *  3. Gamification           — XP bar, level, current/best streaks, badge shelf
- *  4. Habit Rings            — 7-day dot grid (Weight · Water · Sleep · Food)
+ * Pure achievement collection page. Sections:
+ *  1. Hero card — XP · level progress bar · total badges earned
+ *  2. Badge shelves — one horizontal shelf per logging category
+ *     Each shelf uses the same infinite milestone ladder as Habits.
+ *     Earned = full colour. Next locked = 🔒 + "X more" nudge. +1 ghost.
+ *  3. Shareable cards — Daily / Weekly / Monthly / Yearly
+ *     Not-yet-unlocked cards show a lock overlay.
  */
 import React, { useCallback, useRef, useState } from 'react';
 import {
@@ -26,17 +28,11 @@ import {
   useIonViewWillEnter,
 } from '@ionic/react';
 import { IonIcon } from '@ionic/react';
-import {
-  shareOutline,
-  trophyOutline,
-  flameOutline,
-  checkmarkCircle,
-} from 'ionicons/icons';
+import { lockClosedOutline, shareOutline } from 'ionicons/icons';
 import { toPng } from 'html-to-image';
 import { Share } from '@capacitor/share';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
-import { useWeightLog } from '../hooks/useWeightLog';
 import { useGamification, LEVELS } from '../hooks/useGamification';
 import { useAchievementCards } from '../hooks/useAchievementCards';
 import {
@@ -47,232 +43,234 @@ import {
   LifetimeShareCard,
 } from '../progress/ShareCard';
 
-// ── Shared style tokens ───────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Infinite milestone ladder — identical logic to Habits page
+// ─────────────────────────────────────────────────────────────────────────────
 
-const S = {
-  sectionHeader: {
-    color: 'var(--md-primary)',
-    fontFamily: 'var(--md-font)',
-    fontSize: 'var(--md-label-lg)',
-    fontWeight: 700,
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase' as const,
-  },
-  card: {
-    margin: '0 16px 8px',
-    borderRadius: 'var(--md-shape-xl)',
-    border: '1px solid var(--md-outline-variant)',
-    boxShadow: 'none',
-    background: 'var(--md-surface-container-low)',
-  } as React.CSSProperties,
-};
-
-// ── Marquee card dimensions ───────────────────────────────────────────────────
-
-const MARQUEE_W = 140;
-const MARQUEE_H = 190;
-
-// ── Section: Weight Photo Marquee ─────────────────────────────────────────────
-
-interface MarqueeCardProps {
-  uri?: string;
-  value: number;
-  unit: string;
-  date: string;
-  delta: number | null; // kg / lbs vs previous entry (positive = gained)
+function milestonesUpTo(value: number): number[] {
+  const fixed = [3, 7, 14, 21, 30];
+  const all: number[] = [...fixed];
+  if (value >= 31) for (let m = 60; m <= Math.min(value + 60, 9999); m += 30) all.push(m);
+  if (value >= 365) for (let m = 365; m <= Math.min(value + 100, 9999); m += 100) all.push(m);
+  if (value >= 1000) for (let m = 1000; m <= value + 365; m += 365) all.push(m);
+  return all;
 }
 
-const MarqueeCard: React.FC<MarqueeCardProps> = ({ uri, value, unit, date, delta }) => {
-  const [expanded, setExpanded] = useState(false);
+/** Returns the next milestone strictly above `value`, or null if very high. */
+function nextMilestone(value: number): number | null {
+  const all = milestonesUpTo(value + 400);
+  return all.find(m => m > value) ?? null;
+}
+
+/** Returns all milestones <= value */
+function earnedMilestones(value: number): number[] {
+  return milestonesUpTo(value).filter(m => m <= value);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Category definitions
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface Category {
+  id: string;
+  emoji: string;
+  label: string;
+  value: (counts: ReturnType<typeof useGamification>['counts']) => number;
+  unit: string;           // e.g. "days"
+  color: string;
+  badgeNames: (n: number) => string;
+}
+
+const CATEGORIES: Category[] = [
+  {
+    id: 'weight',
+    emoji: '⚖️',
+    label: 'Weight Logger',
+    value: c => c.weightDays,
+    unit: 'days',
+    color: '#5C7A6E',
+    badgeNames: n => `${n}-Day Weigh-In`,
+  },
+  {
+    id: 'water',
+    emoji: '💧',
+    label: 'Hydration Hero',
+    value: c => c.waterGoalDays,
+    unit: 'goal days',
+    color: '#3A6B8A',
+    badgeNames: n => `${n}-Day Hydration`,
+  },
+  {
+    id: 'sleep',
+    emoji: '😴',
+    label: 'Sleep Tracker',
+    value: c => c.sleepDays,
+    unit: 'days',
+    color: '#7B5295',
+    badgeNames: n => `${n}-Day Sleep`,
+  },
+  {
+    id: 'food',
+    emoji: '🍽️',
+    label: 'Food Journal',
+    value: c => c.foodEntries,
+    unit: 'entries',
+    color: '#8A5A2E',
+    badgeNames: n => `${n} Meals Logged`,
+  },
+  {
+    id: 'workout',
+    emoji: '💪',
+    label: 'Workout Warrior',
+    value: c => c.workoutDays,
+    unit: 'days',
+    color: '#8A3A3A',
+    badgeNames: n => `${n}-Day Workout`,
+  },
+  {
+    id: 'streak',
+    emoji: '🌟',
+    label: 'App Streak',
+    value: c => c.appStreakBest,
+    unit: 'day best streak',
+    color: '#4A6A2E',
+    badgeNames: n => `${n}-Day Streak`,
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Badge chip
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface BadgeChipProps {
+  emoji: string;
+  label: string;
+  color: string;
+  earned: boolean;
+  locked: boolean;      // true = ghost (future)
+  nudge?: string;       // "7 more days" shown on next-locked badge
+  onTap?: () => void;
+}
+
+const BadgeChip: React.FC<BadgeChipProps> = ({ emoji, label, color, earned, locked, nudge, onTap }) => {
+  const opacity = locked ? 0.28 : 1;
 
   return (
-    <>
-      <div
-        onClick={() => uri && setExpanded(true)}
-        style={{
-          width: MARQUEE_W,
-          height: MARQUEE_H,
-          borderRadius: 'var(--md-shape-lg)',
-          overflow: 'hidden',
-          flexShrink: 0,
-          position: 'relative',
-          background: uri ? 'transparent' : 'var(--md-surface-container)',
-          border: uri ? 'none' : '2px dashed var(--md-outline-variant)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: uri ? 'flex-end' : 'center',
-          cursor: uri ? 'pointer' : 'default',
-        }}
-      >
-        {uri ? (
-          <>
-            <img
-              src={uri}
-              alt={date}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-            />
-            {/* Scrim */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '55%',
-                background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
-              }}
-            />
-            {/* Weight + delta */}
-            <div
-              style={{
-                position: 'relative',
-                zIndex: 1,
-                width: '100%',
-                padding: '8px 10px 10px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 3,
-              }}
-            >
-              <span style={{ color: '#fff', fontFamily: 'var(--md-font)', fontSize: 22, fontWeight: 300, lineHeight: 1 }}>
-                {value} <span style={{ fontSize: 13, opacity: 0.8 }}>{unit}</span>
-              </span>
-              {delta !== null && (
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: delta <= 0 ? '#9ECA7F' : '#F5A623',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {delta > 0 ? '+' : ''}{delta.toFixed(1)} {unit}
-                </span>
-              )}
-              <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 10 }}>
-                {new Date(date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-              </span>
-            </div>
-          </>
-        ) : (
-          <div style={{ textAlign: 'center', padding: 8 }}>
-            <div style={{ fontSize: 28, marginBottom: 4 }}>📷</div>
-            <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
-              No photo
-            </span>
-            <br />
-            <span style={{ fontFamily: 'var(--md-font)', fontSize: 22, fontWeight: 300, color: 'var(--md-on-surface)' }}>
-              {value} <span style={{ fontSize: 13 }}>{unit}</span>
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Fullscreen overlay */}
-      {expanded && uri && (
-        <div
-          onClick={() => setExpanded(false)}
-          style={{
-            position: 'fixed',
+    <div
+      onClick={earned ? onTap : undefined}
+      style={{
+        flexShrink: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 6,
+        width: 68,
+        cursor: earned ? 'pointer' : 'default',
+        opacity,
+      }}
+    >
+      {/* Circle */}
+      <div style={{
+        position: 'relative',
+        width: 52,
+        height: 52,
+        borderRadius: '50%',
+        background: earned
+          ? `radial-gradient(circle at 35% 30%, ${color}66, ${color}22)`
+          : 'var(--md-surface-container-high)',
+        border: earned
+          ? `2.5px solid ${color}`
+          : nudge
+            ? `2px dashed ${color}88`
+            : '2px solid var(--md-outline-variant)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 24,
+        boxShadow: earned ? `0 0 12px ${color}44` : 'none',
+        filter: locked ? 'grayscale(1)' : 'none',
+        transition: 'all 0.2s ease',
+      }}>
+        {/* Lock overlay for next-locked */}
+        {nudge && !earned && (
+          <div style={{
+            position: 'absolute',
             inset: 0,
-            zIndex: 9999,
-            background: 'rgba(0,0,0,0.92)',
+            borderRadius: '50%',
+            background: 'rgba(0,0,0,0.36)',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 12,
-          }}
-        >
-          <img
-            src={uri}
-            alt={date}
-            style={{
-              maxWidth: '90vw',
-              maxHeight: '80vh',
-              borderRadius: 16,
-              objectFit: 'contain',
-            }}
-          />
-          <span style={{ color: '#fff', opacity: 0.7, fontSize: 13 }}>
-            {value} {unit} · {new Date(date + 'T00:00:00').toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
-          </span>
-        </div>
-      )}
-    </>
+          }}>
+            <IonIcon icon={lockClosedOutline} style={{ fontSize: 18, color: '#fff' }} />
+          </div>
+        )}
+        <span style={{ fontSize: nudge && !earned ? 20 : 24, opacity: nudge && !earned ? 0.4 : 1 }}>
+          {emoji}
+        </span>
+      </div>
+
+      {/* Label */}
+      <span style={{
+        fontFamily: 'var(--md-font)',
+        fontSize: 9,
+        color: earned ? 'var(--md-on-surface)' : 'var(--md-on-surface-variant)',
+        textAlign: 'center',
+        lineHeight: 1.2,
+        maxWidth: 68,
+      }}>
+        {nudge && !earned ? nudge : label}
+      </span>
+    </div>
   );
 };
 
-// ── Section: Shareable Cards ──────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Badge detail modal (tapping an earned badge)
+// ─────────────────────────────────────────────────────────────────────────────
 
-const CARD_LABELS = ['Daily', 'Weekly', 'Monthly', 'Yearly', 'Lifetime'];
-const CARD_COLORS = ['#3D6659', '#2E4F66', '#5A3A6B', '#6B3A3A', '#2D3561'];
-
-interface ShareableSectionProps {
-  cards: ReturnType<typeof useAchievementCards>;
+interface BadgeDetail {
+  emoji: string;
+  label: string;
+  description: string;
+  color: string;
 }
 
-const ShareableSection: React.FC<ShareableSectionProps> = ({ cards }) => {
-  const dailyRef    = useRef<HTMLDivElement>(null);
-  const weeklyRef   = useRef<HTMLDivElement>(null);
-  const monthlyRef  = useRef<HTMLDivElement>(null);
-  const yearlyRef   = useRef<HTMLDivElement>(null);
-  const lifetimeRef = useRef<HTMLDivElement>(null);
-
-  const refs = [dailyRef, weeklyRef, monthlyRef, yearlyRef, lifetimeRef];
-
-  const [sharing, setSharing] = useState<number | null>(null);
+const BadgeDetailModal: React.FC<{
+  badge: BadgeDetail | null;
+  levelEmoji: string;
+  levelName: string;
+  onClose: () => void;
+}> = ({ badge, levelEmoji, levelName, onClose }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [sharing, setSharing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  const handleShare = useCallback(async (idx: number) => {
-    const ref = refs[idx];
-    if (!ref.current) return;
-    setSharing(idx);
+  const handleShare = async () => {
+    if (!ref.current || !badge) return;
+    setSharing(true);
     try {
-      const dataUrl = await toPng(ref.current, { cacheBust: true });
+      const dataUrl = await toPng(ref.current, { cacheBust: true, pixelRatio: 2 });
       const base64 = dataUrl.split(',')[1];
-      const fileName = `patty-achievement-${CARD_LABELS[idx].toLowerCase()}-${Date.now()}.png`;
-
+      const fileName = `patty-badge-${Date.now()}.png`;
       let shared = false;
-
-      // Try Capacitor native share
       try {
-        const { uri } = await Filesystem.writeFile({
-          path: fileName,
-          data: base64,
-          directory: Directory.Cache,
-        });
-        await Share.share({
-          title: `My ${CARD_LABELS[idx]} Achievements on Patty`,
-          files: [uri],
-        });
+        const { uri } = await Filesystem.writeFile({ path: fileName, data: base64, directory: Directory.Cache });
+        await Share.share({ title: `I earned the ${badge.label} badge on Patty!`, files: [uri] });
         shared = true;
-        // Clean up
         try { await Filesystem.deleteFile({ path: fileName, directory: Directory.Cache }); } catch { /* ok */ }
       } catch {
-        // Fallback: web native share with Blob
         if (navigator.share && navigator.canShare) {
           try {
             const res = await fetch(dataUrl);
             const blob = await res.blob();
             const file = new File([blob], fileName, { type: 'image/png' });
             if (navigator.canShare({ files: [file] })) {
-              await navigator.share({
-                title: `My ${CARD_LABELS[idx]} Achievements on Patty`,
-                files: [file],
-              });
+              await navigator.share({ title: `I earned the ${badge.label} badge on Patty!`, files: [file] });
               shared = true;
             }
           } catch { /* fall through */ }
         }
-        // Final fallback: download
         if (!shared) {
           const a = document.createElement('a');
           a.href = dataUrl;
@@ -281,147 +279,287 @@ const ShareableSection: React.FC<ShareableSectionProps> = ({ cards }) => {
           setToast('Image downloaded!');
         }
       }
-    } catch (err) {
-      console.error('Share failed:', err);
-      setToast('Could not generate share image');
-    } finally {
-      setSharing(null);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cards]);
+    } catch { setToast('Could not generate badge image'); }
+    finally { setSharing(false); }
+  };
 
-  if (cards.loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
-        <IonSpinner name="crescent" />
-      </div>
-    );
-  }
+  if (!badge) return null;
 
-  // Scale factor: fit within ~(screenWidth - 32px) ≈ 340px
-  const SCALE = Math.min(1, (window.innerWidth - 32) / 400);
+  return (
+    <IonModal isOpen={!!badge} onDidDismiss={onClose}>
+      <IonHeader>
+        <IonToolbar style={{ '--background': 'var(--md-surface-container)' } as React.CSSProperties}>
+          <IonTitle style={{ fontFamily: 'var(--md-font)', fontWeight: 700 }}>{badge.label}</IonTitle>
+          <IonButtons slot="end">
+            <IonButton onClick={onClose} style={{ '--color': 'var(--md-on-surface-variant)' } as React.CSSProperties}>Close</IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent style={{ '--background': 'var(--md-surface)' } as React.CSSProperties}>
+        <div style={{ padding: '28px 24px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Shareable capture area */}
+          <div
+            ref={ref}
+            style={{
+              width: '100%',
+              borderRadius: 'var(--md-shape-xl)',
+              background: `linear-gradient(160deg, ${badge.color}22 0%, var(--md-surface-container) 100%)`,
+              border: `1.5px solid ${badge.color}55`,
+              padding: '32px 24px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 12,
+              boxShadow: `0 4px 24px ${badge.color}22`,
+              marginBottom: 24,
+            }}
+          >
+            <div style={{
+              width: 96, height: 96, borderRadius: '50%',
+              background: `radial-gradient(circle at 35% 30%, ${badge.color}66, ${badge.color}22)`,
+              border: `3px solid ${badge.color}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 46, boxShadow: `0 0 28px ${badge.color}55`, marginBottom: 4,
+            }}>
+              {badge.emoji}
+            </div>
+            <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-lg)', fontWeight: 700, color: 'var(--md-on-surface)', textAlign: 'center', lineHeight: 1.2 }}>
+              {badge.label}
+            </div>
+            <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', textAlign: 'center', maxWidth: 240, lineHeight: 1.4 }}>
+              {badge.description}
+            </div>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: `${badge.color}22`, border: `1px solid ${badge.color}55`,
+              borderRadius: 'var(--md-shape-full)', padding: '4px 14px', marginTop: 4,
+            }}>
+              <span style={{ fontSize: 14 }}>{levelEmoji}</span>
+              <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', fontWeight: 600, color: badge.color }}>
+                {levelName} · Patty
+              </span>
+            </div>
+          </div>
+
+          <IonButton
+            expand="block"
+            onClick={handleShare}
+            disabled={sharing}
+            style={{
+              width: '100%',
+              '--border-radius': 'var(--md-shape-full)',
+              '--background': badge.color,
+              '--color': '#fff',
+            } as React.CSSProperties}
+          >
+            {sharing
+              ? <IonSpinner name="crescent" style={{ width: 20, height: 20 }} />
+              : <><IonIcon icon={shareOutline} slot="start" />Share This Badge</>
+            }
+          </IonButton>
+        </div>
+        <IonToast isOpen={!!toast} message={toast ?? ''} duration={2500} onDidDismiss={() => setToast(null)} position="top" />
+      </IonContent>
+    </IonModal>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Badge shelf — one per category
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface BadgeShelfProps {
+  cat: Category;
+  value: number;
+  levelEmoji: string;
+  levelName: string;
+}
+
+const BadgeShelf: React.FC<BadgeShelfProps> = ({ cat, value, levelEmoji, levelName }) => {
+  const [selectedBadge, setSelectedBadge] = useState<BadgeDetail | null>(null);
+
+  const earned = earnedMilestones(value);
+  const next = nextMilestone(value);
+  const afterNext = next !== null ? nextMilestone(next) : null;
+
+  const earnedCount = earned.length;
+
+  // Determine a badge emoji by milestone tier (mirrors Habits badgeTier)
+  const badgeEmoji = (n: number): string => {
+    if (n <= 30)  return '⭐';
+    if (n < 365)  return '🔥';
+    if (n < 1000) return '💎';
+    return '🏆';
+  };
 
   return (
     <>
-      {/* Hidden off-screen full-size cards for capture */}
-      <div style={{ position: 'absolute', left: -9999, top: 0, zIndex: -1, pointerEvents: 'none' }}>
-        <DailyShareCard    ref={dailyRef}    data={cards.daily}    />
-        <WeeklyShareCard   ref={weeklyRef}   data={cards.weekly}   />
-        <MonthlyShareCard  ref={monthlyRef}  data={cards.monthly}  />
-        <YearlyShareCard   ref={yearlyRef}   data={cards.yearly}   />
-        <LifetimeShareCard ref={lifetimeRef} data={cards.lifetime} />
+      {/* Section header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 16px 0' }}>
+        <IonListHeader style={{ padding: 0 }}>
+          <IonLabel style={{
+            color: 'var(--md-primary)',
+            fontFamily: 'var(--md-font)',
+            fontSize: 'var(--md-label-lg)',
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}>
+            {cat.emoji} {cat.label}
+          </IonLabel>
+        </IonListHeader>
+        {earnedCount > 0 && (
+          <span style={{
+            fontFamily: 'var(--md-font)',
+            fontSize: 'var(--md-label-sm)',
+            color: cat.color,
+            fontWeight: 700,
+          }}>
+            {earnedCount} earned
+          </span>
+        )}
       </div>
 
-      {/* Visible page-snap scroll */}
+      {/* Progress line */}
+      <div style={{ padding: '3px 16px 0', fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)' }}>
+        {value} {cat.unit}
+        {next !== null && (
+          <span style={{ color: cat.color, fontWeight: 600 }}>
+            {' '}· {next - value} to go
+          </span>
+        )}
+      </div>
+
+      {/* Horizontal badge scroll */}
       <div
         style={{
           display: 'flex',
-          overflowX: 'auto',
-          scrollSnapType: 'x mandatory',
           gap: 12,
-          padding: '8px 16px 16px',
+          overflowX: 'auto',
+          padding: '10px 16px 16px',
           scrollbarWidth: 'none',
-        }}
+        } as React.CSSProperties}
       >
-        {[
-          <DailyShareCard    key="d" data={cards.daily}    />,
-          <WeeklyShareCard   key="w" data={cards.weekly}   />,
-          <MonthlyShareCard  key="m" data={cards.monthly}  />,
-          <YearlyShareCard   key="y" data={cards.yearly}   />,
-          <LifetimeShareCard key="l" data={cards.lifetime} />,
-        ].map((CardEl, idx) => (
-          <div
-            key={idx}
-            style={{
-              scrollSnapAlign: 'start',
-              flexShrink: 0,
-              width: 400 * SCALE,
-              height: 600 * SCALE,
-              position: 'relative',
-              borderRadius: 28 * SCALE,
-              overflow: 'hidden',
-            }}
-          >
-            {/* Scaled visual preview */}
-            <div style={{ transform: `scale(${SCALE})`, transformOrigin: 'top left', pointerEvents: 'none' }}>
-              {CardEl}
-            </div>
-
-            {/* Share button overlay */}
-            <button
-              onClick={() => handleShare(idx)}
-              disabled={sharing !== null}
-              style={{
-                position: 'absolute',
-                bottom: 10 * SCALE,
-                right: 10 * SCALE,
-                width: 36,
-                height: 36,
-                borderRadius: '50%',
-                border: 'none',
-                background: CARD_COLORS[idx],
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                zIndex: 2,
-              }}
-            >
-              {sharing === idx
-                ? <IonSpinner name="crescent" style={{ width: 18, height: 18, color: '#fff' }} />
-                : <IonIcon icon={shareOutline} style={{ color: '#fff', fontSize: 18 }} />
-              }
-            </button>
-          </div>
+        {/* Earned badges */}
+        {earned.map(n => (
+          <BadgeChip
+            key={n}
+            emoji={badgeEmoji(n)}
+            label={cat.badgeNames(n)}
+            color={cat.color}
+            earned={true}
+            locked={false}
+            onTap={() => setSelectedBadge({
+              emoji: badgeEmoji(n),
+              label: cat.badgeNames(n),
+              description: `${value} ${cat.unit} logged in Patty`,
+              color: cat.color,
+            })}
+          />
         ))}
+
+        {/* Next locked badge */}
+        {next !== null && (
+          <BadgeChip
+            key={`next-${next}`}
+            emoji={badgeEmoji(next)}
+            label={cat.badgeNames(next)}
+            color={cat.color}
+            earned={false}
+            locked={false}
+            nudge={`${next - value} more`}
+          />
+        )}
+
+        {/* Ghost — one step beyond next */}
+        {afterNext !== null && (
+          <BadgeChip
+            key={`ghost-${afterNext}`}
+            emoji={badgeEmoji(afterNext)}
+            label={cat.badgeNames(afterNext)}
+            color={cat.color}
+            earned={false}
+            locked={true}
+          />
+        )}
+
+        {/* Empty state — value = 0, show the first badge as next */}
+        {earnedCount === 0 && next === null && (
+          <div style={{
+            padding: '12px 0',
+            fontFamily: 'var(--md-font)',
+            fontSize: 'var(--md-body-sm)',
+            color: 'var(--md-on-surface-variant)',
+            opacity: 0.7,
+          }}>
+            Start logging to earn your first badge
+          </div>
+        )}
       </div>
 
+      {/* Divider */}
+      <div style={{ margin: '0 16px 4px', height: 1, background: 'var(--md-outline-variant)', opacity: 0.35 }} />
 
-
-      <IonToast
-        isOpen={!!toast}
-        message={toast ?? ''}
-        duration={2500}
-        onDidDismiss={() => setToast(null)}
-        position="top"
+      <BadgeDetailModal
+        badge={selectedBadge}
+        levelEmoji={levelEmoji}
+        levelName={levelName}
+        onClose={() => setSelectedBadge(null)}
       />
     </>
   );
 };
 
-// ── Section: Gamification ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Shareable cards section (with lock overlay for unearned cards)
+// ─────────────────────────────────────────────────────────────────────────────
 
-const GamificationSection: React.FC<{ gam: ReturnType<typeof useGamification> }> = ({ gam }) => {
-  const [badgeOpen, setBadgeOpen] = useState(false);
-  const badgeGridRef = useRef<HTMLDivElement>(null);
-  const [selectedBadge, setSelectedBadge] = useState<typeof gam.badges[0] | null>(null);
-  const [badgeDetailOpen, setBadgeDetailOpen] = useState(false);
-  const badgeShareRef = useRef<HTMLDivElement>(null);
-  const [sharingOne, setSharingOne] = useState(false);
-  const [badgeToast, setBadgeToast] = useState<string | null>(null);
+const CARD_META = [
+  { key: 'daily',    label: 'Daily',    unlock: 'Log anything today to unlock', color: '#3D6659' },
+  { key: 'weekly',   label: 'This Week',unlock: 'Log for 3+ days this week',    color: '#2E4F66' },
+  { key: 'monthly',  label: 'Monthly',  unlock: 'Log for 7+ days this month',   color: '#5A3A6B' },
+  { key: 'yearly',   label: 'Yearly',   unlock: 'Log for 30+ days this year',   color: '#6B3A3A' },
+  { key: 'lifetime', label: 'Lifetime', unlock: 'Log for 7+ days total',        color: '#2D3561' },
+];
 
-  const openBadgeDetail = useCallback((badge: typeof gam.badges[0]) => {
-    setSelectedBadge(badge);
-    setBadgeDetailOpen(true);
-  }, [gam]);
+interface ShareSectionProps {
+  cards: ReturnType<typeof useAchievementCards>;
+  counts: ReturnType<typeof useGamification>['counts'];
+}
 
-  const closeBadgeDetail = useCallback(() => {
-    setBadgeDetailOpen(false);
-    setTimeout(() => setSelectedBadge(null), 300);
-  }, []);
+const ShareSection: React.FC<ShareSectionProps> = ({ cards, counts }) => {
+  const dailyRef    = useRef<HTMLDivElement>(null);
+  const weeklyRef   = useRef<HTMLDivElement>(null);
+  const monthlyRef  = useRef<HTMLDivElement>(null);
+  const yearlyRef   = useRef<HTMLDivElement>(null);
+  const lifetimeRef = useRef<HTMLDivElement>(null);
+  const refs        = [dailyRef, weeklyRef, monthlyRef, yearlyRef, lifetimeRef];
 
-  const handleShareOneBadge = useCallback(async () => {
-    if (!badgeShareRef.current || !selectedBadge) return;
-    setSharingOne(true);
+  const [sharing, setSharing] = useState<number | null>(null);
+  const [toast, setToast]     = useState<string | null>(null);
+
+  // Determine whether each card is "unlocked" based on actual log counts
+  const totalDays = counts.weightDays + counts.waterGoalDays + counts.sleepDays;
+  const unlocked = [
+    totalDays >= 1,                         // daily: logged anything
+    cards.weekly.weightOf7 + cards.weekly.waterOf7 + cards.weekly.sleepOf7 >= 3,  // weekly: 3+ days
+    cards.monthly.weightLogs + cards.monthly.sleepLogs >= 7,                       // monthly: 7+ days
+    cards.yearly.totalWeighIns + cards.yearly.totalSleepNights >= 30,              // yearly: 30+ days
+    totalDays >= 7,                         // lifetime: 7+ days
+  ];
+
+  const handleShare = useCallback(async (idx: number) => {
+    const ref = refs[idx];
+    if (!ref.current || !unlocked[idx]) return;
+    setSharing(idx);
     try {
-      const dataUrl = await toPng(badgeShareRef.current, { cacheBust: true, pixelRatio: 2 });
+      const dataUrl = await toPng(ref.current, { cacheBust: true });
       const base64 = dataUrl.split(',')[1];
-      const fileName = `patty-badge-${selectedBadge.id}-${Date.now()}.png`;
+      const fileName = `patty-${CARD_META[idx].key}-${Date.now()}.png`;
       let shared = false;
       try {
         const { uri } = await Filesystem.writeFile({ path: fileName, data: base64, directory: Directory.Cache });
-        await Share.share({ title: `I earned the ${selectedBadge.label} badge on Patty!`, files: [uri] });
+        await Share.share({ title: `My ${CARD_META[idx].label} Achievements on Patty`, files: [uri] });
         shared = true;
         try { await Filesystem.deleteFile({ path: fileName, directory: Directory.Cache }); } catch { /* ok */ }
       } catch {
@@ -431,7 +569,7 @@ const GamificationSection: React.FC<{ gam: ReturnType<typeof useGamification> }>
             const blob = await res.blob();
             const file = new File([blob], fileName, { type: 'image/png' });
             if (navigator.canShare({ files: [file] })) {
-              await navigator.share({ title: `I earned the ${selectedBadge.label} badge on Patty!`, files: [file] });
+              await navigator.share({ title: `My ${CARD_META[idx].label} Achievements on Patty`, files: [file] });
               shared = true;
             }
           } catch { /* fall through */ }
@@ -441,784 +579,284 @@ const GamificationSection: React.FC<{ gam: ReturnType<typeof useGamification> }>
           a.href = dataUrl;
           a.download = fileName;
           a.click();
-          setBadgeToast('Image downloaded!');
+          setToast('Image downloaded!');
         }
       }
-    } catch { setBadgeToast('Could not generate badge image'); }
-    finally { setSharingOne(false); }
-  }, [selectedBadge]);
+    } catch { setToast('Could not generate share image'); }
+    finally { setSharing(null); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cards, counts, unlocked]);
 
-  if (gam.loading) {
-    return (
-      <IonCard style={S.card}>
-        <IonCardContent style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
-          <IonSpinner name="crescent" />
-        </IonCardContent>
-      </IonCard>
-    );
+  if (cards.loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}><IonSpinner name="crescent" /></div>;
   }
 
-  const pct = gam.xpForLevel === Infinity ? 1 : gam.xpIntoLevel / gam.xpForLevel;
-  const milestones = [7, 14, 30, 100, 300, 500, 750, 1000, 2000, 5000, 10000];
-  const fmtM = (n: number) => n >= 1000 ? `${n / 1000}K` : `${n}d`;
-  const earnedCount = gam.badges.filter(b => b.earned).length;
+  const SCALE = Math.min(1, (window.innerWidth - 32) / 400);
+  const cardEls = [
+    <DailyShareCard    key="d" ref={dailyRef}    data={cards.daily}    />,
+    <WeeklyShareCard   key="w" ref={weeklyRef}   data={cards.weekly}   />,
+    <MonthlyShareCard  key="m" ref={monthlyRef}  data={cards.monthly}  />,
+    <YearlyShareCard   key="y" ref={yearlyRef}   data={cards.yearly}   />,
+    <LifetimeShareCard key="l" ref={lifetimeRef} data={cards.lifetime} />,
+  ];
+
+  // Also render off-screen for capture
+  const captureEls = [
+    <DailyShareCard    key="cd" ref={dailyRef}    data={cards.daily}    />,
+    <WeeklyShareCard   key="cw" ref={weeklyRef}   data={cards.weekly}   />,
+    <MonthlyShareCard  key="cm" ref={monthlyRef}  data={cards.monthly}  />,
+    <YearlyShareCard   key="cy" ref={yearlyRef}   data={cards.yearly}   />,
+    <LifetimeShareCard key="cl" ref={lifetimeRef} data={cards.lifetime} />,
+  ];
 
   return (
     <>
-    <IonCard style={S.card}>
-      <IonCardContent style={{ padding: '8px 16px 20px' }}>
+      {/* Off-screen capture targets */}
+      <div style={{ position: 'absolute', left: -9999, top: 0, zIndex: -1, pointerEvents: 'none' }}>
+        {captureEls}
+      </div>
 
-        {/* Level + XP bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <span style={{ fontSize: 32 }}>{gam.level.emoji}</span>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-sm)', fontWeight: 600, color: 'var(--md-on-surface)' }}>
-                {gam.level.name}
-              </span>
-              <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
-                {gam.xp.toLocaleString()} XP
-              </span>
-            </div>
-            {/* XP bar track */}
-            <div style={{
-              height: 8,
-              borderRadius: 4,
-              background: 'var(--md-surface-container-high)',
-              overflow: 'hidden',
-            }}>
-              <div style={{
-                height: '100%',
-                width: `${Math.min(100, Math.round(pct * 100))}%`,
-                borderRadius: 4,
-                background: gam.level.color,
-                transition: 'width 0.6s ease',
-              }} />
-            </div>
-            {gam.xpForLevel !== Infinity && (
-              <div style={{ fontFamily: 'var(--md-font)', fontSize: 10, color: 'var(--md-on-surface-variant)', marginTop: 2 }}>
-                {gam.xpIntoLevel} / {gam.xpForLevel} to {LEVELS[Math.min(LEVELS.length - 1, LEVELS.indexOf(gam.level) + 1)].name}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Streaks */}
-        <div style={{
+      <div
+        style={{
           display: 'flex',
+          overflowX: 'auto',
+          scrollSnapType: 'x mandatory',
           gap: 12,
-          marginBottom: 16,
-          padding: '10px 12px',
-          background: 'var(--md-surface-container)',
-          borderRadius: 'var(--md-shape-md)',
-        }}>
-          <div style={{ flex: 1, textAlign: 'center' }}>
-            <IonIcon icon={flameOutline} style={{ fontSize: 20, color: '#F5A623', display: 'block', margin: '0 auto 2px' }} />
-            <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-lg)', fontWeight: 300, color: 'var(--md-on-surface)' }}>
-              {gam.currentStreak}
-            </div>
-            <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)' }}>
-              Current
-            </div>
-          </div>
-          <div style={{ width: 1, background: 'var(--md-outline-variant)' }} />
-          <div style={{ flex: 1, textAlign: 'center' }}>
-            <IonIcon icon={trophyOutline} style={{ fontSize: 20, color: gam.level.color, display: 'block', margin: '0 auto 2px' }} />
-            <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-lg)', fontWeight: 300, color: 'var(--md-on-surface)' }}>
-              {gam.bestStreak}
-            </div>
-            <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)' }}>
-              Best
-            </div>
-          </div>
-        </div>
+          padding: '8px 16px 20px',
+          scrollbarWidth: 'none',
+        } as React.CSSProperties}
+      >
+        {cardEls.map((CardEl, idx) => {
+          const isUnlocked = unlocked[idx];
+          return (
+            <div
+              key={idx}
+              style={{
+                scrollSnapAlign: 'start',
+                flexShrink: 0,
+                width: 400 * SCALE,
+                height: 600 * SCALE,
+                position: 'relative',
+                borderRadius: 28 * SCALE,
+                overflow: 'hidden',
+              }}
+            >
+              {/* Scaled visual preview */}
+              <div style={{ transform: `scale(${SCALE})`, transformOrigin: 'top left', pointerEvents: 'none' }}>
+                {CardEl}
+              </div>
 
-        {/* Milestone dots */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
-          {milestones.map(m => {
-            const reached = gam.bestStreak >= m;
-            return (
-              <div key={m} style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 3,
-                flex: '0 0 auto',
-              }}>
+              {/* Lock overlay */}
+              {!isUnlocked && (
                 <div style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  background: reached
-                    ? `linear-gradient(135deg, ${gam.level.color} 0%, ${gam.level.color}99 100%)`
-                    : 'var(--md-surface-container-high)',
-                  border: reached
-                    ? `2px solid ${gam.level.color}`
-                    : '2px solid var(--md-outline-variant)',
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: 28 * SCALE,
+                  background: 'rgba(0,0,0,0.62)',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: reached ? `0 0 8px ${gam.level.color}55` : 'none',
-                  transition: 'all 0.3s ease',
+                  gap: 8,
+                  backdropFilter: 'blur(2px)',
                 }}>
-                  {reached && (
-                    <IonIcon icon={checkmarkCircle} style={{ fontSize: 14, color: '#fff' }} />
-                  )}
-                </div>
-                <span style={{
-                  fontSize: 9,
-                  color: reached ? gam.level.color : 'var(--md-on-surface-variant)',
-                  fontFamily: 'var(--md-font)',
-                  fontWeight: reached ? 700 : 400,
-                }}>
-                  {fmtM(m)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Badges preview row */}
-        <div style={{ marginTop: 4 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: 'var(--md-on-surface)' }}>
-              Badges
-            </span>
-            <button
-              onClick={() => setBadgeOpen(true)}
-              style={{
-                fontFamily: 'var(--md-font)',
-                fontSize: 'var(--md-label-sm)',
-                fontWeight: 600,
-                color: gam.level.color,
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '4px 0',
-              }}
-            >
-              {earnedCount}/{gam.badges.length} See All →
-            </button>
-          </div>
-
-          {/* Earned badge pills horizontal scroll */}
-          {earnedCount === 0 ? (
-            <div style={{
-              padding: '14px 0',
-              textAlign: 'center',
-              fontFamily: 'var(--md-font)',
-              fontSize: 'var(--md-body-sm)',
-              color: 'var(--md-on-surface-variant)',
-            }}>
-              No badges yet — keep tracking to earn your first! 🏅
-            </div>
-          ) : (
-            <div style={{
-              display: 'flex',
-              gap: 10,
-              overflowX: 'auto',
-              scrollbarWidth: 'none',
-              paddingBottom: 4,
-            }}>
-              {gam.badges.filter(b => b.earned).map(badge => (
-                <div
-                  key={badge.id}
-                  onClick={() => openBadgeDetail(badge)}
-                  style={{
-                    flexShrink: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 5,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <div style={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: '50%',
-                    background: `radial-gradient(circle at 35% 35%, ${gam.level.color}44, ${gam.level.color}22)`,
-                    border: `2.5px solid ${gam.level.color}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 24,
-                    boxShadow: `0 0 12px ${gam.level.color}55`,
-                  }}>
-                    {badge.emoji}
-                  </div>
+                  <IonIcon icon={lockClosedOutline} style={{ fontSize: 32, color: '#fff', opacity: 0.85 }} />
                   <span style={{
                     fontFamily: 'var(--md-font)',
-                    fontSize: 9,
-                    color: 'var(--md-on-surface-variant)',
+                    fontSize: 12,
+                    color: '#fff',
+                    opacity: 0.75,
                     textAlign: 'center',
-                    maxWidth: 52,
-                    lineHeight: 1.2,
+                    maxWidth: '75%',
+                    lineHeight: 1.4,
                   }}>
-                    {badge.label}
+                    {CARD_META[idx].unlock}
                   </span>
                 </div>
-              ))}
+              )}
+
+              {/* Share button — only when unlocked */}
+              {isUnlocked && (
+                <button
+                  onClick={() => handleShare(idx)}
+                  disabled={sharing !== null}
+                  style={{
+                    position: 'absolute',
+                    bottom: 10 * SCALE,
+                    right: 10 * SCALE,
+                    width: 36, height: 36,
+                    borderRadius: '50%',
+                    border: 'none',
+                    background: CARD_META[idx].color,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                    zIndex: 2,
+                  }}
+                >
+                  {sharing === idx
+                    ? <IonSpinner name="crescent" style={{ width: 18, height: 18, color: '#fff' }} />
+                    : <IonIcon icon={shareOutline} style={{ color: '#fff', fontSize: 18 }} />
+                  }
+                </button>
+              )}
             </div>
-          )}
-        </div>
-      </IonCardContent>
-    </IonCard>
+          );
+        })}
+      </div>
 
-    {/* ── Badge Modal ──────────────────────────────────────────────────────── */}
-    <IonModal isOpen={badgeOpen} onDidDismiss={() => setBadgeOpen(false)}>
-      <IonHeader>
-        <IonToolbar style={{ '--background': 'var(--md-surface-container)' }}>
-          <IonTitle style={{ fontFamily: 'var(--md-font)', fontWeight: 700 }}>My Badges</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={() => setBadgeOpen(false)} style={{ '--color': 'var(--md-on-surface-variant)' }}>
-              Close
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent style={{ '--background': 'var(--md-surface)' }}>
-
-        {/* Capture area */}
-        <div ref={badgeGridRef} style={{ background: 'var(--md-surface)', paddingBottom: 8 }}>
-
-          {/* Hero count banner */}
-          <div style={{
-            margin: '16px 16px 20px',
-            borderRadius: 'var(--md-shape-xl)',
-            background: `linear-gradient(135deg, ${gam.level.color}33 0%, ${gam.level.color}11 100%)`,
-            border: `1.5px solid ${gam.level.color}55`,
-            padding: '18px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16,
-          }}>
-            {/* Ring progress */}
-            <div style={{ position: 'relative', flexShrink: 0, width: 64, height: 64 }}>
-              <svg width="64" height="64" style={{ transform: 'rotate(-90deg)' }}>
-                <circle cx="32" cy="32" r="26" fill="none" stroke="var(--md-surface-container-high)" strokeWidth="6" />
-                <circle
-                  cx="32" cy="32" r="26" fill="none"
-                  stroke={gam.level.color} strokeWidth="6"
-                  strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 26}`}
-                  strokeDashoffset={`${2 * Math.PI * 26 * (1 - earnedCount / Math.max(1, gam.badges.length))}`}
-                  style={{ transition: 'stroke-dashoffset 0.8s ease' }}
-                />
-              </svg>
-              <div style={{
-                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: 'var(--md-font)', fontSize: 15, fontWeight: 700, color: 'var(--md-on-surface)',
-              }}>
-                {earnedCount}
-              </div>
-            </div>
-            <div>
-              <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-headline-sm)', fontWeight: 700, color: 'var(--md-on-surface)', lineHeight: 1.1 }}>
-                {earnedCount} / {gam.badges.length}
-              </div>
-              <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', marginTop: 2 }}>
-                {earnedCount === 0 ? 'Start logging to earn badges' :
-                 earnedCount === gam.badges.length ? '🎉 All badges earned!' :
-                 `${gam.badges.length - earnedCount} more to unlock`}
-              </div>
-              <div style={{
-                marginTop: 6,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 4,
-                background: `${gam.level.color}22`,
-                border: `1px solid ${gam.level.color}55`,
-                borderRadius: 'var(--md-shape-full)',
-                padding: '2px 10px',
-              }}>
-                <span style={{ fontSize: 14 }}>{gam.level.emoji}</span>
-                <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', fontWeight: 600, color: gam.level.color }}>
-                  {gam.level.name}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Earned section */}
-          {earnedCount > 0 && (
-            <>
-              <div style={{ padding: '0 16px 10px', fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: gam.level.color, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
-                Earned
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, padding: '0 16px 20px' }}>
-                {gam.badges.filter(b => b.earned).map(badge => (
-                  <div
-                    key={badge.id}
-                    onClick={() => openBadgeDetail(badge)}
-                    style={{
-                      borderRadius: 'var(--md-shape-xl)',
-                      background: `linear-gradient(145deg, ${gam.level.color}28 0%, var(--md-surface-container) 100%)`,
-                      border: `1.5px solid ${gam.level.color}66`,
-                      padding: '16px 14px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      boxShadow: `0 2px 12px ${gam.level.color}22`,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: '50%',
-                      background: `radial-gradient(circle at 35% 30%, ${gam.level.color}55, ${gam.level.color}22)`,
-                      border: `2px solid ${gam.level.color}`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 22,
-                      flexShrink: 0,
-                      boxShadow: `0 0 14px ${gam.level.color}44`,
-                    }}>
-                      {badge.emoji}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: 'var(--md-on-surface)', lineHeight: 1.2 }}>
-                        {badge.label}
-                      </div>
-                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 10, color: 'var(--md-on-surface-variant)', marginTop: 2, lineHeight: 1.3 }}>
-                        {badge.description}
-                      </div>
-                      <div style={{
-                        marginTop: 5,
-                        display: 'inline-block',
-                        background: `${gam.level.color}33`,
-                        color: gam.level.color,
-                        borderRadius: 'var(--md-shape-full)',
-                        padding: '1px 8px',
-                        fontSize: 9,
-                        fontFamily: 'var(--md-font)',
-                        fontWeight: 700,
-                        letterSpacing: '0.06em',
-                      }}>
-                        ✓ EARNED
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Locked section */}
-          {gam.badges.filter(b => !b.earned).length > 0 && (
-            <>
-              <div style={{ padding: '0 16px 10px', fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: 'var(--md-on-surface-variant)', letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>
-                Locked
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, padding: '0 16px 24px' }}>
-                {gam.badges.filter(b => !b.earned).map(badge => (
-                  <div
-                    key={badge.id}
-                    style={{
-                      borderRadius: 'var(--md-shape-xl)',
-                      background: 'var(--md-surface-container)',
-                      border: '1px solid var(--md-outline-variant)',
-                      padding: '16px 14px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      opacity: 0.55,
-                    }}
-                  >
-                    <div style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: '50%',
-                      background: 'var(--md-surface-container-high)',
-                      border: '2px solid var(--md-outline-variant)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 22,
-                      flexShrink: 0,
-                      filter: 'grayscale(1)',
-                    }}>
-                      {badge.emoji}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-lg)', fontWeight: 700, color: 'var(--md-on-surface)', lineHeight: 1.2 }}>
-                        {badge.label}
-                      </div>
-                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 10, color: 'var(--md-on-surface-variant)', marginTop: 2, lineHeight: 1.3 }}>
-                        {badge.description}
-                      </div>
-                      <div style={{
-                        marginTop: 5,
-                        display: 'inline-block',
-                        background: 'var(--md-surface-container-high)',
-                        color: 'var(--md-on-surface-variant)',
-                        borderRadius: 'var(--md-shape-full)',
-                        padding: '1px 8px',
-                        fontSize: 9,
-                        fontFamily: 'var(--md-font)',
-                        fontWeight: 700,
-                        letterSpacing: '0.06em',
-                      }}>
-                        🔒 LOCKED
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-      </IonContent>
-    </IonModal>
-
-    {/* ── Per-Badge Share Modal ─────────────────────────────────────────────── */}
-    <IonModal
-      isOpen={badgeDetailOpen}
-      onDidDismiss={closeBadgeDetail}
-    >
-      <IonHeader>
-        <IonToolbar style={{ '--background': 'var(--md-surface-container)' }}>
-          <IonTitle style={{ fontFamily: 'var(--md-font)', fontWeight: 700 }}>
-            {selectedBadge?.label ?? 'Badge'}
-          </IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={closeBadgeDetail} style={{ '--color': 'var(--md-on-surface-variant)' }}>
-              Close
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent style={{ '--background': 'var(--md-surface)' }}>
-        {selectedBadge && (
-          <div style={{ padding: '28px 24px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-
-            {/* Capture area — this is what gets rendered into the share image */}
-            <div
-              ref={badgeShareRef}
-              style={{
-                width: '100%',
-                borderRadius: 'var(--md-shape-xl)',
-                background: `linear-gradient(160deg, ${gam.level.color}22 0%, var(--md-surface-container) 100%)`,
-                border: `1.5px solid ${gam.level.color}55`,
-                padding: '32px 24px 24px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 12,
-                boxShadow: `0 4px 24px ${gam.level.color}22`,
-                marginBottom: 24,
-              }}
-            >
-              {/* Badge circle */}
-              <div style={{
-                width: 96,
-                height: 96,
-                borderRadius: '50%',
-                background: `radial-gradient(circle at 35% 30%, ${gam.level.color}66, ${gam.level.color}22)`,
-                border: `3px solid ${gam.level.color}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 46,
-                boxShadow: `0 0 28px ${gam.level.color}55`,
-                marginBottom: 4,
-              }}>
-                {selectedBadge.emoji}
-              </div>
-              {/* Badge name */}
-              <div style={{
-                fontFamily: 'var(--md-font)',
-                fontSize: 'var(--md-title-lg)',
-                fontWeight: 700,
-                color: 'var(--md-on-surface)',
-                textAlign: 'center',
-                lineHeight: 1.2,
-              }}>
-                {selectedBadge.label}
-              </div>
-              {/* Description */}
-              <div style={{
-                fontFamily: 'var(--md-font)',
-                fontSize: 'var(--md-body-sm)',
-                color: 'var(--md-on-surface-variant)',
-                textAlign: 'center',
-                maxWidth: 240,
-                lineHeight: 1.4,
-              }}>
-                {selectedBadge.description}
-              </div>
-              {/* Earned chip */}
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                background: `${gam.level.color}22`,
-                border: `1px solid ${gam.level.color}55`,
-                borderRadius: 'var(--md-shape-full)',
-                padding: '4px 14px',
-                marginTop: 4,
-              }}>
-                <span style={{ fontSize: 14 }}>{gam.level.emoji}</span>
-                <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', fontWeight: 600, color: gam.level.color }}>
-                  {gam.level.name} · Patty
-                </span>
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <IonButton
-                expand="block"
-                onClick={handleShareOneBadge}
-                disabled={sharingOne}
-                style={{
-                  '--border-radius': 'var(--md-shape-full)',
-                  '--background': gam.level.color,
-                  '--background-activated': gam.level.color,
-                  '--color': '#fff',
-                  '--color-activated': '#fff',
-                }}
-              >
-                {sharingOne
-                  ? <IonSpinner name="crescent" style={{ width: 20, height: 20 }} />
-                  : <><IonIcon icon={shareOutline} slot="start" />Share This Badge</>
-                }
-              </IonButton>
-            </div>
-          </div>
-        )}
-      </IonContent>
-    </IonModal>
-
-    <IonToast
-      isOpen={!!badgeToast}
-      message={badgeToast ?? ''}
-      duration={2500}
-      onDidDismiss={() => setBadgeToast(null)}
-      position="top"
-    />
+      <IonToast isOpen={!!toast} message={toast ?? ''} duration={2500} onDidDismiss={() => setToast(null)} position="top" />
     </>
   );
 };
 
-// ── Section: Habit Rings ──────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Page
+// ─────────────────────────────────────────────────────────────────────────────
 
-interface HabitRingsProps {
-  ring: ReturnType<typeof useAchievementCards>['habitRing'];
-  loading: boolean;
-}
-
-const HabitRings: React.FC<HabitRingsProps> = ({ ring, loading }) => {
-  const habits: Array<{ key: 'weight' | 'water' | 'sleep' | 'food'; label: string; emoji: string; color: string }> = [
-    { key: 'weight', label: 'Weight', emoji: '\u2696\uFE0F', color: '#5C7A6E' },
-    { key: 'water',  label: 'Water',  emoji: '\uD83D\uDCA7', color: '#3A6B8A' },
-    { key: 'sleep',  label: 'Sleep',  emoji: '\uD83D\uDE34', color: '#7B5295' },
-    { key: 'food',   label: 'Food',   emoji: '\uD83C\uDF7D\uFE0F',  color: '#954B3A' },
-  ];
-
-  return (
-    <IonCard style={{ ...S.card, marginTop: 4, marginBottom: 24 }}>
-      <IonCardContent style={{ padding: '8px 16px 20px' }}>
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 16 }}>
-            <IonSpinner name="crescent" />
-          </div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <div style={{ minWidth: 280 }}>
-              {/* Day labels row */}
-              <div style={{ display: 'grid', gridTemplateColumns: '60px repeat(7, 1fr)', gap: 0, marginBottom: 8 }}>
-                <div />
-                {ring.map((day, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      textAlign: 'center',
-                      fontFamily: 'var(--md-font)',
-                      fontSize: 11,
-                      color: day.isToday ? 'var(--md-primary)' : 'var(--md-on-surface-variant)',
-                      fontWeight: day.isToday ? 700 : 400,
-                    }}
-                  >
-                    {day.dateLabel}
-                  </div>
-                ))}
-              </div>
-
-              {/* Habit rows */}
-              {habits.map(h => (
-                <div
-                  key={h.key}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '60px repeat(7, 1fr)',
-                    gap: 0,
-                    marginBottom: 10,
-                    alignItems: 'center',
-                  }}
-                >
-                  <div style={{
-                    fontFamily: 'var(--md-font)',
-                    fontSize: 12,
-                    color: 'var(--md-on-surface-variant)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    paddingRight: 4,
-                  }}>
-                    <span>{h.emoji}</span>
-                    <span style={{ fontSize: 10 }}>{h.label}</span>
-                  </div>
-
-                  {ring.map((day, i) => {
-                    const filled = day[h.key];
-                    return (
-                      <div
-                        key={i}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <div style={{
-                          width: 18,
-                          height: 18,
-                          borderRadius: '50%',
-                          background: filled
-                            ? h.color
-                            : day.isToday
-                              ? 'var(--md-primary-container)'
-                              : 'var(--md-surface-container)',
-                          border: filled
-                            ? `2px solid ${h.color}`
-                            : day.isToday
-                              ? '2px solid var(--md-primary)'
-                              : '2px solid var(--md-outline-variant)',
-                          transition: 'background 0.2s ease',
-                        }} />
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </IonCardContent>
-    </IonCard>
-  );
-};
-
-// ── Page ──────────────────────────────────────────────────────────────────────
-
-const Achievements: React.FC = () => {
-  const { entries, loading: weightLoading, reload: reloadWeight } = useWeightLog();
-  const gam = useGamification();
+const AchievementsPage: React.FC = () => {
+  const gam   = useGamification();
   const cards = useAchievementCards();
 
   useIonViewWillEnter(() => {
-    reloadWeight();
     gam.reload?.();
     cards.reload?.();
   });
 
-  // Entries with computed deltas (entries are newest-first from hook)
-  // First (newest) entry has no delta; subsequent entries show change vs their predecessor
-  const marqueeEntries = entries.map((e, i) => {
-    const prev = entries[i + 1] ?? null;
-    const delta = (i === 0 || prev === null) ? null : +(e.value - prev.value).toFixed(2);
-    return { ...e, delta };
-  });
+  const totalBadges = CATEGORIES.reduce((sum, cat) => sum + earnedMilestones(cat.value(gam.counts)).length, 0);
+  const pct = gam.xpForLevel === Infinity ? 1 : gam.xpIntoLevel / gam.xpForLevel;
+  const nextLevel = LEVELS[Math.min(LEVELS.length - 1, LEVELS.indexOf(gam.level) + 1)];
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle style={{ fontFamily: 'var(--md-font)', fontWeight: 600 }}>
-            Achievements
-          </IonTitle>
+          <IonTitle style={{ fontFamily: 'var(--md-font)', fontWeight: 600 }}>Achievements</IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent style={{ '--padding-bottom': '40px' }}>
+      <IonContent style={{ '--padding-bottom': '40px' } as React.CSSProperties}>
 
-        {/* ── 1. Habit Rings ───────────────────────────────────────────── */}
-        <IonListHeader style={{ paddingTop: 12 }}>
-          <IonLabel style={S.sectionHeader}>Habit Rings</IonLabel>
-        </IonListHeader>
-        <HabitRings ring={cards.habitRing} loading={cards.loading} />
+        {/* ── Hero card ──────────────────────────────────────────────────── */}
+        <IonCard style={{
+          margin: '16px 16px 8px',
+          borderRadius: 'var(--md-shape-xl)',
+          border: '1px solid var(--md-outline-variant)',
+          boxShadow: 'none',
+          background: 'var(--md-surface-container-low)',
+        }}>
+          <IonCardContent style={{ padding: '16px 20px 20px' }}>
+            {gam.loading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: 16 }}><IonSpinner name="crescent" /></div>
+            ) : (
+              <>
+                {/* Level row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <span style={{ fontSize: 36 }}>{gam.level.emoji}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-sm)', fontWeight: 600, color: 'var(--md-on-surface)' }}>
+                        {gam.level.name}
+                      </span>
+                      <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
+                        {gam.xp.toLocaleString()} XP
+                      </span>
+                    </div>
+                    {/* XP bar */}
+                    <div style={{ height: 8, borderRadius: 4, background: 'var(--md-surface-container-high)', overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${Math.min(100, Math.round(pct * 100))}%`,
+                        borderRadius: 4,
+                        background: gam.level.color,
+                        transition: 'width 0.6s ease',
+                      }} />
+                    </div>
+                    {gam.xpForLevel !== Infinity && gam.level !== nextLevel && (
+                      <div style={{ fontFamily: 'var(--md-font)', fontSize: 10, color: 'var(--md-on-surface-variant)', marginTop: 2 }}>
+                        {gam.xpIntoLevel} / {gam.xpForLevel} to {nextLevel.name}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-        {/* ── 2. Weight Journey ───────────────────────────────────────────── */}
-        <IonListHeader style={{ paddingTop: 20 }}>
-          <IonLabel style={S.sectionHeader}>Weight Journey</IonLabel>
-        </IonListHeader>
+                {/* Stats row */}
+                <div style={{
+                  display: 'flex',
+                  gap: 12,
+                  padding: '10px 12px',
+                  background: 'var(--md-surface-container)',
+                  borderRadius: 'var(--md-shape-md)',
+                }}>
+                  <div style={{ flex: 1, textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-lg)', fontWeight: 300, color: 'var(--md-on-surface)' }}>
+                      {totalBadges}
+                    </div>
+                    <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)' }}>
+                      Badges
+                    </div>
+                  </div>
+                  <div style={{ width: 1, background: 'var(--md-outline-variant)' }} />
+                  <div style={{ flex: 1, textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-lg)', fontWeight: 300, color: 'var(--md-on-surface)' }}>
+                      {gam.currentStreak}
+                    </div>
+                    <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)' }}>
+                      Current Streak
+                    </div>
+                  </div>
+                  <div style={{ width: 1, background: 'var(--md-outline-variant)' }} />
+                  <div style={{ flex: 1, textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-lg)', fontWeight: 300, color: 'var(--md-on-surface)' }}>
+                      {gam.bestStreak}
+                    </div>
+                    <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)' }}>
+                      Best Streak
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </IonCardContent>
+        </IonCard>
 
-        {weightLoading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 16 }}>
-            <IonSpinner name="crescent" />
-          </div>
-        ) : marqueeEntries.length === 0 ? (
-          <div style={{
-            margin: '8px 16px 4px',
-            padding: 24,
-            borderRadius: 'var(--md-shape-xl)',
-            border: '2px dashed var(--md-outline-variant)',
-            textAlign: 'center',
-          }}>
-            <div style={{ fontSize: 40, marginBottom: 8 }}>📷</div>
-            <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-lg)', color: 'var(--md-on-surface)' }}>
-              No weigh-ins yet
-            </div>
-            <div style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', marginTop: 4 }}>
-              Log your first weight entry with a photo
-            </div>
-          </div>
-        ) : (
-          <div style={{
-            display: 'flex',
-            gap: 10,
-            overflowX: 'auto',
-            padding: '8px 16px 12px',
-            scrollbarWidth: 'none',
-          }}>
-            {marqueeEntries.map(entry => (
-              <MarqueeCard
-                key={entry.id}
-                uri={entry.photo_uri}
-                value={entry.value}
-                unit={entry.unit}
-                date={entry.date}
-                delta={entry.delta}
+        {/* ── Badge shelves ─────────────────────────────────────────────── */}
+        <div style={{ marginTop: 16 }}>
+          {gam.loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}><IonSpinner name="crescent" /></div>
+          ) : (
+            CATEGORIES.map(cat => (
+              <BadgeShelf
+                key={cat.id}
+                cat={cat}
+                value={cat.value(gam.counts)}
+                levelEmoji={gam.level.emoji}
+                levelName={gam.level.name}
               />
-            ))}
-          </div>
-        )}
-
-        {/* ── 3. Gamification (Badges) ───────────────────────────────────────── */}
-        <IonListHeader style={{ paddingTop: 20 }}>
-          <IonLabel style={S.sectionHeader}>Badges</IonLabel>
-        </IonListHeader>
-        <div style={{ marginTop: 4 }}>
-          <GamificationSection gam={gam} />
+            ))
+          )}
         </div>
 
-        {/* ── 4. Shareable Achievement Cards ─────────────────────────────── */}
-        <IonListHeader style={{ paddingTop: 20 }}>
-          <IonLabel style={S.sectionHeader}>
+        {/* ── Shareable cards ────────────────────────────────────────────── */}
+        <IonListHeader style={{ paddingTop: 16 }}>
+          <IonLabel style={{
+            color: 'var(--md-primary)',
+            fontFamily: 'var(--md-font)',
+            fontSize: 'var(--md-label-lg)',
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}>
             <IonIcon icon={shareOutline} style={{ marginRight: 6, verticalAlign: 'middle', fontSize: 16 }} />
             Share Achievements
           </IonLabel>
         </IonListHeader>
 
-        <ShareableSection cards={cards} />
+        <ShareSection cards={cards} counts={gam.counts} />
 
       </IonContent>
     </IonPage>
   );
 };
 
-export default Achievements;
+export default AchievementsPage;
