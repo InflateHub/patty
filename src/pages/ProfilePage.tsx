@@ -685,13 +685,37 @@ const ProfilePage: React.FC = () => {
           <IonListHeader style={hdr}>App Info</IonListHeader>
           <IonCardContent style={{ padding: '4px 0 12px' }}>
             <IonList lines="none" style={{ background: 'transparent' }}>
-              <IonItem style={transparentItem}>
+              <IonItem
+                style={{ ...transparentItem, cursor: 'pointer' }}
+                button
+                detail
+                onClick={() => window.open('https://patty.saranmahadev.in', '_blank', 'noopener')}
+              >
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">2.5.0</IonNote>
+                <IonNote slot="end">2.6.0</IonNote>
               </IonItem>
-              <IonItem style={transparentItem}>
+              <IonItem
+                style={{ ...transparentItem, cursor: 'pointer' }}
+                button
+                detail
+                onClick={() => window.open('https://saranmahadev.in/#contact', '_blank', 'noopener')}
+              >
                 <IonLabel>Built by</IonLabel>
                 <IonNote slot="end">Saran Mahadev</IonNote>
+              </IonItem>
+              <IonItem
+                style={{ ...transparentItem, cursor: 'pointer' }}
+                button
+                detail
+                onClick={() => window.open('mailto:hello@saranmahadev.in?subject=Patty%20Feedback', '_blank', 'noopener')}
+              >
+                <IonLabel style={{ color: 'var(--md-primary)' }}>Send Feedback</IonLabel>
+              </IonItem>
+              <IonItem
+                style={{ ...transparentItem, cursor: 'not-allowed', opacity: 0.5 }}
+              >
+                <IonLabel>Rate on Play Store</IonLabel>
+                <IonNote slot="end">Coming soon</IonNote>
               </IonItem>
               <IonItem
                 style={{ ...transparentItem, cursor: 'pointer' }}

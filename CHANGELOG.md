@@ -2,6 +2,17 @@
 
 ---
 
+## [2.6.0] — Notifications & Profile Polish
+*Goal: clean up the Notifications page footer and add production-grade tappable links to the App Info card.*
+
+- [x] **Notifications page footer removed** — deleted the "Reminders are delivered by the device OS" explanatory note at the bottom of NotificationsPage
+- [x] **Version row tappable** — tapping the version chip opens `https://patty.saranmahadev.in` in a new browser tab
+- [x] **Developer credit tappable** — "Built by Saran Mahadev" row opens `https://saranmahadev.in/#contact` in a new browser tab
+- [x] **Send Feedback link** — new row in App Info opens `mailto:hello@saranmahadev.in?subject=Patty%20Feedback`
+- [x] **Rate on Play Store placeholder** — visible but disabled row labelled "Coming soon" ready for the live Play Store link
+
+---
+
 ## [2.5.0] — Habits Page
 *Goal: a gamified daily habit system with good vs bad habit categories, infinite dynamic milestones, and permanently locked past-day history.*
 

@@ -490,20 +490,6 @@ const NotificationsPage: React.FC = () => {
           </IonCardContent>
         </IonCard>
 
-        {/* ── Footer note ────────────────────────────────────────────── */}
-        <div style={{ padding: '8px 24px 40px', textAlign: 'center' }}>
-          <IonNote
-            style={{
-              fontSize: 'var(--md-body-sm)',
-              color: 'var(--md-on-surface-variant)',
-              fontFamily: 'var(--md-font)',
-              lineHeight: 1.5,
-            }}
-          >
-            Reminders are delivered by the device OS. They require Patty to be installed
-            natively (Android&nbsp;/&nbsp;iOS) — in the browser they are saved but not fired.
-          </IonNote>
-        </div>
       </IonContent>
     </IonPage>
   );

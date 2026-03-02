@@ -108,18 +108,18 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 *Goal: clean up Notifications page copy, fix engagement nudge defaults, and add production-grade profile links.*
 
 ### Notifications Page
-- [ ] **Remove footer copy** — delete the "Reminders are delivered by the device OS" explanatory text at the bottom of the page
-- [ ] **Engagement nudges default OFF** — `pref_engage_morning`, `pref_engage_midday`, `pref_engage_evening` default to `0` instead of `1` in `migrations.ts` and `useNotifications`
-- [ ] **Engagement nudge label update** — section subtitle reads "Motivational messages sent by the app (not the OS)" instead of the previous copy
+- [x] **Remove footer copy** — delete the "Reminders are delivered by the device OS" explanatory text at the bottom of the page
+- ~~**Engagement nudges default OFF**~~ — skipped (not needed)
+- ~~**Engagement nudge label update**~~ — skipped (not needed)
 
 ### Profile / Settings
-- [ ] **Developer credit link** — the developer name row in App Info is a tappable `IonItem` that opens `https://saranmahadev.in/#contact` in the in-app browser (`@capacitor/browser`)
-- [ ] **Version row link** — tapping the version chip opens `https://patty.saranmahadev.in` in the in-app browser
-- [ ] **Send Feedback** link — tappable row that opens `mailto:hello@saranmahadev.in?subject=Patty%20Feedback`
-- [ ] **Rate on Play Store** link (placeholder, activates once Play Store listing is live)
+- [x] **Developer credit link** — the developer name row in App Info is a tappable `IonItem` that opens `https://saranmahadev.in/#contact` in a new browser tab
+- [x] **Version row link** — tapping the version chip opens `https://patty.saranmahadev.in` in a new browser tab
+- [x] **Send Feedback** link — tappable row that opens `mailto:hello@saranmahadev.in?subject=Patty%20Feedback`
+- [x] **Rate on Play Store** link (placeholder, activates once Play Store listing is live)
 
 ### Home Page
-- [ ] **Habits shortcut** — a compact "Habits" summary chip or card placed near the notifications bell on the Home header or as a home dashboard card section, showing today's completion count and current longest streak at a glance
+- ~~**Habits shortcut**~~ — skipped
 
 ---
 
