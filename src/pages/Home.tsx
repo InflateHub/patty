@@ -1,97 +1,144 @@
-/* Dashboard — 2.0.0 */
-import React, { useMemo } from 'react';
+/* Dashboard — 2.8.0 */
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   IonButton,
   IonButtons,
   IonCard,
   IonCardContent,
-  IonCol,
   IonContent,
-  IonGrid,
   IonHeader,
   IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
   IonListHeader,
-  IonNote,
   IonPage,
-  IonRow,
   IonTitle,
   IonToolbar,
   useIonViewWillEnter,
 } from '@ionic/react';
-import { personCircleOutline, notificationsOutline, trophyOutline } from 'ionicons/icons';
+import { personCircleOutline } from 'ionicons/icons';
 
 import { useWeightLog } from '../hooks/useWeightLog';
 import { useWaterLog } from '../hooks/useWaterLog';
 import { useSleepLog } from '../hooks/useSleepLog';
-import { useFoodLog } from '../hooks/useFoodLog';
-import { useProfile, computeBMI, bmiCategory, computeBMR, computeTDEE, ageFromDob } from '../hooks/useProfile';
-import { WaterRing } from '../components/WaterRing';
-import { WeightChart } from '../components/WeightChart';
+import { useWorkoutLog, WorkoutEntry } from '../hooks/useWorkoutLog';
+import { useProfile } from '../hooks/useProfile';
+import { useHabits, HabitWithStats } from '../hooks/useHabits';
+import { getDb } from '../db/database';
 import { today, formatDuration } from '../track/trackUtils';
+import SpeedDial from '../components/SpeedDial';
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function salutation(name: string): string {
   const h = new Date().getHours();
   const base = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
   return name ? `${base}, ${name.split(' ')[0]}` : base;
 }
 
-const MEAL_LABELS: Record<string, string> = {
-  breakfast: 'Breakfast',
-  lunch: 'Lunch',
-  dinner: 'Dinner',
-  snack: 'Snacks',
-};
+function buildDateRange(days: number): string[] {
+  const out: string[] = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    out.push(d.toISOString().slice(0, 10));
+  }
+  return out;
+}
 
-const secHdr: React.CSSProperties = { paddingTop: 16, paddingBottom: 4 };
+const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const HEATMAP_DAYS = 14;
 
+type HeatEvent = 'done' | 'relapse';
+type HeatmapMap = Map<string, Map<string, HeatEvent>>; // habitId → date → event
+
+// ── Component ─────────────────────────────────────────────────────────────────
 const Home: React.FC = () => {
   const history = useHistory();
-  const { entries: weightEntries, latestEntry, reload: reloadWeight } = useWeightLog();
+  const { latestEntry, reload: reloadWeight } = useWeightLog();
   const { todayTotal, dailyGoal, loading: waterLoading, reload: reloadWater } = useWaterLog();
   const { lastNightEntry, reload: reloadSleep } = useSleepLog();
-  const { entries: foodEntries, reload: reloadFood } = useFoodLog();
+  const { todayEntries: todayWorkouts } = useWorkoutLog();
   const { profile, reload: reloadProfile } = useProfile();
+  const { habits, reload: reloadHabits } = useHabits();
+
+  const [heatmap, setHeatmap] = useState<HeatmapMap>(new Map());
+
+  const loadHeatmap = useCallback(async () => {
+    const oldest = buildDateRange(HEATMAP_DAYS)[0];
+    try {
+      const db = getDb();
+      const compRes = await db.query(
+        `SELECT habit_id, date FROM habit_completions WHERE date >= ?;`,
+        [oldest]
+      );
+      const relRes = await db.query(
+        `SELECT habit_id, date FROM habit_relapses WHERE date >= ?;`,
+        [oldest]
+      );
+      const map: HeatmapMap = new Map();
+      for (const r of compRes.values ?? []) {
+        const hId = r.habit_id as string;
+        if (!map.has(hId)) map.set(hId, new Map());
+        map.get(hId)!.set(r.date as string, 'done');
+      }
+      for (const r of relRes.values ?? []) {
+        const hId = r.habit_id as string;
+        if (!map.has(hId)) map.set(hId, new Map());
+        map.get(hId)!.set(r.date as string, 'relapse');
+      }
+      setHeatmap(map);
+    } catch { /* silent */ }
+  }, []);
 
   useIonViewWillEnter(() => {
     reloadWeight();
     reloadWater();
     reloadSleep();
-    reloadFood();
     reloadProfile();
+    reloadHabits();
+    loadHeatmap();
   });
 
-  const weightKg = latestEntry
-    ? latestEntry.unit === 'lbs'
-      ? latestEntry.value / 2.20462
-      : latestEntry.value
-    : 0;
-  const bmi = computeBMI(weightKg, profile.heightCm);
-  const bmiCat = bmiCategory(bmi);
-  const age = ageFromDob(profile.dob);
-  const bmr = computeBMR(weightKg, profile.heightCm, age, profile.sex);
-  const tdee = computeTDEE(bmr, profile.activity);
-  const hasWeight = weightKg > 0;
-
+  // ── Derived values ─────────────────────────────────────────────────────────
   const todayDate = today();
+  const waterPct = dailyGoal > 0 ? todayTotal / dailyGoal : 0;
 
-  // Last 7 weight entries (already sorted DESC by date), reversed for chart
-  const miniChartEntries = useMemo(() => weightEntries.slice(0, 7), [weightEntries]);
+  const workoutSessions = todayWorkouts.length;
+  const workoutMinutes = useMemo(
+    () => Math.round(todayWorkouts.reduce((s, e: WorkoutEntry) => s + (e.duration_sec ?? 0), 0) / 60),
+    [todayWorkouts]
+  );
 
-  const todayFoodCounts = useMemo(() => {
-    const todayFood = foodEntries.filter(e => e.date === todayDate);
-    return {
-      breakfast: todayFood.filter(e => e.meal === 'breakfast').length,
-      lunch: todayFood.filter(e => e.meal === 'lunch').length,
-      dinner: todayFood.filter(e => e.meal === 'dinner').length,
-      snack: todayFood.filter(e => e.meal === 'snack').length,
-    };
-  }, [foodEntries, todayDate]);
+  const goodHabits = habits.filter((h: HabitWithStats) => h.type === 'good');
+  const habitsDone = goodHabits.filter((h: HabitWithStats) => h.stats.todayActed).length;
+  const habitsTotal = goodHabits.length;
 
-  const waterPct = dailyGoal > 0 ? Math.round((todayTotal / dailyGoal) * 100) : 0;
+  const bestStreak = useMemo(
+    () => habits.reduce((acc: number, h: HabitWithStats) => Math.max(acc, h.stats.currentStreak), 0),
+    [habits]
+  );
+
+  const insightLine = useMemo(() => {
+    const daysSinceWeight = latestEntry
+      ? Math.round((Date.now() - new Date(latestEntry.date + 'T00:00:00').getTime()) / 86_400_000)
+      : 999;
+    if (daysSinceWeight >= 4) return `⚖️ Weight not logged in ${daysSinceWeight} days`;
+    if (dailyGoal > 0 && todayTotal >= dailyGoal) return `💧 Water goal reached — keep it up!`;
+    if (lastNightEntry && lastNightEntry.duration_min >= 7 * 60)
+      return `😴 Great sleep last night — ${formatDuration(lastNightEntry.duration_min)}`;
+    if (habitsTotal > 0 && habitsDone === habitsTotal) return `✓ All habits done today — you're on a roll!`;
+    if (habitsTotal > 0 && habitsDone < habitsTotal)
+      return `${habitsTotal - habitsDone} habit${habitsTotal - habitsDone !== 1 ? 's' : ''} left today.`;
+    return `Track your day and build your streaks.`;
+  }, [latestEntry, dailyGoal, todayTotal, lastNightEntry, habitsTotal, habitsDone]);
+
+  const heatmapDates = useMemo(() => buildDateRange(HEATMAP_DAYS), []);
+
+  // ── Speed dial deep-link handler ───────────────────────────────────────────
+  const handleQuickAdd = useCallback((target: 'water' | 'weight' | 'food' | 'workout') => {
+    sessionStorage.setItem('patty_track_tab_request', target);
+    history.push('/tabs/track');
+  }, [history]);
 
   return (
     <IonPage>
@@ -99,14 +146,11 @@ const Home: React.FC = () => {
         <IonToolbar>
           <IonTitle>Patty</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={() => history.push('/tabs/notifications')}>
-              <IonIcon icon={notificationsOutline} style={{ fontSize: 24, color: 'var(--md-on-surface-variant)' }} />
-            </IonButton>
-            <IonButton onClick={() => history.push('/tabs/achievements')}>
-              <IonIcon icon={trophyOutline} style={{ fontSize: 22, color: 'var(--md-on-surface-variant)' }} />
-            </IonButton>
             <IonButton onClick={() => history.push('/tabs/profile')}>
-              <IonIcon icon={personCircleOutline} style={{ fontSize: 26, color: 'var(--md-on-surface-variant)' }} />
+              <IonIcon
+                icon={personCircleOutline}
+                style={{ fontSize: 26, color: 'var(--md-on-surface-variant)' }}
+              />
             </IonButton>
           </IonButtons>
         </IonToolbar>
@@ -119,152 +163,220 @@ const Home: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
-        {/* ── Greeting ────────────────────────────────── */}
-        <div className="md-greeting">
-          <p className="md-greeting__title">{salutation(profile.name)}</p>
-          <p className="md-greeting__sub">
+        {/* ── Greeting ────────────────────────────────────────────────── */}
+        <div style={{ padding: '20px 20px 4px' }}>
+          <p style={{
+            margin: 0,
+            fontSize: 'var(--md-headline-sm)',
+            fontFamily: 'var(--md-font)',
+            fontWeight: 600,
+            color: 'var(--md-on-surface)',
+            lineHeight: 1.25,
+          }}>
+            {salutation(profile.name)}
+          </p>
+          <p style={{
+            margin: '4px 0 0',
+            fontSize: 'var(--md-body-md)',
+            fontFamily: 'var(--md-font)',
+            color: 'var(--md-on-surface-variant)',
+          }}>
             {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
+          {habitsTotal > 0 && (
+            <p style={{
+              margin: '10px 0 0',
+              fontSize: 'var(--md-label-lg)',
+              fontFamily: 'var(--md-font)',
+              color: 'var(--md-primary)',
+              fontWeight: 500,
+            }}>
+              {bestStreak > 0 ? `🔥 ${bestStreak}-day streak · ` : ''}{habitsDone}/{habitsTotal} habits done
+            </p>
+          )}
         </div>
 
-        {/* ── At-a-glance stats row ───────────────────── */}
-        <IonCard>
-          <IonCardContent style={{ padding: '16px 4px' }}>
-            <IonGrid style={{ padding: 0 }}>
-              <IonRow style={{ textAlign: 'center' }}>
-                {/* Weight */}
-                <IonCol>
-                  <p className="md-stat-value">
-                    {latestEntry ? `${latestEntry.value} ${latestEntry.unit}` : '\u2014'}
-                  </p>
-                  <p className="md-stat-label">Weight</p>
-                </IonCol>
-                {/* Divider */}
-                <IonCol style={{ borderLeft: '1px solid var(--md-outline-variant)', borderRight: '1px solid var(--md-outline-variant)' }}>
-                  <p className="md-stat-value">{waterLoading ? '\u2026' : `${waterPct}%`}</p>
-                  <p className="md-stat-label">Water</p>
-                </IonCol>
-                {/* Sleep */}
-                <IonCol>
-                  <p className="md-stat-value">
-                    {lastNightEntry ? formatDuration(lastNightEntry.duration_min) : '\u2014'}
-                  </p>
-                  <p className="md-stat-label">Sleep</p>
-                </IonCol>
-              </IonRow>
-            </IonGrid>
-          </IonCardContent>
-        </IonCard>
-
-        {/* ── Water ring ──────────────────────────────── */}
-        <IonCard>
-          <IonListHeader style={secHdr}>Water Today</IonListHeader>
-          <IonCardContent style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 16px 20px' }}>
-            <WaterRing total={todayTotal} goal={dailyGoal} size={160} />
-          </IonCardContent>
-        </IonCard>
-
-        {/* ── Weight mini-chart ───────────────────────── */}
-        <IonCard>
-          <IonListHeader style={secHdr}>Weight Trend</IonListHeader>
-          <IonCardContent style={{ padding: '8px 8px 16px' }}>
-            <WeightChart entries={miniChartEntries} />
-          </IonCardContent>
-        </IonCard>
-
-        {/* ── Your Metrics ────────────────────────────── */}
-        <IonCard>
-          <IonListHeader style={secHdr}>Your Metrics</IonListHeader>
+        {/* ── Today's Progress ────────────────────────────────────────── */}
+        <IonCard style={{ margin: '16px 16px 0' }}>
+          <IonListHeader style={{ paddingTop: 16, paddingBottom: 4 }}>Today</IonListHeader>
           <IonCardContent style={{ padding: '8px 16px 16px' }}>
-            {!hasWeight ? (
-              <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)', color: 'var(--md-on-surface-variant)', margin: 0, textAlign: 'center', padding: '8px 0' }}>
-                Log your weight in the Track tab to see your metrics.
-              </p>
+
+            {/* Water */}
+            <div className="hd-progress-row">
+              <span className="hd-progress-icon">💧</span>
+              <span className="hd-progress-label">Water</span>
+              <div className="hd-progress-bar-wrap">
+                <div
+                  className="hd-progress-bar-fill"
+                  style={{ width: `${Math.min(Math.round(waterPct * 100), 100)}%` }}
+                />
+              </div>
+              <span className="hd-progress-value">
+                {waterLoading ? '…' : `${(todayTotal / 1000).toFixed(1)}L`}
+              </span>
+            </div>
+
+            {/* Sleep */}
+            <div className="hd-progress-row">
+              <span className="hd-progress-icon">😴</span>
+              <span className="hd-progress-label">Sleep</span>
+              <div className="hd-progress-bar-wrap hd-progress-bar-wrap--empty" />
+              <span className="hd-progress-value">
+                {lastNightEntry ? formatDuration(lastNightEntry.duration_min) : '—'}
+              </span>
+            </div>
+
+            {/* Weight */}
+            <div className="hd-progress-row">
+              <span className="hd-progress-icon">⚖️</span>
+              <span className="hd-progress-label">Weight</span>
+              <div className="hd-progress-bar-wrap hd-progress-bar-wrap--empty" />
+              <span className="hd-progress-value">
+                {latestEntry ? `${latestEntry.value} ${latestEntry.unit}` : '—'}
+              </span>
+            </div>
+
+            {/* Workout */}
+            <div className="hd-progress-row hd-progress-row--last">
+              <span className="hd-progress-icon">🏃</span>
+              <span className="hd-progress-label">Workout</span>
+              <div className="hd-progress-bar-wrap hd-progress-bar-wrap--empty" />
+              <span className="hd-progress-value">
+                {workoutSessions > 0 ? `${workoutSessions} · ${workoutMinutes}m` : 'Rest day'}
+              </span>
+            </div>
+
+          </IonCardContent>
+        </IonCard>
+
+        {/* ── Habit Heatmap ────────────────────────────────────────────── */}
+        <IonCard style={{ margin: '12px 16px 0' }}>
+          <IonListHeader style={{ paddingTop: 16, paddingBottom: 4 }}>Habit Activity</IonListHeader>
+          <IonCardContent style={{ padding: '8px 12px 16px' }}>
+
+            {habits.length === 0 ? (
+              /* Empty state */
+              <div
+                style={{ textAlign: 'center', padding: '20px 0 8px' }}
+                onClick={() => history.push('/tabs/habits')}
+              >
+                <p style={{ fontSize: 32, margin: '0 0 8px' }}>🔥</p>
+                <p style={{
+                  margin: '0 0 4px',
+                  fontFamily: 'var(--md-font)',
+                  fontSize: 'var(--md-body-md)',
+                  fontWeight: 500,
+                  color: 'var(--md-on-surface)',
+                }}>No habits yet</p>
+                <p style={{
+                  margin: 0,
+                  fontFamily: 'var(--md-font)',
+                  fontSize: 'var(--md-body-sm)',
+                  color: 'var(--md-primary)',
+                }}>Tap to add your first habit →</p>
+              </div>
             ) : (
               <>
-                {/* Weight */}
-                <div className="md-metric-row">
-                  <span className="md-metric-label">Weight</span>
-                  <span className="md-metric-value">{latestEntry!.value} {latestEntry!.unit}</span>
+                {/* Day-of-week header row */}
+                <div style={{ display: 'flex', marginBottom: 6, paddingLeft: 82 }}>
+                  {heatmapDates.map(d => (
+                    <div
+                      key={d}
+                      style={{
+                        width: 14,
+                        marginRight: 3,
+                        textAlign: 'center',
+                        fontSize: 9,
+                        fontFamily: 'var(--md-font)',
+                        fontWeight: d === todayDate ? 700 : 400,
+                        color: d === todayDate ? 'var(--md-primary)' : 'var(--md-on-surface-variant)',
+                      }}
+                    >
+                      {DAY_LABELS[new Date(d + 'T00:00:00').getDay()]}
+                    </div>
+                  ))}
                 </div>
 
-                {/* BMI — needs height */}
-                {bmi > 0 ? (
-                  <div className="md-metric-row">
-                    <span className="md-metric-label">BMI</span>
-                    <span className="md-metric-value">
-                      {bmi.toFixed(1)}
-                      {bmiCat && (
+                {/* One row per habit */}
+                {habits.map((habit: HabitWithStats) => {
+                  const habitEvents = heatmap.get(habit.id) ?? new Map<string, HeatEvent>();
+                  return (
+                    <div key={habit.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 5 }}>
+                      {/* Habit label */}
+                      <div style={{
+                        width: 82,
+                        flexShrink: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        overflow: 'hidden',
+                        paddingRight: 4,
+                      }}>
+                        <span style={{ fontSize: 13, flexShrink: 0 }}>{habit.emoji}</span>
                         <span style={{
-                          display: 'inline-block', marginLeft: 8, padding: '2px 10px',
-                          borderRadius: 'var(--md-shape-full)',
-                          background: ({ Underweight: '#5bcaff', Normal: 'var(--md-primary)', Overweight: '#f5a623', Obese: '#e74c3c' } as Record<string,string>)[bmiCat] ?? 'var(--md-surface-variant)',
-                          color: '#fff', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', fontWeight: 600, verticalAlign: 'middle',
-                        }}>{bmiCat}</span>
-                      )}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="md-metric-row">
-                    <span className="md-metric-label">BMI</span>
-                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', fontStyle: 'italic' }}>Add height in profile</span>
-                  </div>
-                )}
+                          fontSize: 10,
+                          fontFamily: 'var(--md-font)',
+                          color: 'var(--md-on-surface-variant)',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>
+                          {habit.name}
+                        </span>
+                      </div>
 
-                {/* BMR */}
-                {bmr > 0 ? (
-                  <div className="md-metric-row">
-                    <span className="md-metric-label">BMR</span>
-                    <span className="md-metric-value">{bmr.toLocaleString()} kcal</span>
-                  </div>
-                ) : bmi > 0 ? (
-                  <div className="md-metric-row">
-                    <span className="md-metric-label">BMR</span>
-                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', fontStyle: 'italic' }}>Add DOB &amp; sex in profile</span>
-                  </div>
-                ) : null}
-
-                {/* TDEE */}
-                {tdee > 0 ? (
-                  <div className="md-metric-row">
-                    <span className="md-metric-label">TDEE</span>
-                    <span className="md-metric-value">{tdee.toLocaleString()} kcal</span>
-                  </div>
-                ) : bmr > 0 ? (
-                  <div className="md-metric-row">
-                    <span className="md-metric-label">TDEE</span>
-                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', fontStyle: 'italic' }}>Add activity level in profile</span>
-                  </div>
-                ) : null}
+                      {/* Date cells */}
+                      {heatmapDates.map(d => {
+                        const event = habitEvents.get(d);
+                        const isToday = d === todayDate;
+                        let bg = 'var(--md-surface-variant)';
+                        let opacity = 0.45;
+                        if (event === 'done') { bg = habit.colour; opacity = 1; }
+                        else if (event === 'relapse') { bg = '#CF6679'; opacity = 1; }
+                        return (
+                          <div
+                            key={d}
+                            style={{
+                              width: 14,
+                              height: 14,
+                              borderRadius: 3,
+                              background: bg,
+                              opacity,
+                              marginRight: 3,
+                              flexShrink: 0,
+                              outline: isToday ? '2px solid var(--md-outline)' : 'none',
+                              outlineOffset: 1,
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  );
+                })}
               </>
             )}
+
           </IonCardContent>
         </IonCard>
 
-        {/* ── Today's meals ───────────────────────────── */}
-        <IonCard style={{ margin: '12px 16px 32px' }}>
-          <IonListHeader style={secHdr}>Today&apos;s Meals</IonListHeader>
-          <IonCardContent style={{ padding: '0 0 8px' }}>
-            <IonList lines="inset" style={{ background: 'transparent' }}>
-              {(['breakfast', 'lunch', 'dinner', 'snack'] as const).map(meal => {
-                const count = todayFoodCounts[meal];
-                return (
-                  <IonItem key={meal} style={{ '--background': 'transparent' } as React.CSSProperties}>
-                    <IonLabel style={{ fontFamily: 'var(--md-font)' }}>{MEAL_LABELS[meal]}</IonLabel>
-                    <IonNote slot="end" style={{
-                      fontFamily: 'var(--md-font)',
-                      color: count > 0 ? 'var(--md-primary)' : 'var(--md-on-surface-variant)',
-                    }}>
-                      {count > 0 ? `${count} entr${count === 1 ? 'y' : 'ies'}` : 'None logged'}
-                    </IonNote>
-                  </IonItem>
-                );
-              })}
-            </IonList>
-          </IonCardContent>
-        </IonCard>
+        {/* ── Insight line ─────────────────────────────────────────────── */}
+        <p style={{
+          margin: '16px 20px 0',
+          fontSize: 'var(--md-body-md)',
+          fontFamily: 'var(--md-font)',
+          color: 'var(--md-on-surface-variant)',
+          textAlign: 'center',
+          fontStyle: 'italic',
+        }}>
+          {insightLine}
+        </p>
 
+        {/* Bottom space for FAB */}
+        <div style={{ height: 100 }} />
       </IonContent>
+
+      {/* ── Animated Speed Dial FAB ─────────────────────────────────────── */}
+      <SpeedDial onSelect={handleQuickAdd} />
     </IonPage>
   );
 };

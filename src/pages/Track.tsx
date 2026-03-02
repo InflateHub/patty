@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IonContent,
   IonFab,
@@ -11,6 +11,7 @@ import {
   IonSegmentButton,
   IonTitle,
   IonToolbar,
+  useIonViewWillEnter,
 } from '@ionic/react';
 import { barbellOutline, fastFoodOutline, moonOutline, scaleOutline, waterOutline } from 'ionicons/icons';
 import { WeightTab } from '../track/WeightTab';
@@ -32,6 +33,15 @@ const TAB_META: Record<TabId, { icon: string; label: string }> = {
 const Track: React.FC = () => {
   const [tab, setTab] = useState<TabId>('weight');
   const [fabTrigger, setFabTrigger] = useState(0);
+
+  // Deep-link from Home SpeedDial: sessionStorage key set before navigating
+  useIonViewWillEnter(() => {
+    const requested = sessionStorage.getItem('patty_track_tab_request') as TabId | null;
+    if (requested && Object.keys(TAB_META).includes(requested)) {
+      setTab(requested);
+      sessionStorage.removeItem('patty_track_tab_request');
+    }
+  });
 
   function handleTabChange(next: TabId) {
     setTab(next);

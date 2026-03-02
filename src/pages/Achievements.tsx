@@ -741,7 +741,7 @@ const AchievementsPage: React.FC = () => {
         <IonCard style={{
           margin: '16px 16px 8px',
           borderRadius: 'var(--md-shape-xl)',
-          border: '1px solid var(--md-outline-variant)',
+          border: `2px solid ${gam.level.color}`,
           boxShadow: 'none',
           background: 'var(--md-surface-container-low)',
         }}>

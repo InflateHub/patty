@@ -1,4 +1,4 @@
-/* ProfilePage — 2.0.0 */
+/* ProfilePage — 2.8.0 */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -27,7 +27,7 @@ import {
   IonToolbar,
   IonToast,
 } from '@ionic/react';
-import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline } from 'ionicons/icons';
+import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline, chevronForwardOutline, notificationsOutline, trophyOutline } from 'ionicons/icons';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
 import {
@@ -38,6 +38,7 @@ import {
 } from '../hooks/useProfile';
 import { useAppLock } from '../hooks/useAppLock';
 import { applyTheme, SEED_COLOURS } from '../hooks/useTheme';
+import { useGamification, getLevel } from '../hooks/useGamification';
 import PinSetupModal from '../components/PinSetupModal';
 import ColorPicker from '../components/ColorPicker';
 import { getDb } from '../db/database';
@@ -51,6 +52,7 @@ const transparentItem = { '--background': 'transparent' } as React.CSSProperties
 const ProfilePage: React.FC = () => {
   const history = useHistory();
   const { profile, prefs, loading, saveProfile, savePrefs } = useProfile();
+  const gamification = useGamification();
   const {
     lockEnabled, biometricEnabled, biometricAvailable,
     enableLock, disableLock, changePIN, setBiometricEnabled,
@@ -245,6 +247,111 @@ const ProfilePage: React.FC = () => {
       </IonHeader>
 
       <IonContent fullscreen>
+
+        {/* ── Identity Hero ────────────────────────────────────────────── */}
+        <IonCard>
+          <IonCardContent style={{ padding: '20px 16px 16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              {/* Avatar circle */}
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%',
+                background: 'var(--md-primary-container)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <span style={{
+                  fontSize: 'var(--md-headline-lg)',
+                  fontFamily: 'var(--md-font)',
+                  fontWeight: 700,
+                  color: 'var(--md-on-primary-container)',
+                  lineHeight: 1,
+                  userSelect: 'none',
+                }}>
+                  {profile.name ? profile.name.charAt(0).toUpperCase() : '?'}
+                </span>
+              </div>
+
+              {/* Name */}
+              <p style={{
+                margin: 0,
+                fontSize: 'var(--md-title-lg)',
+                fontFamily: 'var(--md-font)',
+                fontWeight: 600,
+                color: 'var(--md-on-surface)',
+                textAlign: 'center',
+              }}>
+                {profile.name || 'Your Name'}
+              </p>
+
+              {/* Level chip */}
+              {!gamification.loading && (
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '4px 14px',
+                  borderRadius: 'var(--md-shape-full)',
+                  background: gamification.level.color + '22',
+                  border: `1px solid ${gamification.level.color}55`,
+                }}>
+                  <span style={{ fontSize: 14 }}>{gamification.level.emoji}</span>
+                  <span style={{
+                    fontSize: 'var(--md-label-lg)',
+                    fontFamily: 'var(--md-font)',
+                    fontWeight: 600,
+                    color: gamification.level.color,
+                  }}>
+                    Level {gamification.xp > 0 ? Math.floor(Math.log2(gamification.xp / 50) + 2) : 1} · {gamification.level.name}
+                  </span>
+                </div>
+              )}
+
+              {/* XP + Streak quick stats */}
+              <div style={{ display: 'flex', gap: 24, marginTop: 4 }}>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ margin: 0, fontSize: 'var(--md-title-md)', fontFamily: 'var(--md-font)', fontWeight: 700, color: 'var(--md-on-surface)' }}>
+                    {gamification.loading ? '—' : gamification.xp.toLocaleString()}
+                  </p>
+                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>Total XP</p>
+                </div>
+                <div style={{ width: 1, background: 'var(--md-outline-variant)' }} />
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ margin: 0, fontSize: 'var(--md-title-md)', fontFamily: 'var(--md-font)', fontWeight: 700, color: 'var(--md-on-surface)' }}>
+                    {gamification.loading ? '—' : gamification.bestStreak}
+                  </p>
+                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>Best Streak</p>
+                </div>
+              </div>
+            </div>
+          </IonCardContent>
+        </IonCard>
+
+        {/* ── Notifications + Achievements nav ─────────────────────────── */}
+        <IonCard>
+          <IonCardContent style={{ padding: '4px 0 12px' }}>
+            <IonList lines="inset" style={{ background: 'transparent' }}>
+              <IonItem
+                style={{ ...transparentItem, cursor: 'pointer' }}
+                button
+                detail={false}
+                onClick={() => history.push('/tabs/notifications')}
+              >
+                <IonIcon icon={notificationsOutline} slot="start" style={{ color: 'var(--md-primary)', fontSize: 20 }} />
+                <IonLabel style={{ fontFamily: 'var(--md-font)' }}>Notifications</IonLabel>
+                <IonIcon icon={chevronForwardOutline} slot="end" style={{ color: 'var(--md-on-surface-variant)', fontSize: 18 }} />
+              </IonItem>
+              <IonItem
+                style={{ ...transparentItem, cursor: 'pointer' }}
+                button
+                detail={false}
+                lines="none"
+                onClick={() => history.push('/tabs/achievements')}
+              >
+                <IonIcon icon={trophyOutline} slot="start" style={{ color: 'var(--md-primary)', fontSize: 20 }} />
+                <IonLabel style={{ fontFamily: 'var(--md-font)' }}>Achievements</IonLabel>
+                <IonIcon icon={chevronForwardOutline} slot="end" style={{ color: 'var(--md-on-surface-variant)', fontSize: 18 }} />
+              </IonItem>
+            </IonList>
+          </IonCardContent>
+        </IonCard>
 
         {/* ── About Me ──────────────────────────────────────────────────── */}
         <IonCard>

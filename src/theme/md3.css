@@ -634,6 +634,65 @@ input[type="number"] {
   color: var(--md-on-surface-variant);
 }
 
+/* ── Home: Today's Progress rows ────────────────────────────────────────── */
+.hd-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--md-outline-variant);
+}
+
+.hd-progress-row--last {
+  border-bottom: none;
+}
+
+.hd-progress-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.hd-progress-label {
+  font-family: var(--md-font);
+  font-size: var(--md-body-md);
+  color: var(--md-on-surface-variant);
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.hd-progress-bar-wrap {
+  flex: 1;
+  height: 4px;
+  border-radius: var(--md-shape-full);
+  background: var(--md-surface-variant);
+  overflow: hidden;
+  position: relative;
+}
+
+.hd-progress-bar-wrap--empty {
+  opacity: 0; /* placeholder — keeps layout for stat rows that don't have a bar */
+}
+
+.hd-progress-bar-fill {
+  height: 100%;
+  background: var(--md-primary);
+  border-radius: var(--md-shape-full);
+  transition: width 600ms var(--md-easing-decelerate);
+  min-width: 4px;
+}
+
+.hd-progress-value {
+  font-family: var(--md-font);
+  font-size: var(--md-title-sm);
+  font-weight: 600;
+  color: var(--md-on-surface);
+  min-width: 72px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
 /* ── Utility: Section header (outside IonListHeader) ────────────────────── */
 .md-section-header {
   padding-top: 16px;
