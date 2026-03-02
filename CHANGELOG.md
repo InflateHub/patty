@@ -2,6 +2,18 @@
 
 ---
 
+## [2.2.0] — Onboarding Redesign
+*Goal: a leaner, more visually immersive onboarding that collects only what matters.*
+
+- [x] **Remove weight logging step** — Height & Weight step replaced by Height & Sex; no weight entry created during onboarding; `weight_entries` starts empty
+- [x] **Scrollable ruler height picker** — CSS snap-scroll horizontal ruler (100–250 cm); cm / ft+in unit toggle; large live display value above the ruler; fade masks and centre-needle indicator
+- [x] **Illustrated sex cards** — three full-height cards (Male 👨 / Female 👩 / Prefer not to say 🙂) with emoji icon, label, and selected check mark; replace plain chips
+- [x] **Custom water goal drum picker** — vertical snap-scroll drum roller (500–4000 ml in 100 ml steps); selected value shown large above in primary colour; ml / oz unit toggle; +100 ml / +250 ml / +500 ml quick-add chips
+- [x] **Remove photo prompt** — no progress photo requested during onboarding; photo journey starts from Track → Weight on first weigh-in
+- [x] **Step 2 renamed** — title changed from "Your body metrics" to "Height & Sex"
+
+---
+
 ## [2.1.0] — UX Fixes & Polish
 *Goal: resolve the most visible friction points and interaction gaps found in the 2.0.0 build.*
 

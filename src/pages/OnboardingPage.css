@@ -84,3 +84,174 @@ input[type='date'].ob-date-input::-webkit-calendar-picker-indicator {
   opacity: 0.5;
   cursor: pointer;
 }
+
+/* ── Height ruler picker ────────────────────────────────────────────────── */
+
+.ob-ruler-wrap {
+  position: relative;
+}
+
+.ob-ruler-needle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--md-primary);
+  border-radius: 2px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ob-ruler-track {
+  display: flex;
+  align-items: flex-end;
+  height: 72px;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+.ob-ruler-track::-webkit-scrollbar { display: none; }
+
+.ob-ruler-tick {
+  min-width: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  scroll-snap-align: center;
+  flex-shrink: 0;
+}
+
+.ob-tick-bar {
+  width: 1.5px;
+  border-radius: 2px;
+  transition: background 0.08s, opacity 0.08s;
+}
+
+.ob-tick-label {
+  font-family: var(--md-font);
+  font-size: 9px;
+  margin-top: 4px;
+  line-height: 1;
+  transition: color 0.08s;
+}
+
+.ob-ruler-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 64px;
+  pointer-events: none;
+  z-index: 3;
+}
+.ob-ruler-fade-l {
+  left: 0;
+  background: linear-gradient(to right, var(--md-surface), transparent);
+}
+.ob-ruler-fade-r {
+  right: 0;
+  background: linear-gradient(to left, var(--md-surface), transparent);
+}
+
+/* ── Sex illustrated cards ──────────────────────────────────────────────── */
+
+.ob-sex-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 6px 16px;
+  border-radius: var(--md-shape-xl);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  min-height: 116px;
+}
+
+.ob-sex-icon {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.ob-sex-label {
+  font-family: var(--md-font);
+  font-size: var(--md-label-md);
+  text-align: center;
+  line-height: 1.3;
+  white-space: pre-line;
+}
+
+.ob-sex-check {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 14px;
+  color: var(--md-primary);
+}
+
+/* ── Water drum picker ──────────────────────────────────────────────────── */
+
+.ob-drum-wrap {
+  position: relative;
+  height: 168px;
+  border-radius: var(--md-shape-lg);
+  background: var(--md-surface-container-low);
+  overflow: hidden;
+}
+
+.ob-drum-selector {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  right: 16px;
+  height: 56px;
+  transform: translateY(-50%);
+  border: 2px solid var(--md-primary);
+  border-radius: var(--md-shape-md);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ob-drum-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 60px;
+  pointer-events: none;
+  z-index: 2;
+}
+.ob-drum-fade-t {
+  top: 0;
+  background: linear-gradient(to bottom, var(--md-surface-container-low) 15%, transparent);
+}
+.ob-drum-fade-b {
+  bottom: 0;
+  background: linear-gradient(to top, var(--md-surface-container-low) 15%, transparent);
+}
+
+.ob-drum-scroll {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ob-drum-scroll::-webkit-scrollbar { display: none; }
+
+.ob-drum-item {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--md-font);
+  scroll-snap-align: center;
+  transition: font-size 0.12s, color 0.12s, opacity 0.12s;
+}

@@ -11,12 +11,10 @@
  * Step 5  Celebration     — confetti + "Let's go"
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IonPage, IonContent, IonButton, IonSpinner, IonActionSheet } from '@ionic/react';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { IonPage, IonContent, IonButton, IonSpinner } from '@ionic/react';
 import { getDb } from '../db/database';
-import { savePhotoFile } from '../utils/photoStorage';
 import type { Goal, ActivityLevel, Sex } from '../hooks/useProfile';
 import './OnboardingPage.css';
 
@@ -44,12 +42,14 @@ const ACTIVITIES: { id: ActivityLevel; emoji: string; label: string; desc: strin
   { id: 'very',      emoji: '🏋️', label: 'Very Active',       desc: '6–7 exercise days / week'      },
 ];
 
-const WATER_PRESETS: { ml: number; label: string }[] = [
-  { ml: 1500, label: '1.5 L' },
-  { ml: 2000, label: '2.0 L' },
-  { ml: 2500, label: '2.5 L' },
-  { ml: 3000, label: '3.0 L' },
+const SEX_OPTIONS: { id: Sex; emoji: string; label: string }[] = [
+  { id: 'male',   emoji: '👨', label: 'Male'   },
+  { id: 'female', emoji: '👩', label: 'Female'  },
+  { id: 'other',  emoji: '🙂', label: 'Prefer\nnot to say' },
 ];
+
+/** 500 ml → 4000 ml in 100 ml steps (36 values) */
+const WATER_VALS: number[] = Array.from({ length: 36 }, (_, i) => 500 + i * 100);
 
 const CONFETTI_COLORS = [
   '#5C7A6E', '#FFAB40', '#80DEEA', '#F48FB1',
@@ -102,61 +102,67 @@ const OnboardingPage: React.FC = () => {
   const [step, setStep] = useState(0);
 
   // Step 1
-  const [name,     setName]    = useState('');
-  const [dob,      setDob]     = useState('');
+  const [name, setName] = useState('');
+  const [dob,  setDob]  = useState('');
   // Step 2
-  const [heightCm, setHeightCm] = useState('');
-  const [weight,   setWeight]   = useState('');
-  const [unit,     setUnit]     = useState<'kg' | 'lb'>('kg');
-  const [sex,      setSex]      = useState<Sex | ''>('');
+  const [heightCm,   setHeightCm]   = useState('170');
+  const [heightUnit, setHeightUnit] = useState<'cm' | 'ftin'>('cm');
+  const [sex,        setSex]        = useState<Sex | ''>('');
   // Step 3
-  const [goal,     setGoal]     = useState<Goal | ''>('');
-  // Step 2 — starting photo (optional)
-  const [obPhoto, setObPhoto]           = useState<string | null>(null);
-  const [showPhotoSheet, setShowPhotoSheet] = useState(false);
+  const [goal, setGoal] = useState<Goal | ''>('');
   // Step 4
-  const [activity, setActivity] = useState<ActivityLevel | ''>('');
+  const [activity,  setActivity]  = useState<ActivityLevel | ''>('');
   const [waterGoal, setWaterGoal] = useState(2000);
+  const [waterUnit, setWaterUnit] = useState<'ml' | 'oz'>('ml');
 
   const [saving, setSaving] = useState(false);
 
-  // ── Photo capture ───────────────────────────────────────────────────────
-
-  const captureObPhoto = async (source: CameraSource) => {
-    try {
-      if (source === CameraSource.Camera) {
-        const perms = await Camera.checkPermissions();
-        if (perms.camera !== 'granted') {
-          const req = await Camera.requestPermissions({ permissions: ['camera'] });
-          if (req.camera !== 'granted') return;
-        }
-      } else {
-        const perms = await Camera.checkPermissions();
-        if (perms.photos !== 'granted') {
-          const req = await Camera.requestPermissions({ permissions: ['photos'] });
-          if (req.photos !== 'granted') return;
-        }
-      }
-      const photo = await Camera.getPhoto({
-        resultType: CameraResultType.DataUrl,
-        source,
-        quality: 80,
-      });
-      if (photo.dataUrl) setObPhoto(photo.dataUrl);
-    } catch {
-      // user cancelled — no-op
-    }
-  };
+  // ── Refs ────────────────────────────────────────────────────────────────
+  const rulerRef     = useRef<HTMLDivElement>(null);
+  const waterDrumRef = useRef<HTMLDivElement>(null);
+  const waterScrollT = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Validation ──────────────────────────────────────────────────────────
 
   const canProceed = (): boolean => {
     if (step === 1) return name.trim().length > 0 && dob !== '';
-    if (step === 2) return parseFloat(heightCm) > 0 && parseFloat(weight) > 0 && sex !== '' && obPhoto !== null;
+    if (step === 2) return parseFloat(heightCm) > 0 && sex !== '';
     if (step === 3) return goal !== '';
     if (step === 4) return activity !== '';
     return true;
   };
+
+  // ── Scroll handlers ──────────────────────────────────────────────────────
+
+  /** Read ruler scroll position → update heightCm */
+  const handleRulerScroll = useCallback(() => {
+    if (!rulerRef.current) return;
+    const cm = Math.round(rulerRef.current.scrollLeft / 16) + 100;
+    setHeightCm(String(Math.min(250, Math.max(100, cm))));
+  }, []);
+
+  /** Read drum scroll position → update waterGoal (debounced 150 ms) */
+  const handleWaterScroll = useCallback(() => {
+    if (!waterDrumRef.current) return;
+    if (waterScrollT.current) clearTimeout(waterScrollT.current);
+    waterScrollT.current = setTimeout(() => {
+      if (!waterDrumRef.current) return;
+      const idx = Math.round(waterDrumRef.current.scrollTop / 56);
+      setWaterGoal(WATER_VALS[Math.max(0, Math.min(WATER_VALS.length - 1, idx))]);
+    }, 150);
+  }, []);
+
+  /** Initialise scroll position when the step with a picker becomes active */
+  useEffect(() => {
+    if (step === 2 && rulerRef.current) {
+      rulerRef.current.scrollLeft = (parseFloat(heightCm) || 170 - 100) * 16;
+    }
+    if (step === 4 && waterDrumRef.current) {
+      const idx = WATER_VALS.indexOf(waterGoal);
+      waterDrumRef.current.scrollTop = Math.max(0, idx) * 56;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   // ── Navigation ──────────────────────────────────────────────────────────
 
@@ -171,15 +177,14 @@ const OnboardingPage: React.FC = () => {
       const db = await getDb();
 
       const pairs: [string, string][] = [
-        ['profile_name',      name.trim()        ],
-        ['profile_dob',       dob                ],
-        ['profile_sex',       sex                ],
-        ['profile_height_cm', heightCm           ],
-        ['profile_activity',  activity           ],
-        ['profile_goal',      goal               ],
-        ['pref_weight_unit',  unit               ],
-        ['pref_water_goal_ml', String(waterGoal) ],
-        ['onboarding_complete', '1'              ],
+        ['profile_name',       name.trim()        ],
+        ['profile_dob',        dob                ],
+        ['profile_sex',        sex                ],
+        ['profile_height_cm',  heightCm           ],
+        ['profile_activity',   activity           ],
+        ['profile_goal',       goal               ],
+        ['pref_water_goal_ml', String(waterGoal)  ],
+        ['onboarding_complete', '1'               ],
       ];
 
       for (const [key, value] of pairs) {
@@ -187,32 +192,6 @@ const OnboardingPage: React.FC = () => {
           'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value;',
           [key, value],
         );
-      }
-
-      // Persist starting weight entry (with optional photo)
-      const wVal    = parseFloat(weight);
-      const entryId = `onb-${Date.now()}`;
-      const today   = new Date().toISOString().slice(0, 10);
-      let weightPhotoPath: string | null = null;
-      if (obPhoto) {
-        try { weightPhotoPath = await savePhotoFile('weight_photos', entryId, obPhoto); } catch { /* ignore */ }
-      }
-      await db.run(
-        'INSERT OR IGNORE INTO weight_entries (id, date, value, unit, photo_path) VALUES (?, ?, ?, ?, ?);',
-        [entryId, today, wVal, unit, weightPhotoPath],
-      );
-
-      // Also log as a progress / before photo so gallery + achievements are consistent
-      if (obPhoto) {
-        try {
-          const ppId   = `pp_onb_${Date.now()}`;
-          const ppNow  = new Date().toISOString();
-          const ppPath = await savePhotoFile('progress_photos', ppId, obPhoto);
-          await db.run(
-            'INSERT INTO progress_photos (id, date, photo_path, created_at) VALUES (?, ?, ?, ?);',
-            [ppId, today, ppPath, ppNow],
-          );
-        } catch { /* ignore */ }
       }
     } finally {
       setSaving(false);
@@ -486,175 +465,105 @@ const OnboardingPage: React.FC = () => {
           fontFamily: 'var(--md-font)',
           fontSize: 'var(--md-body-md)',
           color: 'var(--md-on-surface-variant)',
-          marginBottom: 20,
+          marginBottom: 24,
           marginTop: 0,
         }}
       >
         Used to calculate BMI, BMR and your daily calorie target.
       </p>
 
-      {/* Starting photo (required) */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 20 }}>
-        <div
-          onClick={() => setShowPhotoSheet(true)}
-          style={{
-            width: 96,
-            height: 96,
-            borderRadius: '50%',
-            border: obPhoto ? 'none' : '2px dashed var(--md-outline)',
-            background: obPhoto ? 'transparent' : 'var(--md-surface-container)',
-            cursor: 'pointer',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-            flexShrink: 0,
-          }}
-        >
-          {obPhoto ? (
-            <img
-              src={obPhoto}
-              alt="before"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          ) : (
-            <>
-              <span style={{ fontSize: 28, lineHeight: 1 }}>📷</span>
-              <span
-                style={{
-                  fontFamily: 'var(--md-font)',
-                  fontSize: 9,
-                  color: 'var(--md-on-surface-variant)',
-                  marginTop: 4,
-                  textAlign: 'center',
-                  lineHeight: 1.2,
-                  paddingInline: 4,
-                }}
-              >
-                Before photo
-              </span>
-            </>
-          )}
-          {obPhoto && (
-            <div
-              style={{
-                position: 'absolute', inset: 0,
-                background: 'rgba(0,0,0,0.28)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <span style={{ fontSize: 22 }}>✎</span>
-            </div>
-          )}
-        </div>
-        <p
-          style={{
-            fontFamily: 'var(--md-font)',
-            fontSize: 'var(--md-label-sm)',
-            color: 'var(--md-on-surface-variant)',
-            margin: '6px 0 0',
-            textAlign: 'center',
-          }}
-        >
-          Tap to take your starting photo
-        </p>
-      </div>
-
-      {/* Height */}
+      {/* ── HEIGHT ──────────────────────────────────────────────────────── */}
       <div style={sectionLabel}>Height</div>
-      <div style={{ position: 'relative' }}>
-        <input
-          type="number"
-          placeholder="e.g. 170"
-          value={heightCm}
-          min={100}
-          max={250}
-          onChange={e => setHeightCm(e.target.value)}
-          style={{ ...inputBase, paddingRight: 52 }}
-        />
-        <span
-          style={{
-            position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
-            fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)',
-            color: 'var(--md-on-surface-variant)',
-          }}
-        >
-          cm
-        </span>
-      </div>
 
-      {/* Weight + unit */}
-      <div style={{ ...sectionLabel, marginTop: 20 }}>Starting Weight</div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-        <div style={{ flex: 1, position: 'relative' }}>
-          <input
-            type="number"
-            placeholder={unit === 'kg' ? 'e.g. 70' : 'e.g. 154'}
-            value={weight}
-            min={1}
-            max={500}
-            onChange={e => setWeight(e.target.value)}
-            style={{ ...inputBase, paddingRight: 48 }}
-          />
-          <span
-            style={{
-              position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
-              fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)',
-              color: 'var(--md-on-surface-variant)',
-            }}
-          >
-            {unit}
-          </span>
-        </div>
-        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-          {(['kg', 'lb'] as const).map(u => (
-            <div key={u} onClick={() => setUnit(u)} style={chipStyle(unit === u)}>
-              {u}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Biological sex */}
-      <div style={{ ...sectionLabel, marginTop: 20 }}>Biological Sex</div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        {(['male', 'female', 'other'] as Sex[]).map(s => (
-          <div
-            key={s}
-            onClick={() => setSex(s)}
-            style={{
-              ...chipStyle(sex === s),
-              flex: 1,
-              justifyContent: 'center',
-            }}
-          >
-            {s.charAt(0).toUpperCase() + s.slice(1)}
+      {/* Unit toggle */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        {(['cm', 'ftin'] as const).map(u => (
+          <div key={u} onClick={() => setHeightUnit(u)} style={chipStyle(heightUnit === u)}>
+            {u === 'cm' ? 'cm' : 'ft / in'}
           </div>
         ))}
       </div>
 
-      {/* Photo action sheet */}
-      <IonActionSheet
-        isOpen={showPhotoSheet}
-        onDidDismiss={() => setShowPhotoSheet(false)}
-        header="Starting Photo"
-        buttons={[
-          {
-            text: 'Take Photo',
-            handler: () => { captureObPhoto(CameraSource.Camera); },
-          },
-          {
-            text: 'Choose from Gallery',
-            handler: () => { captureObPhoto(CameraSource.Photos); },
-          },
-          ...(obPhoto
-            ? [{ text: 'Remove Photo', role: 'destructive', handler: () => { setObPhoto(null); } }]
-            : []),
-          { text: 'Cancel', role: 'cancel' },
-        ]}
-      />
+      {/* Large display value */}
+      {(() => {
+        const cm = parseFloat(heightCm) || 170;
+        const totalIn = Math.round(cm / 2.54);
+        const ftPart  = Math.floor(totalIn / 12);
+        const inPart  = totalIn % 12;
+        return (
+          <div style={{ textAlign: 'center', marginBottom: 10 }}>
+            <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-headline-lg)', fontWeight: 700, color: 'var(--md-primary)' }}>
+              {heightUnit === 'cm' ? `${cm} cm` : `${ftPart}' ${inPart}"`}
+            </span>
+          </div>
+        );
+      })()}
+
+      {/* Scrollable ruler */}
+      <div className="ob-ruler-wrap" style={{ marginBottom: 28 }}>
+        <div className="ob-ruler-needle" />
+        <div ref={rulerRef} onScroll={handleRulerScroll} className="ob-ruler-track">
+          <div style={{ minWidth: 'calc(50%)', flexShrink: 0 }} />
+          {Array.from({ length: 151 }, (_, i) => 100 + i).map(c => {
+            const cm   = parseFloat(heightCm) || 170;
+            const dist = Math.abs(c - cm);
+            return (
+              <div key={c} className="ob-ruler-tick">
+                <div
+                  className="ob-tick-bar"
+                  style={{
+                    height:     c % 10 === 0 ? 34 : c % 5 === 0 ? 22 : 12,
+                    background: c === cm ? 'var(--md-primary)' : 'var(--md-outline-variant)',
+                    opacity:    dist > 20 ? 0.25 : dist > 10 ? 0.55 : 1,
+                  }}
+                />
+                {c % 10 === 0 && (
+                  <span className="ob-tick-label" style={{ color: c === cm ? 'var(--md-primary)' : 'var(--md-on-surface-variant)' }}>
+                    {c}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+          <div style={{ minWidth: 'calc(50%)', flexShrink: 0 }} />
+        </div>
+        <div className="ob-ruler-fade ob-ruler-fade-l" />
+        <div className="ob-ruler-fade ob-ruler-fade-r" />
+      </div>
+
+      {/* ── SEX ─────────────────────────────────────────────────────────── */}
+      <div style={{ ...sectionLabel, marginTop: 20 }}>Biological Sex</div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        {SEX_OPTIONS.map(s => (
+          <div
+            key={s.id}
+            onClick={() => setSex(s.id)}
+            className="ob-sex-card"
+            style={{
+              border: sex === s.id
+                ? '2px solid var(--md-primary)'
+                : '1.5px solid var(--md-outline-variant)',
+              background: sex === s.id
+                ? 'var(--md-primary-container)'
+                : 'var(--md-surface-container-low)',
+            }}
+          >
+            <span className="ob-sex-icon">{s.emoji}</span>
+            <span
+              className="ob-sex-label"
+              style={{
+                fontWeight: sex === s.id ? 600 : 400,
+                color: sex === s.id
+                  ? 'var(--md-on-primary-container)'
+                  : 'var(--md-on-surface-variant)',
+              }}
+            >
+              {s.label}
+            </span>
+            {sex === s.id && <span className="ob-sex-check">✓</span>}
+          </div>
+        ))}
+      </div>
     </div>
   );
 
@@ -752,21 +661,71 @@ const OnboardingPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Daily water goal */}
+      {/* Daily water goal — drum picker */}
       <div style={{ ...sectionLabel, marginTop: 24 }}>Daily Water Goal</div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        {WATER_PRESETS.map(p => (
+
+      {/* Unit toggle + live big value */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-headline-md)', fontWeight: 700, color: 'var(--md-primary)' }}>
+          {waterUnit === 'ml'
+            ? `${waterGoal} ml`
+            : `${Math.round(waterGoal / 29.574)} oz`}
+        </span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {(['ml', 'oz'] as const).map(u => (
+            <div key={u} onClick={() => setWaterUnit(u)} style={chipStyle(waterUnit === u)}>{u}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Drum roller */}
+      <div className="ob-drum-wrap" style={{ marginBottom: 12 }}>
+        <div className="ob-drum-selector" />
+        <div className="ob-drum-fade ob-drum-fade-t" />
+        <div className="ob-drum-fade ob-drum-fade-b" />
+        <div ref={waterDrumRef} onScroll={handleWaterScroll} className="ob-drum-scroll">
+          <div style={{ height: 56 }} />
+          {WATER_VALS.map((v, i) => {
+            const selIdx = WATER_VALS.indexOf(waterGoal);
+            const dist   = Math.abs(i - selIdx);
+            return (
+              <div
+                key={v}
+                className="ob-drum-item"
+                style={{
+                  fontWeight: v === waterGoal ? 700 : 400,
+                  fontSize:   v === waterGoal ? 'var(--md-title-lg)' : 'var(--md-body-lg)',
+                  color:      v === waterGoal ? 'var(--md-on-surface)' : 'var(--md-on-surface-variant)',
+                  opacity:    dist > 3 ? 0.2 : dist > 1 ? 0.5 : 1,
+                }}
+              >
+                {waterUnit === 'ml' ? `${v} ml` : `${Math.round(v / 29.574)} oz`}
+              </div>
+            );
+          })}
+          <div style={{ height: 56 }} />
+        </div>
+      </div>
+
+      {/* Quick-add chips */}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+        {[100, 250, 500].map(amt => (
           <div
-            key={p.ml}
-            onClick={() => setWaterGoal(p.ml)}
-            style={{
-              ...chipStyle(waterGoal === p.ml),
-              flex: 1,
-              padding: '10px 4px',
-              justifyContent: 'center',
+            key={amt}
+            onClick={() => {
+              setWaterGoal(prev => {
+                const next = Math.min(4000, prev + amt);
+                setTimeout(() => {
+                  if (waterDrumRef.current) {
+                    waterDrumRef.current.scrollTop = WATER_VALS.indexOf(next) * 56;
+                  }
+                }, 0);
+                return next;
+              });
             }}
+            style={{ ...chipStyle(false), cursor: 'pointer', userSelect: 'none' } as React.CSSProperties}
           >
-            {p.label}
+            +{waterUnit === 'ml' ? `${amt} ml` : `${Math.round(amt / 29.574)} oz`}
           </div>
         ))}
       </div>
@@ -875,7 +834,7 @@ const OnboardingPage: React.FC = () => {
 
   // ── Render ───────────────────────────────────────────────────────────────
 
-  const STEP_TITLES = ['', 'Tell us about you', 'Your body metrics', "What's your main goal?", 'Your lifestyle'];
+  const STEP_TITLES = ['', 'Tell us about you', 'Height & Sex', "What's your main goal?", 'Your lifestyle'];
 
   return (
     <IonPage>

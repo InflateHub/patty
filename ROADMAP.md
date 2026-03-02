@@ -1,7 +1,7 @@
 ﻿# Patty — Roadmap (3.0.0)
 
 All versions prior to 2.0.0 are archived in the [`ROADMAP/`](ROADMAP/) folder.
-Current production version: **2.1.0**. This document plans the path to **3.0.0**.
+Current production version: **2.2.0**. This document plans the path to **3.0.0**.
 
 ---
 
@@ -32,10 +32,10 @@ Current production version: **2.1.0**. This document plans the path to **3.0.0**
 *Goal: a leaner, more visually immersive onboarding that collects only what matters.*
 
 ### Step Changes
-- [ ] **Remove weight logging step** — the Height & Weight step is replaced by a Height & Sex step; no weight value is collected during onboarding; `weight_entries` table starts empty after onboarding (no seed row written)
-- [ ] **Height & Sex step — full-screen innovative layout** — full-viewport card; Height input uses a scrollable ruler-style picker (CSS snap scroll, cm / ft+in toggle); Sex uses large illustrated toggle cards (Male / Female / Prefer not to say) with subtle icon art; fills the entire screen with no scroll
-- [ ] **Custom water goal picker** — the water goal step replaces the plain number input with a styled horizontal drum-roller or arc-slider component built in React (no native `<input type=number>`); shows the current value large and centred with ml / oz unit toggle; custom button increments (+100 ml / +250 ml quick-add chips below the picker)
-- [ ] **Remove photo prompt** — no progress photo is requested during onboarding; the photo journey begins from the Track → Weight tab on first weigh-in
+- [x] **Remove weight logging step** — the Height & Weight step is replaced by a Height & Sex step; no weight value is collected during onboarding; `weight_entries` table starts empty after onboarding (no seed row written)
+- [x] **Height & Sex step — full-screen innovative layout** — full-viewport card; Height input uses a scrollable ruler-style picker (CSS snap scroll, cm / ft+in toggle); Sex uses large illustrated toggle cards (Male / Female / Prefer not to say) with subtle icon art; fills the entire screen with no scroll
+- [x] **Custom water goal picker** — the water goal step replaces the plain number input with a styled horizontal drum-roller or arc-slider component built in React (no native `<input type=number>`); shows the current value large and centred with ml / oz unit toggle; custom button increments (+100 ml / +250 ml quick-add chips below the picker)
+- [x] **Remove photo prompt** — no progress photo is requested during onboarding; the photo journey begins from the Track → Weight tab on first weigh-in
 
 ### Tutorial Walkthrough (post-onboarding)
 - [ ] After the celebration screen routes to Home, a tooltip-based walkthrough launches automatically
