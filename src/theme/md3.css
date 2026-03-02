@@ -371,10 +371,18 @@ ion-item.item-has-focus ion-label[position="stacked"] {
 }
 
 /* ── Segment ─────────────────────────────────────────────────────────────── */
+.segment-toolbar {
+  --padding-start: 0;
+  --padding-end: 0;
+  --min-height: auto;
+  padding: 0;
+}
+
 ion-segment {
-  --background: var(--md-surface-variant);
-  border-radius: var(--md-shape-full);
-  padding: 4px;
+  --background: var(--ion-toolbar-background);
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
 }
 
 ion-segment-button {
@@ -382,24 +390,66 @@ ion-segment-button {
   --background-checked: var(--md-primary-container);
   --color: var(--md-on-surface-variant);
   --color-checked: var(--md-on-primary-container);
-  --border-radius: var(--md-shape-full);
+  --border-radius: 0;
   --indicator-box-shadow: none;
   --indicator-color: var(--md-primary-container);
   --indicator-height: 100%;
-  --indicator-border-radius: var(--md-shape-full);
+  --indicator-border-radius: 0;
   --indicator-transition: transform var(--md-duration-md) var(--md-easing-spring);
-  min-height: 36px;
-  font-size: var(--md-label-lg);
+  --padding-start: 0;
+  --padding-end: 0;
+  flex: 1;
+  margin: 0;
+  min-height: 52px;
+  max-width: none;
+  font-size: var(--md-label-sm);
   font-weight: 500;
   letter-spacing: .00625em;
   transition: color var(--md-duration-sm) var(--md-easing-standard);
 }
 
-/* ── Focus rings — border-radius-aware (replaces rectangular browser outline) */
+ion-segment-button::part(native) {
+  padding: 6px 0;
+}
+
+/* ── Focus rings */
 ion-segment-button::part(native):focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--md-primary);
-  border-radius: var(--md-shape-full);
+  border-radius: 0;
+}
+
+/* ── Color picker hue / range slider ────────────────────────────── */
+input.cp-hue-slider {
+  display: block;
+  width: 100%;
+  height: 18px;
+  border-radius: 9px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  outline: none;
+  cursor: pointer;
+  border: none;
+}
+input.cp-hue-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid rgba(0,0,0,0.3);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  cursor: pointer;
+}
+input.cp-hue-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid rgba(0,0,0,0.3);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  cursor: pointer;
 }
 
 ion-chip:focus-visible {

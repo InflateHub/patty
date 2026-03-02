@@ -54,14 +54,14 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 2.4.0 — Theming: Custom Colour Picker
+## 2.4.0 — Theming: Custom Colour Picker ✅
 *Goal: replace the browser's native `<input type="color">` with a fully custom, branded picker.*
 
-- [ ] **Custom hex colour picker component** (`src/components/ColorPicker.tsx`) — built in React + CSS, no third-party picker library
-- [ ] Picker layout: large hue/saturation 2-D gradient canvas (pointer drag); separate lightness slider; separate hue bar; live hex input field with validation; preview swatch (old colour left, new colour right)
-- [ ] Renders inside a bottom sheet modal (`IonModal` with `initialBreakpoint`); triggered from the "Custom" chip in ProfilePage → Preferences → Colour
-- [ ] Real-time theme preview: as the user drags, the MD3 palette recalculates live and the preview card updates (debounced 150 ms to avoid jank)
-- [ ] Maintains backward compatibility: the 8 curated seed colour chips remain; picker only used for the free-form custom option
+- [x] **Custom hex colour picker component** (`src/components/ColorPicker.tsx`) — built in React + CSS, no third-party picker library
+- [x] Picker layout: large hue/saturation 2-D gradient canvas (pointer drag); separate hue bar; live hex input field with validation; preview swatch (old colour left, new colour right)
+- [x] Renders inside a bottom sheet modal (`IonModal` with `initialBreakpoint`); triggered from the "Custom" chip in ProfilePage → Preferences → Colour
+- [x] Real-time theme preview: as the user drags, the MD3 palette recalculates live and the preview card updates (debounced 150 ms to avoid jank)
+- [x] Maintains backward compatibility: the 8 curated seed colour chips remain; picker only used for the free-form custom option
 
 ---
 

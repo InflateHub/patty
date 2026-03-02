@@ -44,11 +44,10 @@ const Track: React.FC = () => {
         <IonToolbar>
           <IonTitle>Track</IonTitle>
         </IonToolbar>
-        <IonToolbar>
+        <IonToolbar class="segment-toolbar">
           <IonSegment
             value={tab}
             onIonChange={(e) => handleTabChange(e.detail.value as TabId)}
-            style={{ maxWidth: 560, margin: '0 auto', '--background': 'transparent' } as React.CSSProperties}
           >
             {(Object.entries(TAB_META) as [TabId, { icon: string; label: string }][]).map(([id, meta]) => (
               <IonSegmentButton key={id} value={id} aria-label={meta.label} layout="icon-top">

@@ -2,6 +2,20 @@
 
 ---
 
+## [2.4.0] — Custom Colour Picker
+*Goal: replace the browser-native `<input type="color">` with a fully custom, branded in-app picker.*
+
+- [x] **`src/components/ColorPicker.tsx`** — zero-dependency HSV picker built in React + canvas
+- [x] **SV canvas** — 2-D drag-to-pick saturation (X axis) × value/brightness (Y axis) for the selected hue; pointer-capture drag works on both mouse and touch
+- [x] **Hue bar** — horizontal `<input type="range">` styled with a rainbow `conic-gradient` track and custom circular thumb via `.cp-hue-slider` CSS class
+- [x] **Preview swatch** — split left/right pill showing the previous colour vs the live new colour
+- [x] **Hex input** — monospace text field with realtime validation; invalid input shown in red with "Invalid" label; hex updates the canvas/hue position
+- [x] **Bottom-sheet modal** — `IonModal` at 88% breakpoint with Cancel / Apply buttons
+- [x] **ProfilePage integration** — the native colour-input + custom hex text input removed; replaced with a rainbow conic-gradient circle chip appended to the seed-colour swatch row; active custom colour shows a checkmark and ring; tapping opens `ColorPicker`
+- [x] **Real-time preview** — `handleColorPickerApply` calls `applyTheme` immediately on Apply
+
+---
+
 ## [2.3.2] — Water & Weight Tab Redesign
 *Goal: redesign Water and Weight tabs to match the Sleep tab's rich, card-based pattern with week visualisations.*
 

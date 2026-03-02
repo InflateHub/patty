@@ -74,7 +74,7 @@ const Home: React.FC = () => {
   const age = ageFromDob(profile.dob);
   const bmr = computeBMR(weightKg, profile.heightCm, age, profile.sex);
   const tdee = computeTDEE(bmr, profile.activity);
-  const hasMetrics = bmi > 0;
+  const hasWeight = weightKg > 0;
 
   const todayDate = today();
 
@@ -173,38 +173,67 @@ const Home: React.FC = () => {
         <IonCard>
           <IonListHeader style={secHdr}>Your Metrics</IonListHeader>
           <IonCardContent style={{ padding: '8px 16px 16px' }}>
-            {hasMetrics ? (
-              <>
-                {[{ label: 'BMI', value: (
-                  <span>
-                    {bmi.toFixed(1)}
-                    {bmiCat && (
-                      <span style={{
-                        display: 'inline-block', marginLeft: 8, padding: '2px 10px',
-                        borderRadius: 'var(--md-shape-full)',
-                        background: ({ Underweight: '#5bcaff', Normal: 'var(--md-primary)', Overweight: '#f5a623', Obese: '#e74c3c' } as Record<string,string>)[bmiCat] ?? 'var(--md-surface-variant)',
-                        color: '#fff', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', fontWeight: 600, verticalAlign: 'middle',
-                      }}>{bmiCat}</span>
-                    )}
-                  </span>
-                )}, ...(bmr > 0 ? [{ label: 'BMR', value: `${bmr.toLocaleString()} kcal` }] : []),
-                   ...(tdee > 0 ? [{ label: 'TDEE', value: `${tdee.toLocaleString()} kcal` }] : []),
-                ].map(({ label, value }) => (
-                  <div key={label} className="md-metric-row">
-                    <span className="md-metric-label">{label}</span>
-                    <span className="md-metric-value">{value}</span>
-                  </div>
-                ))}
-                {(!bmr || !tdee) && (
-                  <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)', margin: '8px 0 0' }}>
-                    Add date of birth, sex &amp; activity level in your profile to see BMR &amp; TDEE.
-                  </p>
-                )}
-              </>
-            ) : (
+            {!hasWeight ? (
               <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)', color: 'var(--md-on-surface-variant)', margin: 0, textAlign: 'center', padding: '8px 0' }}>
-                Log your weight and add height in your profile to see BMI, BMR &amp; TDEE.
+                Log your weight in the Track tab to see your metrics.
               </p>
+            ) : (
+              <>
+                {/* Weight */}
+                <div className="md-metric-row">
+                  <span className="md-metric-label">Weight</span>
+                  <span className="md-metric-value">{latestEntry!.value} {latestEntry!.unit}</span>
+                </div>
+
+                {/* BMI — needs height */}
+                {bmi > 0 ? (
+                  <div className="md-metric-row">
+                    <span className="md-metric-label">BMI</span>
+                    <span className="md-metric-value">
+                      {bmi.toFixed(1)}
+                      {bmiCat && (
+                        <span style={{
+                          display: 'inline-block', marginLeft: 8, padding: '2px 10px',
+                          borderRadius: 'var(--md-shape-full)',
+                          background: ({ Underweight: '#5bcaff', Normal: 'var(--md-primary)', Overweight: '#f5a623', Obese: '#e74c3c' } as Record<string,string>)[bmiCat] ?? 'var(--md-surface-variant)',
+                          color: '#fff', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', fontWeight: 600, verticalAlign: 'middle',
+                        }}>{bmiCat}</span>
+                      )}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="md-metric-row">
+                    <span className="md-metric-label">BMI</span>
+                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', fontStyle: 'italic' }}>Add height in profile</span>
+                  </div>
+                )}
+
+                {/* BMR */}
+                {bmr > 0 ? (
+                  <div className="md-metric-row">
+                    <span className="md-metric-label">BMR</span>
+                    <span className="md-metric-value">{bmr.toLocaleString()} kcal</span>
+                  </div>
+                ) : bmi > 0 ? (
+                  <div className="md-metric-row">
+                    <span className="md-metric-label">BMR</span>
+                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', fontStyle: 'italic' }}>Add DOB &amp; sex in profile</span>
+                  </div>
+                ) : null}
+
+                {/* TDEE */}
+                {tdee > 0 ? (
+                  <div className="md-metric-row">
+                    <span className="md-metric-label">TDEE</span>
+                    <span className="md-metric-value">{tdee.toLocaleString()} kcal</span>
+                  </div>
+                ) : bmr > 0 ? (
+                  <div className="md-metric-row">
+                    <span className="md-metric-label">TDEE</span>
+                    <span style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', fontStyle: 'italic' }}>Add activity level in profile</span>
+                  </div>
+                ) : null}
+              </>
             )}
           </IonCardContent>
         </IonCard>

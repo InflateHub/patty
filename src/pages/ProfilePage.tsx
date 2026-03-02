@@ -1,5 +1,5 @@
 /* ProfilePage — 2.0.0 */
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   IonAlert,
@@ -39,6 +39,7 @@ import {
 import { useAppLock } from '../hooks/useAppLock';
 import { applyTheme, SEED_COLOURS } from '../hooks/useTheme';
 import PinSetupModal from '../components/PinSetupModal';
+import ColorPicker from '../components/ColorPicker';
 import { getDb } from '../db/database';
 
 // ── Shared minor styles ───────────────────────────────────────────────────────
@@ -71,10 +72,7 @@ const ProfilePage: React.FC = () => {
     themeMode: 'system',
     fontSize: 'default',
   });
-  // Custom hex input state (separate from swatch selection)
-  const [customHex, setCustomHex] = useState<string>('');
-  const [customHexError, setCustomHexError] = useState<boolean>(false);
-  const colorPickerRef = useRef<HTMLInputElement>(null);
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [toast, setToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('Profile saved');
 
@@ -91,9 +89,7 @@ const ProfilePage: React.FC = () => {
     if (!loading) {
       setForm(profile);
       setPrefForm(prefs);
-      // Pre-fill custom hex if the saved seed is not one of the curated swatches
-      const isCurated = SEED_COLOURS.some(c => c.hex.toUpperCase() === prefs.themeSeed.toUpperCase());
-      if (!isCurated) setCustomHex(prefs.themeSeed);
+      // no extra state to init
     }
   }, [loading, profile, prefs]);
 
@@ -109,27 +105,17 @@ const ProfilePage: React.FC = () => {
   };
 
   // ── Theme helpers
-  const isHexValid = (hex: string) => /^#[0-9A-Fa-f]{6}$/.test(hex);
-
   const handleSwatchPick = (hex: string) => {
-    setCustomHex('');
-    setCustomHexError(false);
     const next = { ...prefForm, themeSeed: hex };
     setPrefForm(next);
     applyTheme(hex, next.themeMode, next.fontSize);
   };
 
-  const handleCustomHexChange = (raw: string) => {
-    setCustomHex(raw);
-    const hex = raw.startsWith('#') ? raw : `#${raw}`;
-    if (isHexValid(hex)) {
-      setCustomHexError(false);
-      const next = { ...prefForm, themeSeed: hex };
-      setPrefForm(next);
-      applyTheme(hex, next.themeMode, next.fontSize);
-    } else {
-      setCustomHexError(raw.length > 0);
-    }
+  const handleColorPickerApply = (hex: string) => {
+    setColorPickerOpen(false);
+    const next = { ...prefForm, themeSeed: hex };
+    setPrefForm(next);
+    applyTheme(hex, next.themeMode, next.fontSize);
   };
 
   const handleModeChange = (mode: UserPrefs['themeMode']) => {
@@ -528,94 +514,31 @@ const ProfilePage: React.FC = () => {
                     </button>
                   );
                 })}
-              </div>
-
-              {/* Custom hex input */}
-              <div style={{ marginTop: 14 }}>
-                <p style={{
-                  margin: '0 0 8px',
-                  fontSize: 'var(--md-label-lg)',
-                  color: 'var(--md-on-surface-variant)',
-                  fontWeight: 500,
-                }}>Custom hex</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-
-                  {/* Clickable circle — opens native colour picker */}
-                  <button
-                    title="Open colour picker"
-                    onClick={() => colorPickerRef.current?.click()}
-                    style={{
-                      position: 'relative',
-                      width: 36,
-                      height: 36,
-                      borderRadius: '50%',
-                      background: isHexValid(customHex.startsWith('#') ? customHex : `#${customHex}`)
-                        ? (customHex.startsWith('#') ? customHex : `#${customHex}`)
-                        : 'var(--md-surface-variant)',
-                      border: '2px solid var(--md-outline-variant)',
-                      flexShrink: 0,
-                      cursor: 'pointer',
-                      padding: 0,
-                      outline: 'none',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {/* Pencil overlay hint */}
-                    <span style={{
-                      fontSize: 13,
-                      lineHeight: 1,
-                      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))',
-                      pointerEvents: 'none',
-                    }}>✏️</span>
-
-                    {/* Hidden native colour picker */}
-                    <input
-                      ref={colorPickerRef}
-                      type="color"
-                      value={
-                        isHexValid(customHex.startsWith('#') ? customHex : `#${customHex}`)
-                          ? (customHex.startsWith('#') ? customHex : `#${customHex}`)
-                          : '#5C7A6E'
-                      }
-                      onChange={e => handleCustomHexChange(e.target.value)}
+                {/* Custom colour picker chip */}
+                {(() => {
+                  const isCustom = SEED_COLOURS.every(c => c.hex.toUpperCase() !== prefForm.themeSeed.toUpperCase());
+                  return (
+                    <button
+                      title="Custom colour"
+                      onClick={() => setColorPickerOpen(true)}
                       style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        opacity: 0,
-                        cursor: 'pointer',
-                        padding: 0,
-                        border: 'none',
-                        top: 0,
-                        left: 0,
+                        width: 36, height: 36, borderRadius: "50%",
+                        background: isCustom
+                          ? prefForm.themeSeed
+                          : "conic-gradient(#f00 0deg,#ff0 60deg,#0f0 120deg,#0ff 180deg,#00f 240deg,#f0f 300deg,#f00 360deg)",
+                        border: isCustom ? "3px solid var(--md-on-surface)" : "3px solid transparent",
+                        cursor: "pointer", display: "flex", alignItems: "center",
+                        justifyContent: "center", padding: 0, outline: "none",
+                        boxShadow: isCustom ? "0 0 0 2px var(--md-surface), 0 0 0 4px var(--md-on-surface)" : "none",
+                        transition: "box-shadow 0.15s",
                       }}
-                    />
-                  </button>
-
-                  <IonInput
-                    value={customHex}
-                    placeholder="#RRGGBB"
-                    maxlength={7}
-                    style={{
-                      '--background': 'var(--md-surface-variant)',
-                      '--color': 'var(--md-on-surface)',
-                      '--border-radius': 'var(--md-shape-sm)',
-                      '--padding-start': '10px',
-                      '--padding-end': '10px',
-                      fontSize: 'var(--md-body-md)',
-                      flex: 1,
-                    } as React.CSSProperties}
-                    onIonInput={e => handleCustomHexChange((e.detail.value ?? '') as string)}
-                  />
-                  {customHexError && (
-                    <IonNote style={{ color: 'var(--md-error)', fontSize: 'var(--md-body-sm)' }}>
-                      Invalid
-                    </IonNote>
-                  )}
-                </div>
+                    >
+                      {isCustom && (
+                        <IonIcon icon={checkmarkOutline} style={{ color: "#fff", fontSize: 16, filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }} />
+                      )}
+                    </button>
+                  );
+                })()}
               </div>
             </div>
 
@@ -764,7 +687,7 @@ const ProfilePage: React.FC = () => {
             <IonList lines="none" style={{ background: 'transparent' }}>
               <IonItem style={transparentItem}>
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">2.3.2</IonNote>
+                <IonNote slot="end">2.4.0</IonNote>
               </IonItem>
               <IonItem style={transparentItem}>
                 <IonLabel>Built by</IonLabel>
@@ -840,6 +763,14 @@ const ProfilePage: React.FC = () => {
             { text: 'Reset Everything', role: 'destructive', cssClass: 'alert-button-danger', handler: handleFactoryReset },
           ]}
           onDidDismiss={() => setDangerAction(null)}
+        />
+
+        {/* ── Custom colour picker */}
+        <ColorPicker
+          isOpen={colorPickerOpen}
+          initialColor={prefForm.themeSeed}
+          onClose={() => setColorPickerOpen(false)}
+          onApply={handleColorPickerApply}
         />
 
         <IonToast
