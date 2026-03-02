@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  IonBadge,
   IonCard,
   IonCardContent,
   IonContent,
@@ -129,9 +128,6 @@ const Recipes: React.FC = () => {
                       ? `${recipe.prepMin + recipe.cookMin} min`
                       : 'No cook'}
                   </p>
-                  {recipe.custom && (
-                    <IonBadge style={S.customBadge}>custom</IonBadge>
-                  )}
                 </IonCardContent>
               </IonCard>
             ))}
@@ -170,11 +166,13 @@ const Recipes: React.FC = () => {
       <div style={{ position: 'fixed', bottom: 96, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
         {/* Manual arm */}
         {dialOpen && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div
+            onClick={() => { setDialOpen(false); setShowForm(true); }}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+          >
             <span style={{ background: 'var(--md-surface-container-highest)', color: 'var(--md-on-surface)', borderRadius: 'var(--md-shape-full)', padding: '4px 12px', fontSize: 'var(--md-label-lg)', fontFamily: 'var(--md-font)', fontWeight: 600, boxShadow: '0 2px 8px rgba(0,0,0,0.18)', whiteSpace: 'nowrap' }}>Manual</span>
             <button
-              onClick={() => { setDialOpen(false); setShowForm(true); }}
-              style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--md-secondary-container)', color: 'var(--md-on-secondary-container)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.18)' }}
+              style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--md-secondary-container)', color: 'var(--md-on-secondary-container)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', pointerEvents: 'none' }}
             >
               <IonIcon icon={createOutline} style={{ fontSize: 22 }} />
             </button>
@@ -182,11 +180,13 @@ const Recipes: React.FC = () => {
         )}
         {/* AI Generate arm */}
         {dialOpen && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div
+            onClick={() => { setDialOpen(false); setShowAI(true); }}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+          >
             <span style={{ background: 'var(--md-surface-container-highest)', color: 'var(--md-on-surface)', borderRadius: 'var(--md-shape-full)', padding: '4px 12px', fontSize: 'var(--md-label-lg)', fontFamily: 'var(--md-font)', fontWeight: 600, boxShadow: '0 2px 8px rgba(0,0,0,0.18)', whiteSpace: 'nowrap' }}>AI Generate ✨</span>
             <button
-              onClick={() => { setDialOpen(false); setShowAI(true); }}
-              style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--md-primary-container)', color: 'var(--md-on-primary-container)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.18)' }}
+              style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--md-primary-container)', color: 'var(--md-on-primary-container)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', pointerEvents: 'none' }}
             >
               <IonIcon icon={sparkles} style={{ fontSize: 22 }} />
             </button>
@@ -266,15 +266,6 @@ const S = {
     fontFamily: 'var(--md-font)',
     fontSize: 'var(--md-body-md)',
     color: 'var(--md-on-surface-variant)',
-  },
-  customBadge: {
-    background: 'var(--md-tertiary-container)',
-    color: 'var(--md-on-tertiary-container)',
-    borderRadius: 'var(--md-shape-full)',
-    fontSize: 'var(--md-label-sm)',
-    fontFamily: 'var(--md-font)',
-    textTransform: 'lowercase' as const,
-    marginTop: 2,
   },
   fab: {
     '--background': 'var(--md-primary-container)',
