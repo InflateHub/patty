@@ -712,10 +712,12 @@ const ProfilePage: React.FC = () => {
                 <IonLabel style={{ color: 'var(--md-primary)' }}>Send Feedback</IonLabel>
               </IonItem>
               <IonItem
-                style={{ ...transparentItem, cursor: 'not-allowed', opacity: 0.5 }}
+                style={{ ...transparentItem, cursor: 'pointer' }}
+                button
+                detail
+                onClick={() => window.open('https://play.google.com/store/apps/details?id=com.patty.app', '_blank', 'noopener')}
               >
-                <IonLabel>Rate on Play Store</IonLabel>
-                <IonNote slot="end">Coming soon</IonNote>
+                <IonLabel style={{ color: 'var(--md-primary)' }}>Rate on Play Store</IonLabel>
               </IonItem>
               <IonItem
                 style={{ ...transparentItem, cursor: 'pointer' }}
