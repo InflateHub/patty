@@ -20,8 +20,7 @@ import type { Recipe } from '../recipes/recipeData';
 const DIETARY_STYLES = ['Balanced', 'High-Protein', 'Vegetarian', 'Low-Carb'] as const;
 type DietaryStyle = typeof DIETARY_STYLES[number];
 
-const DAYS_OPTIONS = [3, 5, 7] as const;
-type DaysOption = typeof DAYS_OPTIONS[number];
+const DAYS_PRESETS = [3, 5, 7] as const;
 
 interface AIPlanSlot {
   date: string;
@@ -58,16 +57,19 @@ const AIPlannerSheet: React.FC<Props> = ({
   const { profile } = useProfile();
 
   const [dietaryStyle, setDietaryStyle] = useState<DietaryStyle>('Balanced');
-  const [daysToFill, setDaysToFill] = useState<DaysOption>(7);
+  const [daysToFill, setDaysToFill] = useState<number>(7);
+  const [customDays, setCustomDays] = useState('');
   const [avoidRepeats, setAvoidRepeats] = useState(true);
+
+  const todayStr = new Date().toISOString().slice(0, 10);
   const [generating, setGenerating] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
 
-  // Find empty slots in the current week
+  // Find empty slots starting from today
   function getEmptySlots(): Array<{ date: string; slot: SlotType }> {
     const slots: SlotType[] = ['breakfast', 'lunch', 'dinner'];
     const empty: Array<{ date: string; slot: SlotType }> = [];
-    const targetDays = dates.slice(0, daysToFill);
+    const targetDays = dates.filter(d => d >= todayStr).slice(0, daysToFill);
     for (const date of targetDays) {
       for (const slot of slots) {
         if (!weekPlan[date]?.[slot]) {
@@ -222,14 +224,39 @@ const AIPlannerSheet: React.FC<Props> = ({
                 {/* Days to fill */}
                 <div>
                   <div style={{ fontSize: 'var(--md-label-lg)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-                    Days to fill
+                    Days to fill (from today)
                   </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {DAYS_OPTIONS.map((d) => (
-                      <button key={d} style={chipStyle(daysToFill === d)} onClick={() => setDaysToFill(d)}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                    {DAYS_PRESETS.map((d) => (
+                      <button key={d} style={chipStyle(daysToFill === d && !customDays)} onClick={() => { setDaysToFill(d); setCustomDays(''); }}>
                         {d} days
                       </button>
                     ))}
+                    <input
+                      type="number"
+                      min="1"
+                      max="30"
+                      placeholder="Custom"
+                      value={customDays}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setCustomDays(v);
+                        const n = parseInt(v, 10);
+                        if (!isNaN(n) && n > 0) setDaysToFill(n);
+                      }}
+                      style={{
+                        width: 80,
+                        padding: '7px 12px',
+                        borderRadius: 'var(--md-shape-full)',
+                        border: `1.5px solid ${customDays ? 'var(--md-primary)' : 'var(--md-outline-variant)'}`,
+                        background: customDays ? 'var(--md-primary-container)' : 'transparent',
+                        color: customDays ? 'var(--md-on-primary-container)' : 'var(--md-on-surface-variant)',
+                        fontSize: 'var(--md-label-lg)',
+                        fontFamily: 'var(--md-font)',
+                        fontWeight: 500,
+                        outline: 'none',
+                      }}
+                    />
                   </div>
                 </div>
 

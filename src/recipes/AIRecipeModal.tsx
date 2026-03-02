@@ -92,7 +92,7 @@ const AIRecipeModal: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
       const tagPart = selectedTags.length
         ? ` Dietary constraints: ${selectedTags.map((t) => t.replace(/^.*? /, '')).join(', ')}.`
         : '';
-      const prompt = `Create a recipe for: "${description.trim()}".${tagPart} Return a JSON object with the recipe details.`;
+      const prompt = `Create a recipe inspired by: "${description.trim()}".${tagPart} Invent a creative, appetizing recipe name — do NOT copy the description verbatim as the name. Return a JSON object with the recipe details.`;
       const result = await geminiRequest<GeneratedRecipe>({
         apiKey: geminiKey,
         prompt,

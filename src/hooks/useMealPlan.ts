@@ -22,26 +22,25 @@ export type WeekPlan = Record<string, Partial<Record<SlotType, MealSlotEntry>>>;
 
 // ── Week helpers ─────────────────────────────────────────────────────────────
 
-/** Returns the Monday of the week that contains `date` as a YYYY-MM-DD string. */
-export function getMondayOf(date: Date): string {
+/** Returns the Sunday of the week that contains `date` as a YYYY-MM-DD string. */
+export function getSundayOf(date: Date): string {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
   const day = d.getDay(); // 0 = Sun
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
+  d.setDate(d.getDate() - day);
   return d.toISOString().slice(0, 10);
 }
 
-/** Returns the Monday of the current week offset by `offsetWeeks`. */
+/** Returns the Sunday of the current week offset by `offsetWeeks`. */
 export function weekStart(offsetWeeks: number): string {
   const d = new Date();
   d.setDate(d.getDate() + offsetWeeks * 7);
-  return getMondayOf(d);
+  return getSundayOf(d);
 }
 
-/** Returns the 7 dates (Mon–Sun) for a week given the Monday ISO string. */
-export function weekDates(monday: string): string[] {
-  const base = new Date(monday + 'T00:00:00');
+/** Returns the 7 dates (Sun–Sat) for a week given the Sunday ISO string. */
+export function weekDates(sunday: string): string[] {
+  const base = new Date(sunday + 'T00:00:00');
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(base);
     d.setDate(d.getDate() + i);
@@ -50,8 +49,8 @@ export function weekDates(monday: string): string[] {
 }
 
 /** Format a week range, e.g. "Feb 16 – Feb 22". */
-export function formatWeekRange(monday: string): string {
-  const start = new Date(monday + 'T00:00:00');
+export function formatWeekRange(sunday: string): string {
+  const start = new Date(sunday + 'T00:00:00');
   const end = new Date(start);
   end.setDate(end.getDate() + 6);
   const fmt = (d: Date) =>

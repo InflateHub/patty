@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
 import { SLOTS, type SlotType, type WeekPlan } from '../hooks/useMealPlan';
 
-const DAY_ABBR  = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_ABBR  = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const SLOT_META: Record<SlotType, { label: string; emoji: string }> = {
   breakfast: { label: 'Breakfast', emoji: '\u2600\uFE0F' },   // ☀️
   lunch:     { label: 'Lunch',     emoji: '\uD83C\uDF24\uFE0F' }, // 🌤️
