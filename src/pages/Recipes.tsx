@@ -3,8 +3,6 @@ import {
   IonCard,
   IonCardContent,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonHeader,
   IonIcon,
   IonPage,
@@ -193,11 +191,21 @@ const Recipes: React.FC = () => {
           </div>
         )}
         {/* Main FAB */}
-        <IonFab>
-          <IonFabButton onClick={() => setDialOpen((o) => !o)} style={S.fab}>
-            <IonIcon icon={dialOpen ? closeOutline : add} />
-          </IonFabButton>
-        </IonFab>
+        <button
+          onClick={() => setDialOpen((o) => !o)}
+          style={{
+            width: 56, height: 56, borderRadius: '50%',
+            background: 'var(--md-primary-container)',
+            color: 'var(--md-on-primary-container)',
+            border: 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 3px 12px rgba(0,0,0,0.25)',
+            fontSize: 28,
+          }}
+        >
+          <IonIcon icon={dialOpen ? closeOutline : add} />
+        </button>
       </div>
     </IonPage>
   );
@@ -266,10 +274,6 @@ const S = {
     fontFamily: 'var(--md-font)',
     fontSize: 'var(--md-body-md)',
     color: 'var(--md-on-surface-variant)',
-  },
-  fab: {
-    '--background': 'var(--md-primary-container)',
-    '--color': 'var(--md-on-primary-container)',
   },
 };
 
