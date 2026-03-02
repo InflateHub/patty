@@ -588,20 +588,15 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {/* Confidence badge after AI scan */}
+                  {/* AI scan disclaimer */}
                   {macroResult && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{
-                        fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', fontWeight: 600,
-                        padding: '2px 10px', borderRadius: 'var(--md-shape-full)',
-                        background: macroResult.confidence === 'high' ? 'var(--md-primary-container)' : macroResult.confidence === 'medium' ? '#FFF3E0' : '#FFEBEE',
-                        color: macroResult.confidence === 'high' ? 'var(--md-on-primary-container)' : macroResult.confidence === 'medium' ? '#E65100' : 'var(--md-error)',
-                      }}>
-                        {macroResult.confidence === 'high' ? '✓ High confidence' : macroResult.confidence === 'medium' ? '~ Medium confidence' : '⚠ Low confidence'}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <span style={{ fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)', fontStyle: 'italic', opacity: 0.75 }}>
+                        ✨ AI estimate — values are approximate, feel free to adjust
                       </span>
                       <button
                         onClick={() => { setMacroResult(null); setMacroKcal(''); setMacroProtein(''); setMacroCarbs(''); setMacroFat(''); setMacroFibre(''); }}
-                        style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-error)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--md-font)' }}
+                        style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--md-font)', flexShrink: 0, opacity: 0.7 }}
                       >
                         Clear
                       </button>
