@@ -13,8 +13,6 @@ import {
   IonItemOptions,
   IonItemSliding,
   IonLabel,
-  IonList,
-  IonListHeader,
   IonModal,
   IonNote,
   IonSkeletonText,
@@ -25,7 +23,7 @@ import {
   useIonViewWillEnter,
 } from '@ionic/react';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { albumsOutline, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
+import { addOutline, albumsOutline, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
 import { useFoodLog } from '../hooks/useFoodLog';
 import type { FoodEntry, MealType } from '../hooks/useFoodLog';
 import { formatTime, today } from './trackUtils';
@@ -67,26 +65,6 @@ const mealChip = (active: boolean): React.CSSProperties => ({
   alignItems: 'center',
   gap: 6,
 });
-
-const photoThumb: React.CSSProperties = {
-  width: 56,
-  height: 56,
-  borderRadius: 'var(--md-shape-md)',
-  objectFit: 'cover',
-  flexShrink: 0,
-};
-
-const photoPlaceholder: React.CSSProperties = {
-  width: 56,
-  height: 56,
-  borderRadius: 'var(--md-shape-md)',
-  background: 'var(--md-surface-container)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  fontSize: 24,
-};
 
 /* ── Component ───────────────────────────────────────────────────────── */
 
@@ -176,25 +154,49 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
   function renderEntry(entry: FoodEntry) {
     return (
       <IonItemSliding key={entry.id}>
-        <IonItem lines="none" style={{ '--padding-start': '16px', '--inner-padding-end': '16px' } as React.CSSProperties}>
+        <IonItem
+          lines="none"
+          style={{ '--padding-start': '16px', '--inner-padding-end': '16px', '--background': 'transparent' } as React.CSSProperties}
+        >
+          {/* Photo or emoji thumb */}
           <div slot="start" style={{ marginRight: 12 }}>
             {entry.photo_uri ? (
-              <img src={entry.photo_uri} alt="meal" style={photoThumb} />
+              <img
+                src={entry.photo_uri}
+                alt="meal"
+                style={{ width: 48, height: 48, borderRadius: 'var(--md-shape-md)', objectFit: 'cover', flexShrink: 0 }}
+              />
             ) : (
-              <div style={photoPlaceholder}>
-                <span>{mealEmoji(entry.meal)}</span>
+              <div style={{
+                width: 48, height: 48, borderRadius: 'var(--md-shape-md)',
+                background: 'var(--md-surface-container-high)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 22, flexShrink: 0,
+              }}>
+                {mealEmoji(entry.meal)}
               </div>
             )}
           </div>
           <IonLabel>
             {entry.note ? (
-              <p style={{ color: 'var(--md-on-surface)', margin: '0 0 2px' }}>{entry.note}</p>
+              <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)', color: 'var(--md-on-surface)', margin: '0 0 3px', lineHeight: 1.4 }}>
+                {entry.note}
+              </p>
             ) : (
-              <p style={{ color: 'var(--md-on-surface-variant)', margin: '0 0 2px', fontStyle: 'italic' }}>No note</p>
+              <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-md)', color: 'var(--md-on-surface-variant)', margin: '0 0 3px', fontStyle: 'italic' }}>
+                No note
+              </p>
             )}
-            <IonNote style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
-              {formatTime(entry.created_at)}
-            </IonNote>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <IonNote style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>
+                {formatTime(entry.created_at)}
+              </IonNote>
+              {entry.kcal != null && (
+                <span style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-primary)', fontFamily: 'var(--md-font)', fontWeight: 600 }}>
+                  {entry.kcal} kcal
+                </span>
+              )}
+            </div>
           </IonLabel>
         </IonItem>
         <IonItemOptions side="end">
@@ -210,28 +212,92 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
     );
   }
 
-  function renderCategory(meal: { id: MealType; label: string; emoji: string }) {
-    const items = grouped[meal.id];
+  function renderMealCard(meal: { id: MealType; label: string; emoji: string }) {
+    const items = grouped[meal.id] ?? [];
+    const mealKcal = items.filter(e => e.kcal != null).reduce((s, e) => s + (e.kcal ?? 0), 0);
+
     return (
-      <React.Fragment key={meal.id}>
-        <IonListHeader
+      <IonCard
+        key={meal.id}
+        style={{
+          borderRadius: 'var(--md-shape-xl)',
+          margin: '0 16px',
+          boxShadow: 'none',
+          border: '1.5px solid var(--md-outline-variant)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* ── Clickable header ── */}
+        <div
           onClick={() => openModal(meal.id)}
-          style={{ '--color': 'var(--md-primary)', fontSize: 'var(--md-label-lg)', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer' } as React.CSSProperties}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: '14px 16px 14px 16px',
+            cursor: 'pointer',
+            WebkitTapHighlightColor: 'transparent',
+            userSelect: 'none',
+            background: items.length > 0 ? 'var(--md-surface-container-low)' : 'transparent',
+          }}
         >
-          {meal.emoji} {meal.label}
-        </IonListHeader>
-        <IonList style={{ background: 'transparent', paddingBottom: 4 }}>
-          {items.length === 0 ? (
-            <IonItem lines="none" style={{ '--padding-start': '20px' } as React.CSSProperties}>
-              <IonNote style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-outline)' }}>
-                Nothing logged yet
-              </IonNote>
-            </IonItem>
-          ) : (
-            items.map(renderEntry)
-          )}
-        </IonList>
-      </React.Fragment>
+          {/* Emoji bubble */}
+          <div style={{
+            width: 40, height: 40, borderRadius: 'var(--md-shape-lg)',
+            background: 'var(--md-primary-container)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 20, flexShrink: 0,
+          }}>
+            {meal.emoji}
+          </div>
+
+          {/* Label + meta */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontFamily: 'var(--md-font)',
+              fontSize: 'var(--md-title-sm)',
+              fontWeight: 600,
+              color: 'var(--md-on-surface)',
+              lineHeight: 1.2,
+            }}>
+              {meal.label}
+            </div>
+            {items.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                <span style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)', fontFamily: 'var(--md-font)' }}>
+                  {items.length} {items.length === 1 ? 'entry' : 'entries'}
+                </span>
+                {mealKcal > 0 && (
+                  <>
+                    <span style={{ fontSize: 10, color: 'var(--md-outline)' }}>·</span>
+                    <span style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-primary)', fontFamily: 'var(--md-font)', fontWeight: 600 }}>
+                      {mealKcal} kcal
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
+            {items.length === 0 && (
+              <div style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-outline)', fontFamily: 'var(--md-font)', marginTop: 2 }}>
+                Tap to add
+              </div>
+            )}
+          </div>
+
+          {/* Add icon */}
+          <IonIcon
+            icon={addOutline}
+            style={{ fontSize: 22, color: 'var(--md-primary)', flexShrink: 0 }}
+          />
+        </div>
+
+        {/* ── Entries (only when present) ── */}
+        {items.length > 0 && (
+          <div style={{ borderTop: '1px solid var(--md-outline-variant)' }}>
+            {items.map(renderEntry)}
+          </div>
+        )}
+      </IonCard>
     );
   }
 
@@ -240,7 +306,7 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
   return (
     <>
       {/* ── Today summary card ──────────────────────────────────────── */}
-      <IonCard style={{ borderRadius: 'var(--md-shape-xl)', margin: '16px 16px 8px' }}>
+      <IonCard style={{ borderRadius: 'var(--md-shape-xl)', margin: '16px 16px 12px', boxShadow: 'none', border: '1.5px solid var(--md-outline-variant)' }}>
         <IonCardContent style={{ padding: '16px 24px' }}>
           <div style={{ fontSize: 'var(--md-label-md)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
             Today
@@ -273,29 +339,28 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
         </IonCardContent>
       </IonCard>
 
-      {/* ── Grouped meal log ────────────────────────────────────────── */}
-      <IonCard style={{ borderRadius: 'var(--md-shape-xl)', margin: '8px 16px 16px' }}>
-        <IonCardContent style={{ padding: '8px 0 12px' }}>
-          {loading ? (
-            <>  
-              {[1, 2, 3, 4].map((i) => (
-                <React.Fragment key={i}>
-                  <IonListHeader style={{ '--color': 'var(--md-primary)', fontSize: 'var(--md-label-lg)' } as React.CSSProperties}>
-                    <IonSkeletonText animated style={{ width: 80 }} />
-                  </IonListHeader>
-                  <IonItem lines="none" style={{ '--padding-start': '20px' } as React.CSSProperties}>
-                    <IonLabel><IonSkeletonText animated style={{ width: '60%' }} /></IonLabel>
-                  </IonItem>
-                </React.Fragment>
-              ))}
-            </>
-          ) : (
-            MEALS.filter(m =>
-              !OPTIONAL_MEALS.includes(m.id) || (grouped[m.id]?.length ?? 0) > 0
-            ).map(renderCategory)
-          )}
-        </IonCardContent>
-      </IonCard>
+      {/* ── Per-meal cards ───────────────────────────────────────────── */}
+      {loading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 16px 16px' }}>
+          {[1, 2, 3, 4].map((i) => (
+            <IonCard key={i} style={{ borderRadius: 'var(--md-shape-xl)', margin: 0, boxShadow: 'none', border: '1.5px solid var(--md-outline-variant)' }}>
+              <IonCardContent style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                <IonSkeletonText animated style={{ width: 40, height: 40, borderRadius: 'var(--md-shape-lg)' }} />
+                <div style={{ flex: 1 }}>
+                  <IonSkeletonText animated style={{ width: '40%', height: 16, marginBottom: 6 }} />
+                  <IonSkeletonText animated style={{ width: '25%', height: 12 }} />
+                </div>
+              </IonCardContent>
+            </IonCard>
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingBottom: 16 }}>
+          {MEALS.filter(m =>
+            !OPTIONAL_MEALS.includes(m.id) || (grouped[m.id]?.length ?? 0) > 0
+          ).map(renderMealCard)}
+        </div>
+      )}
 
 
       <IonToast
