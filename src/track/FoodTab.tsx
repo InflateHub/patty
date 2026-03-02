@@ -560,18 +560,18 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
                 Macros (optional)
               </div>
 
-              {/* AI scan button — only when Gemini key is configured */}
-              {geminiKey && !scanning && (
+              {/* AI scan button — always visible, disabled until photo + key are ready */}
+              {!scanning && (
                 <div style={{ marginBottom: 12 }}>
                   <IonButton
                     fill="outline"
                     size="small"
-                    disabled={!photoUri}
+                    disabled={!photoUri || !geminiKey}
                     onClick={handleScanWithAI}
                     style={{ '--border-radius': 'var(--md-shape-full)', '--border-color': 'var(--md-primary)', '--color': 'var(--md-primary)' } as React.CSSProperties}
                   >
                     <IonIcon slot="start" icon={sparkles} />
-                    {photoUri ? 'Scan with AI ✨' : 'Add a photo to scan'}
+                    {!geminiKey ? 'Set up AI key in Profile' : photoUri ? 'Scan with AI ✨' : 'Add a photo to scan'}
                   </IonButton>
                 </div>
               )}
