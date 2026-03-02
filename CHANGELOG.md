@@ -2,6 +2,17 @@
 
 ---
 
+## [2.3.0] — Workout Tab
+*Goal: add a fifth Track tab for logging exercise, with a full variety of workout types.*
+
+- [x] **Migration v14** — `workout_entries` table: `id`, `date`, `workout_type`, `name`, `duration_sec`, `steps`, `intensity` (1–5), `calories_burnt`, `notes`, `created_at`
+- [x] **`useWorkoutLog` hook** — `addEntry` / `deleteEntry` / `todayEntries` / `allEntries` / `entriesForDate`
+- [x] **WorkoutTab.tsx** — today summary card (sessions, total minutes, total kcal, total steps); log grouped by type; swipe-to-delete with confirm; history modal (last 30 days)
+- [x] **Add Workout modal** — 2-step: type grid (Cardio 🏃 / Strength 💪 / Yoga 🧘 / HIIT 🔥 / Steps 👣 / Custom ✏️) → entry form; Steps mode shows large step-count input; other modes show stopwatch (Start / Pause / Reset) + manual override, intensity chips (1–5 with emoji), auto-estimated calories
+- [x] **Icon + stacked label tabs** — all five Track segment tabs show icon above a short label (10 px) using `layout="icon-top"`; all five always visible in one row; `aria-label` retains full text for accessibility
+
+---
+
 ## [2.2.0] — Onboarding Redesign
 *Goal: a leaner, more visually immersive onboarding that collects only what matters.*
 

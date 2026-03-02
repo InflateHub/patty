@@ -166,4 +166,22 @@ export const migrations: Migration[] = [
       `ALTER TABLE weight_entries ADD COLUMN created_at TEXT;`,
     ],
   },
+  {
+    version: 14,
+    // 2.3.0 — workout tracking
+    statements: [
+      `CREATE TABLE IF NOT EXISTS workout_entries (
+        id             TEXT    PRIMARY KEY NOT NULL,
+        date           TEXT    NOT NULL,
+        workout_type   TEXT    NOT NULL,
+        name           TEXT    NOT NULL,
+        duration_sec   INTEGER NOT NULL DEFAULT 0,
+        steps          INTEGER,
+        intensity      INTEGER,
+        calories_burnt INTEGER,
+        notes          TEXT,
+        created_at     TEXT    NOT NULL
+      );`,
+    ],
+  },
 ];

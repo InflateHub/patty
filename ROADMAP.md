@@ -39,18 +39,18 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 2.3.0 — Workout Tab
+## 2.3.0 — Workout Tab ✅
 *Goal: add a fifth Track tab for logging exercise, with a full variety of workout types.*
 
 ### Tab Bar
-- [ ] **Icon-only tab labels** — all five Track segment tabs (Weight / Water / Sleep / Food / Workout) switch from text labels to icon-only display using Ionicons; tooltips/aria-labels retain the text for accessibility
+- [x] **Icon + stacked label tabs** — all five Track segment tabs (Weight / Water / Sleep / Food / Workout) show icon above a short label using `layout="icon-top"`; all five visible at once; `aria-label` retains full text
 
 ### Workout Logging
-- [ ] New `workout_entries` table (migration v7): `id`, `date`, `type` (Cardio / Strength / Yoga / Pilates / HIIT / Custom), `name`, `duration_sec`, `intensity` (1–5), `calories_burnt`, `notes`, `photo_uri`, `created_at`
-- [ ] `useWorkoutLog` hook: `addEntry` / `deleteEntry` / `entriesForDate` / `todayEntries` / `allEntries`
-- [ ] **WorkoutTab.tsx** — today's summary card (total duration, total calories, entry count); grouped log list by type; FAB to add
-- [ ] **Add Workout modal** — type selector (icon grid: Cardio 🏃, Strength 💪, Yoga 🧘, Pilates, HIIT 🔥, Custom ✏️); name field (pre-filled from type, editable for Custom); built-in stopwatch timer (Start / Pause / Stop); intensity slider (1–5 with emoji labels); calories field (auto-suggested from type × duration, editable); optional photo capture; notes field
-- [ ] Workout entries visible in the same day timeline; delete with swipe + confirm
+- [x] New `workout_entries` table (migration v14): `id`, `date`, `workout_type`, `name`, `duration_sec`, `steps`, `intensity` (1–5), `calories_burnt`, `notes`, `created_at`
+- [x] `useWorkoutLog` hook: `addEntry` / `deleteEntry` / `entriesForDate` / `todayEntries` / `allEntries`
+- [x] **WorkoutTab.tsx** — today summary card (sessions, total minutes, kcal, steps); grouped log list by type; history modal; FAB to add
+- [x] **Add Workout modal** — type grid (Cardio 🏃, Strength 💪, Yoga 🧘, HIIT 🔥, Steps 👣, Custom ✏️); Steps mode: large step-count input + auto-estimated kcal; other modes: stopwatch (Start / Pause / Reset) + manual override, intensity chips (1–5 emoji), auto-estimated calories; notes field
+- [x] Workout entries visible in day log grouped by type; swipe-to-delete with confirm alert
 
 ---
 

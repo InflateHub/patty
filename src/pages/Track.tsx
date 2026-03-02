@@ -12,19 +12,21 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
-import { fastFoodOutline, moonOutline, scaleOutline, waterOutline } from 'ionicons/icons';
+import { barbellOutline, fastFoodOutline, moonOutline, scaleOutline, waterOutline } from 'ionicons/icons';
 import { WeightTab } from '../track/WeightTab';
 import { WaterTab } from '../track/WaterTab';
 import { SleepTab } from '../track/SleepTab';
 import { FoodTab } from '../track/FoodTab';
+import { WorkoutTab } from '../track/WorkoutTab';
 
-type TabId = 'weight' | 'water' | 'sleep' | 'food';
+type TabId = 'weight' | 'water' | 'sleep' | 'food' | 'workout';
 
-const FAB_ICONS: Record<TabId, string> = {
-  weight: scaleOutline,
-  water:  waterOutline,
-  sleep:  moonOutline,
-  food:   fastFoodOutline,
+const TAB_META: Record<TabId, { icon: string; label: string }> = {
+  weight:  { icon: scaleOutline,    label: 'Weight'  },
+  water:   { icon: waterOutline,    label: 'Water'   },
+  sleep:   { icon: moonOutline,     label: 'Sleep'   },
+  food:    { icon: fastFoodOutline, label: 'Food'    },
+  workout: { icon: barbellOutline,  label: 'Workout' },
 };
 
 const Track: React.FC = () => {
@@ -47,34 +49,29 @@ const Track: React.FC = () => {
           <IonSegment
             value={tab}
             onIonChange={(e) => handleTabChange(e.detail.value as TabId)}
-            style={{ maxWidth: 520, margin: '0 auto', '--background': 'transparent' } as React.CSSProperties}
+            style={{ maxWidth: 560, margin: '0 auto', '--background': 'transparent' } as React.CSSProperties}
           >
-            <IonSegmentButton value="weight">
-              <IonLabel>Weight</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="water">
-              <IonLabel>Water</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="sleep">
-              <IonLabel>Sleep</IonLabel>
-            </IonSegmentButton>
-            <IonSegmentButton value="food">
-              <IonLabel>Food</IonLabel>
-            </IonSegmentButton>
+            {(Object.entries(TAB_META) as [TabId, { icon: string; label: string }][]).map(([id, meta]) => (
+              <IonSegmentButton key={id} value={id} aria-label={meta.label} layout="icon-top">
+                <IonIcon icon={meta.icon} />
+                <IonLabel style={{ fontSize: '10px', marginTop: 2 }}>{meta.label}</IonLabel>
+              </IonSegmentButton>
+            ))}
           </IonSegment>
         </IonToolbar>
       </IonHeader>
 
       <IonContent fullscreen>
-        {tab === 'weight' && <WeightTab openTrigger={fabTrigger} />}
-        {tab === 'water'  && <WaterTab  openTrigger={fabTrigger} />}
-        {tab === 'sleep'  && (
+        {tab === 'weight'  && <WeightTab  openTrigger={fabTrigger} />}
+        {tab === 'water'   && <WaterTab   openTrigger={fabTrigger} />}
+        {tab === 'sleep'   && (
           <SleepTab
             openTrigger={fabTrigger}
             onAlreadyLoggedChange={setSleepAlreadyLogged}
           />
         )}
-        {tab === 'food'   && <FoodTab   openTrigger={fabTrigger} />}
+        {tab === 'food'    && <FoodTab    openTrigger={fabTrigger} />}
+        {tab === 'workout' && <WorkoutTab openTrigger={fabTrigger} />}
 
         {/* Single contextual FAB — icon and disabled state follow active tab */}
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
@@ -83,7 +80,7 @@ const Track: React.FC = () => {
             onClick={() => setFabTrigger((n) => n + 1)}
             style={{ '--background': 'var(--md-primary-container)', '--color': 'var(--md-on-primary-container)' } as React.CSSProperties}
           >
-            <IonIcon icon={FAB_ICONS[tab]} />
+            <IonIcon icon={TAB_META[tab].icon} />
           </IonFabButton>
         </IonFab>
 
