@@ -11,6 +11,10 @@ export interface FoodEntry {
   photo_uri: string | null;
   note: string | null;
   kcal: number | null;
+  protein_g: number | null;
+  carbs_g: number | null;
+  fat_g: number | null;
+  fibre_g: number | null;
   created_at: string;    // ISO timestamp
 }
 
@@ -46,6 +50,10 @@ export function useFoodLog() {
             photo_uri,
             note: r.note as string | null,
             kcal: r.kcal != null ? (r.kcal as number) : null,
+            protein_g: r.protein_g != null ? (r.protein_g as number) : null,
+            carbs_g: r.carbs_g != null ? (r.carbs_g as number) : null,
+            fat_g: r.fat_g != null ? (r.fat_g as number) : null,
+            fibre_g: r.fibre_g != null ? (r.fibre_g as number) : null,
             created_at: r.created_at as string,
           };
         })
@@ -69,9 +77,17 @@ export function useFoodLog() {
    * @param photo_uri Optional data URI of the photo
    * @param note      Optional free-text note
    * @param kcal      Optional calorie count
+   * @param macros    Optional macro breakdown from AI scan
    */
   const addEntry = useCallback(
-    async (date: string, meal: MealType, photo_uri?: string, note?: string, kcal?: number) => {
+    async (
+      date: string,
+      meal: MealType,
+      photo_uri?: string,
+      note?: string,
+      kcal?: number,
+      macros?: { protein_g?: number; carbs_g?: number; fat_g?: number; fibre_g?: number }
+    ) => {
       const id = generateId();
       const created_at = new Date().toISOString();
       try {
@@ -83,8 +99,17 @@ export function useFoodLog() {
           storedPhotoPath = await savePhotoFile('food_photos', id, photo_uri);
         }
         await db.run(
-          'INSERT INTO food_entries (id, date, meal, photo_uri, photo_path, note, kcal, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?);',
-          [id, date, meal, storedPhotoUri, storedPhotoPath, note ?? null, kcal ?? null, created_at]
+          'INSERT INTO food_entries (id, date, meal, photo_uri, photo_path, note, kcal, protein_g, carbs_g, fat_g, fibre_g, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+          [
+            id, date, meal, storedPhotoUri, storedPhotoPath,
+            note ?? null,
+            kcal ?? null,
+            macros?.protein_g ?? null,
+            macros?.carbs_g ?? null,
+            macros?.fat_g ?? null,
+            macros?.fibre_g ?? null,
+            created_at,
+          ]
         );
         await loadAll();
       } catch (err) {

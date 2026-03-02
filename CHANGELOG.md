@@ -2,6 +2,22 @@
 
 ---
 
+## [2.9.0] — AI Foundation (User-Provided Key)
+*Goal: ship all three AI features using the user’s own Gemini Flash API key. No account, no payment, no backend.*
+
+- [x] **`src/utils/gemini.ts`** — Gemini Flash client: text + image prompts, structured JSON output via response schema, typed error handling (`invalid_key`, `quota`, `network`, `parse`)
+- [x] **`src/hooks/useGeminiKey.ts`** — stores and reads the API key from the SQLite `settings` table (`gemini_api_key`)
+- [x] **Profile → AI Settings card** — password-masked key input; helper link to `aistudio.google.com`; **Test Key** button fires a ping and shows success/failure toast; **Save Key** + **Remove** actions
+- [x] **AI Macro Scan (Food Tab)** — Macros section added to the Log Meal modal below the photo; **Scan with AI ✨** button enabled only when a photo is present; shimmer while scanning; result panel: dish name, editable kcal/protein/carbs/fat/fibre chips, confidence badge (green/amber/red); Calories field hidden when scan is active; no-key nudge shown otherwise
+- [x] **DB migration v16** — `ALTER TABLE food_entries ADD COLUMN protein_g REAL`, `carbs_g REAL`, `fat_g REAL`, `fibre_g REAL`
+- [x] **`useFoodLog`** — `FoodEntry` extended with four macro fields; `addEntry` accepts optional `macros` object; food entry cards render compact macro chips (P · C · F · Fi) when any value is present
+- [x] **AI Recipe Generator (`src/recipes/AIRecipeModal.tsx`)** — free-text description input; multi-select dietary tag chips (Vegetarian / Vegan / Gluten-Free / Dairy-Free / High-Protein / Low-Carb); shimmer loading; full recipe preview (hero emoji, time + tag chips, ingredients list, numbered steps); **Save to My Recipes** + **Regenerate** actions; no-key empty state
+- [x] **Recipes FAB → speed-dial** — `+` opens two arms: ✏️ Manual (existing `RecipeFormModal`) and ✨ AI Generate (new `AIRecipeModal`); scrim + animated close
+- [x] **AI Week Planner (`src/plan/AIPlannerSheet.tsx`)** — bottom sheet with dietary style chips (Balanced / High-Protein / Vegetarian / Low-Carb), days-to-fill chips (3 / 5 / 7), avoid-repeats toggle; assembles prompt from profile goal/activity + recipe list + already-assigned slots; maps `recipe_name` → nearest recipe (case-insensitive); batch-fills empty slots; “AI filled X slots” toast; existing manual slots never overwritten; no-key empty state
+- [x] **Plan page** — ✨ sparkles icon button added to the Cook Plan header, opens `AIPlannerSheet`
+
+---
+
 ## [2.8.0] — Home Page Redesign & Profile Identity Hero
 *Goal: transform Home into a focused daily companion and evolve Profile into an identity-first page.*
 

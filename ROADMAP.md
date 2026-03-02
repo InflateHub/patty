@@ -1,7 +1,7 @@
 ﻿# Patty — Roadmap (3.0.0)
 
 All versions prior to 2.0.0 are archived in the [`ROADMAP/`](ROADMAP/) folder.
-Current production version: **2.8.0**. This document plans the path to **3.0.0**.
+Current production version: **2.9.0**. This document plans the path to **3.0.0**.
 
 ---
 
@@ -149,58 +149,46 @@ Current production version: **2.8.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 2.9.0 — Post-Onboarding Tutorial Walkthrough
-*Goal: guide new users through the app with a lightweight spotlight tour after onboarding completes.*
-
-- [ ] After the celebration screen routes to Home, a tooltip-based walkthrough launches automatically on first run
-- [ ] **5 steps:** Home dashboard → Track tab → Recipes → Plan tab → Profile
-- [ ] Each step: full-screen semi-transparent backdrop with spotlight cutout on the target element; bottom sheet tooltip card (title + one-sentence description + "Next" button)
-- [ ] **Skip button** always visible in the top-right corner; skipping or completing stores `tutorial_complete = 1` in the `settings` table so it never re-runs
-- [ ] Final step reads "You're all set — let's go!" and dismisses the overlay
-- [ ] `TutorialOverlay.tsx` — self-contained component, no external library; mounted in `Home.tsx` behind the `tutorial_complete` flag
-
----
-
-## 2.9.5 — AI Foundation (User-Provided Key)
+## 2.9.0 — AI Foundation (User-Provided Key) ✅
 *Goal: ship all three AI features using the user's own Gemini Flash API key. No account, no payment, no backend. Validates AI feature demand before investing in Pro infrastructure.*
 
 ### Setup
-- [ ] `src/utils/gemini.ts` — Gemini Flash client: handles both base64 image prompts and text prompts; enforces structured JSON output via response schema; surfaces clear error messages (invalid key, quota exceeded, network failure)
-- [ ] `src/hooks/useGeminiKey.ts` — reads and writes the Gemini API key from the SQLite `settings` table (`gemini_api_key`)
-- [ ] **Profile → App Settings** — "Gemini API Key" input field (password-masked); helper text with a tappable link to `aistudio.google.com/app/apikey`; "Test key" button that fires a minimal ping and shows success/failure
+- [x] `src/utils/gemini.ts` — Gemini Flash client: handles both base64 image prompts and text prompts; enforces structured JSON output via response schema; surfaces clear error messages (invalid key, quota exceeded, network failure)
+- [x] `src/hooks/useGeminiKey.ts` — reads and writes the Gemini API key from the SQLite `settings` table (`gemini_api_key`)
+- [x] **Profile → App Settings** — "Gemini API Key" input field (password-masked); helper text with a tappable link to `aistudio.google.com/app/apikey`; "Test key" button that fires a minimal ping and shows success/failure
 
 ### Feature 1 — AI Macro Scan (Food Tab)
-- [ ] After a food photo is captured in the Add Food modal, a **"Scan with AI ✨"** button appears below the image thumbnail
-- [ ] Sends the base64 image to Gemini Flash with a strict JSON schema: `{ dish_name, kcal, protein_g, carbs_g, fat_g, confidence }` — confidence is `"high" | "medium" | "low"`
-- [ ] Loading state: shimmer placeholder on the result panel while the API call is in-flight
-- [ ] Result panel shows: dish name, all four macros in styled chips, a coloured confidence badge (green/amber/red); every field is editable before saving
-- [ ] **DB migration v16:** `ALTER TABLE food_entries ADD COLUMN protein_g REAL`, `carbs_g REAL`, `fat_g REAL`
-- [ ] `useFoodLog` — extend `FoodEntry` type and `addEntry` signature to include the three new macro fields
-- [ ] Food log entry cards show a compact macro row (`P · C · F`) when any macro value is present
-- [ ] If no Gemini key is set, the "Scan with AI" button shows a "Set up AI in Profile to use this feature" tooltip instead
+- [x] After a food photo is captured in the Add Food modal, a **Macros section** appears below the image thumbnail; this section contains a **"Scan with AI ✨"** button that is enabled only when a photo is present
+- [x] Sends the base64 image to Gemini Flash with a strict JSON schema: `{ dish_name, kcal, protein_g, carbs_g, fat_g, fibre_g, confidence }` — confidence is `"high" | "medium" | "low"`
+- [x] Loading state: shimmer placeholder on the result panel while the API call is in-flight
+- [x] Result panel shows: dish name, all five macros in styled chips (kcal, P, C, F, Fibre), a coloured confidence badge (green/amber/red); every field is editable before saving
+- [x] **DB migration v16:** `ALTER TABLE food_entries ADD COLUMN protein_g REAL`, `carbs_g REAL`, `fat_g REAL`, `fibre_g REAL`
+- [x] `useFoodLog` — extend `FoodEntry` type and `addEntry` signature to include the four new macro fields (protein, carbs, fat, fibre)
+- [x] Food log entry cards show a compact macro row (`P · C · F · Fi`) when any macro value is present
+- [x] If no Gemini key is set, the "Scan with AI" button shows a "Set up AI in Profile to use this feature" tooltip instead
 
 ### Feature 2 — AI Recipe Generator (Recipes Page)
-- [ ] The `+` FAB on the Recipes page becomes a **speed-dial** using the existing `SpeedDial` component, with two arms:
+- [x] The `+` FAB on the Recipes page becomes a **speed-dial** with two arms:
   - ✏️ **Manual** — opens the existing `RecipeFormModal` (unchanged)
   - ✨ **AI Generate** — opens the new `AIRecipeModal`
-- [ ] `src/recipes/AIRecipeModal.tsx` — free-text description input (e.g. "high-protein low-carb chicken bowl, under 30 min"); optional dietary tags (multi-select chips: vegetarian / vegan / gluten-free / dairy-free / high-protein / low-carb)
-- [ ] Gemini returns structured JSON matching the `Recipe` type: `{ name, emoji, prepMin, cookMin, tags[], ingredients[], steps[] }`
-- [ ] Generated recipe is previewed in a layout identical to `RecipeDetailModal` — hero emoji, time chips, ingredient list, numbered steps — so the user sees the exact final result
-- [ ] "Save to my recipes" calls `useRecipes.addRecipe`; saved recipes are identical in storage to manually created ones
-- [ ] "Regenerate" button re-fires the same prompt for a different result without closing the modal
-- [ ] No Gemini key: "Set up AI in Profile" empty state instead of the description input
+- [x] `src/recipes/AIRecipeModal.tsx` — free-text description input (e.g. "high-protein low-carb chicken bowl, under 30 min"); optional dietary tags (multi-select chips: vegetarian / vegan / gluten-free / dairy-free / high-protein / low-carb)
+- [x] Gemini returns structured JSON matching the `Recipe` type: `{ name, emoji, prepMin, cookMin, tags[], ingredients[], steps[] }`
+- [x] Generated recipe is previewed in a layout identical to `RecipeDetailModal` — hero emoji, time chips, ingredient list, numbered steps — so the user sees the exact final result
+- [x] "Save to my recipes" calls `useRecipes.addRecipe`; saved recipes are identical in storage to manually created ones
+- [x] "Regenerate" button re-fires the same prompt for a different result without closing the modal
+- [x] No Gemini key: "Set up AI in Profile" empty state instead of the description input
 
 ### Feature 3 — AI Week Planner (Plan Page)
-- [ ] **"Plan my week ✨"** icon button added to the Plan page header (right side)
-- [ ] Opens `src/plan/AIPlannerSheet.tsx` — a bottom sheet with preferences:
+- [x] **"Plan my week ✨"** icon button added to the Plan page header (right side)
+- [x] Opens `src/plan/AIPlannerSheet.tsx` — a bottom sheet with preferences:
   - Dietary style: Balanced / High-Protein / Vegetarian / Low-Carb (single-select chips)
   - Days to fill: 3 / 5 / 7 (chip toggle)
   - Avoid repeats this week: toggle (on by default)
-- [ ] On "Generate", the prompt is assembled from: user `goal` + `activity` from `useProfile` + full recipe list names + already-assigned slots for the current week
-- [ ] Gemini returns: `{ date, slot, recipe_name }[]` — only slots not yet filled are returned
-- [ ] App maps `recipe_name` → nearest-matching Recipe object (case-insensitive), batch-calls `assignSlot`; unmatched names are silently skipped
-- [ ] "AI filled X slots" success toast; existing manual slots are **never overwritten**
-- [ ] No Gemini key: sheet shows "Set up AI in Profile" with a link instead of preferences
+- [x] On "Generate", the prompt is assembled from: user `goal` + `activity` from `useProfile` + full recipe list names + already-assigned slots for the current week
+- [x] Gemini returns: `{ date, slot, recipe_name }[]` — only slots not yet filled are returned
+- [x] App maps `recipe_name` → nearest-matching Recipe object (case-insensitive), batch-calls `assignSlot`; unmatched names are silently skipped
+- [x] "AI filled X slots" success toast; existing manual slots are **never overwritten**
+- [x] No Gemini key: sheet shows "Set up AI in Profile" with a link instead of preferences
 
 ---
 

@@ -14,7 +14,7 @@ import {
   IonToolbar,
   useIonAlert,
 } from '@ionic/react';
-import { add, timeOutline } from 'ionicons/icons';
+import { add, closeOutline, createOutline, sparkles, timeOutline } from 'ionicons/icons';
 import type { Recipe } from '../recipes/recipeData';
 import { useRecipes } from '../hooks/useRecipes';
 import { useFoodLog } from '../hooks/useFoodLog';
@@ -22,6 +22,7 @@ import type { MealType } from '../hooks/useFoodLog';
 import { today } from '../track/trackUtils';
 import RecipeDetailModal from '../recipes/RecipeDetailModal';
 import RecipeFormModal from '../recipes/RecipeFormModal';
+import AIRecipeModal from '../recipes/AIRecipeModal';
 
 type AnyRecipe = Recipe & { custom?: true };
 
@@ -31,6 +32,8 @@ const Recipes: React.FC = () => {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<AnyRecipe | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showAI, setShowAI] = useState(false);
+  const [dialOpen, setDialOpen] = useState(false);
   const [presentAlert] = useIonAlert();
 
   const filtered = useMemo(() => {
@@ -136,12 +139,6 @@ const Recipes: React.FC = () => {
         )}
       </IonContent>
 
-      <IonFab slot="fixed" vertical="bottom" horizontal="end">
-        <IonFabButton onClick={() => setShowForm(true)} style={S.fab}>
-          <IonIcon icon={add} />
-        </IonFabButton>
-      </IonFab>
-
       <RecipeDetailModal
         recipe={selected}
         onClose={() => setSelected(null)}
@@ -154,6 +151,54 @@ const Recipes: React.FC = () => {
         onClose={() => setShowForm(false)}
         onSave={addRecipe}
       />
+
+      <AIRecipeModal
+        isOpen={showAI}
+        onClose={() => setShowAI(false)}
+        onSave={addRecipe}
+      />
+
+      {/* Speed-dial scrim */}
+      {dialOpen && (
+        <div
+          onClick={() => setDialOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.32)', zIndex: 999 }}
+        />
+      )}
+
+      {/* Speed-dial container */}
+      <div style={{ position: 'fixed', bottom: 96, right: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
+        {/* Manual arm */}
+        {dialOpen && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ background: 'var(--md-surface-container-highest)', color: 'var(--md-on-surface)', borderRadius: 'var(--md-shape-full)', padding: '4px 12px', fontSize: 'var(--md-label-lg)', fontFamily: 'var(--md-font)', fontWeight: 600, boxShadow: '0 2px 8px rgba(0,0,0,0.18)', whiteSpace: 'nowrap' }}>Manual</span>
+            <button
+              onClick={() => { setDialOpen(false); setShowForm(true); }}
+              style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--md-secondary-container)', color: 'var(--md-on-secondary-container)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.18)' }}
+            >
+              <IonIcon icon={createOutline} style={{ fontSize: 22 }} />
+            </button>
+          </div>
+        )}
+        {/* AI Generate arm */}
+        {dialOpen && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ background: 'var(--md-surface-container-highest)', color: 'var(--md-on-surface)', borderRadius: 'var(--md-shape-full)', padding: '4px 12px', fontSize: 'var(--md-label-lg)', fontFamily: 'var(--md-font)', fontWeight: 600, boxShadow: '0 2px 8px rgba(0,0,0,0.18)', whiteSpace: 'nowrap' }}>AI Generate ✨</span>
+            <button
+              onClick={() => { setDialOpen(false); setShowAI(true); }}
+              style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--md-primary-container)', color: 'var(--md-on-primary-container)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.18)' }}
+            >
+              <IonIcon icon={sparkles} style={{ fontSize: 22 }} />
+            </button>
+          </div>
+        )}
+        {/* Main FAB */}
+        <IonFab>
+          <IonFabButton onClick={() => setDialOpen((o) => !o)} style={S.fab}>
+            <IonIcon icon={dialOpen ? closeOutline : add} />
+          </IonFabButton>
+        </IonFab>
+      </div>
     </IonPage>
   );
 };

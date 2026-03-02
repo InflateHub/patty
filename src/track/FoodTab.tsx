@@ -23,9 +23,11 @@ import {
   useIonViewWillEnter,
 } from '@ionic/react';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { addOutline, albumsOutline, cameraOutline, fastFoodOutline, trash } from 'ionicons/icons';
+import { addOutline, albumsOutline, cameraOutline, fastFoodOutline, sparkles, trash } from 'ionicons/icons';
 import { useFoodLog } from '../hooks/useFoodLog';
 import type { FoodEntry, MealType } from '../hooks/useFoodLog';
+import { useGeminiKey } from '../hooks/useGeminiKey';
+import { geminiRequest, geminiErrorMessage } from '../utils/gemini';
 import { formatTime, today } from './trackUtils';
 
 /* ── Constants ───────────────────────────────────────────────────────── */
@@ -74,6 +76,7 @@ interface FoodTabProps {
 
 export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
   const { loading, addEntry, deleteEntry, todayEntries, reload } = useFoodLog();
+  const { geminiKey } = useGeminiKey();
 
   useIonViewWillEnter(() => {
     reload();
@@ -85,6 +88,26 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
   const [kcal, setKcal] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // AI Macro Scan state
+  interface MacroResult {
+    dish_name: string;
+    kcal: number;
+    protein_g: number;
+    carbs_g: number;
+    fat_g: number;
+    fibre_g: number;
+    confidence: 'high' | 'medium' | 'low';
+  }
+  const [scanning, setScanning] = useState(false);
+  const [macroResult, setMacroResult] = useState<MacroResult | null>(null);
+  // Editable macro fields (post-scan)
+  const [macroKcal, setMacroKcal] = useState('');
+  const [macroProtein, setMacroProtein] = useState('');
+  const [macroCarbs, setMacroCarbs] = useState('');
+  const [macroFat, setMacroFat] = useState('');
+  const [macroFibre, setMacroFibre] = useState('');
+  const [macroDish, setMacroDish] = useState('');
 
   /* Open modal when Track's contextual FAB fires */
   useEffect(() => {
@@ -107,6 +130,15 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
     setNote('');
     setKcal('');
     setSaving(false);
+    // reset AI state
+    setScanning(false);
+    setMacroResult(null);
+    setMacroKcal('');
+    setMacroProtein('');
+    setMacroCarbs('');
+    setMacroFat('');
+    setMacroFibre('');
+    setMacroDish('');
     setModalOpen(true);
   }
 
@@ -139,9 +171,25 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
 
   async function handleSave() {
     setSaving(true);
-    const kcalNum = kcal.trim() ? parseInt(kcal.trim(), 10) : undefined;
+    // If macro scan was used, use macro values; otherwise use manual kcal
+    const hasMacros = macroResult !== null;
+    const kcalNum = hasMacros
+      ? (macroKcal.trim() ? parseInt(macroKcal.trim(), 10) : undefined)
+      : (kcal.trim() ? parseInt(kcal.trim(), 10) : undefined);
+    const noteVal = hasMacros && macroDish.trim() ? macroDish.trim() : (note.trim() || undefined);
+    const macros = hasMacros ? {
+      protein_g: macroProtein.trim() ? parseFloat(macroProtein.trim()) : undefined,
+      carbs_g:   macroCarbs.trim()   ? parseFloat(macroCarbs.trim())   : undefined,
+      fat_g:     macroFat.trim()     ? parseFloat(macroFat.trim())     : undefined,
+      fibre_g:   macroFibre.trim()   ? parseFloat(macroFibre.trim())   : undefined,
+    } : undefined;
     try {
-      await addEntry(todayStr, selectedMeal, photoUri, note.trim() || undefined, Number.isFinite(kcalNum) ? kcalNum : undefined);
+      await addEntry(
+        todayStr, selectedMeal, photoUri,
+        noteVal,
+        Number.isFinite(kcalNum) ? kcalNum : undefined,
+        macros
+      );
       setModalOpen(false);
     } catch {
       setErrorMsg('Could not save entry. Please try again.');
@@ -149,9 +197,48 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
     }
   }
 
-  /* ── Render helpers ──────────────────────────────────────────────── */
+  async function handleScanWithAI() {
+    if (!photoUri || !geminiKey) return;
+    setScanning(true);
+    setMacroResult(null);
+    try {
+      const result = await geminiRequest<MacroResult>({
+        apiKey: geminiKey,
+        imageDataUri: photoUri,
+        prompt:
+          'Analyse this food photo. Return a JSON object with the estimated nutritional values for the dish shown. Be as accurate as possible based on typical serving sizes. If multiple dishes, estimate combined totals.',
+        schema: {
+          type: 'OBJECT',
+          properties: {
+            dish_name:  { type: 'STRING' },
+            kcal:       { type: 'NUMBER' },
+            protein_g:  { type: 'NUMBER' },
+            carbs_g:    { type: 'NUMBER' },
+            fat_g:      { type: 'NUMBER' },
+            fibre_g:    { type: 'NUMBER' },
+            confidence: { type: 'STRING' },
+          },
+          required: ['dish_name','kcal','protein_g','carbs_g','fat_g','fibre_g','confidence'],
+        },
+      });
+      setMacroResult(result);
+      setMacroDish(result.dish_name ?? '');
+      setMacroKcal(String(Math.round(result.kcal ?? 0)));
+      setMacroProtein(String(Math.round((result.protein_g ?? 0) * 10) / 10));
+      setMacroCarbs(String(Math.round((result.carbs_g ?? 0) * 10) / 10));
+      setMacroFat(String(Math.round((result.fat_g ?? 0) * 10) / 10));
+      setMacroFibre(String(Math.round((result.fibre_g ?? 0) * 10) / 10));
+    } catch (err) {
+      setErrorMsg(geminiErrorMessage(err));
+    } finally {
+      setScanning(false);
+    }
+  }
+
+  /* ── Render helpers ── */
 
   function renderEntry(entry: FoodEntry) {
+    const hasMacros = entry.protein_g != null || entry.carbs_g != null || entry.fat_g != null || entry.fibre_g != null;
     return (
       <IonItemSliding key={entry.id}>
         <IonItem
@@ -197,6 +284,30 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
                 </span>
               )}
             </div>
+            {hasMacros && (
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+                {entry.protein_g != null && (
+                  <span style={{ fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', background: 'var(--md-surface-container-high)', color: 'var(--md-on-surface-variant)', borderRadius: 'var(--md-shape-full)', padding: '1px 7px' }}>
+                    P {entry.protein_g}g
+                  </span>
+                )}
+                {entry.carbs_g != null && (
+                  <span style={{ fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', background: 'var(--md-surface-container-high)', color: 'var(--md-on-surface-variant)', borderRadius: 'var(--md-shape-full)', padding: '1px 7px' }}>
+                    C {entry.carbs_g}g
+                  </span>
+                )}
+                {entry.fat_g != null && (
+                  <span style={{ fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', background: 'var(--md-surface-container-high)', color: 'var(--md-on-surface-variant)', borderRadius: 'var(--md-shape-full)', padding: '1px 7px' }}>
+                    F {entry.fat_g}g
+                  </span>
+                )}
+                {entry.fibre_g != null && (
+                  <span style={{ fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', background: 'var(--md-surface-container-high)', color: 'var(--md-on-surface-variant)', borderRadius: 'var(--md-shape-full)', padding: '1px 7px' }}>
+                    Fi {entry.fibre_g}g
+                  </span>
+                )}
+              </div>
+            )}
           </IonLabel>
         </IonItem>
         <IonItemOptions side="end">
@@ -450,14 +561,97 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
               </div>
             </div>
 
+            {/* Macros — AI Scan */}
+            <div>
+              <div style={{ fontSize: 'var(--md-label-lg)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
+                Macros
+              </div>
+              {!geminiKey ? (
+                <div style={{ fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', fontFamily: 'var(--md-font)' }}>
+                  ✨ Set up AI in Profile → App Settings to scan food photos for macros.
+                </div>
+              ) : scanning ? (
+                /* Shimmer while scanning */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <IonSkeletonText animated style={{ width: '60%', height: 18, borderRadius: 8 }} />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {[80, 70, 70, 70, 70].map((w, i) => (
+                      <IonSkeletonText key={i} animated style={{ width: w, height: 28, borderRadius: 'var(--md-shape-full)' }} />
+                    ))}
+                  </div>
+                </div>
+              ) : macroResult ? (
+                /* Editable result panel */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {/* Confidence badge */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{
+                      fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', fontWeight: 600,
+                      padding: '2px 10px', borderRadius: 'var(--md-shape-full)',
+                      background: macroResult.confidence === 'high' ? 'var(--md-primary-container)' : macroResult.confidence === 'medium' ? '#FFF3E0' : '#FFEBEE',
+                      color: macroResult.confidence === 'high' ? 'var(--md-on-primary-container)' : macroResult.confidence === 'medium' ? '#E65100' : 'var(--md-error)',
+                    }}>
+                      {macroResult.confidence === 'high' ? '✓ High confidence' : macroResult.confidence === 'medium' ? '~ Medium confidence' : '⚠ Low confidence'}
+                    </span>
+                    <button
+                      onClick={() => { setMacroResult(null); setMacroKcal(''); setMacroProtein(''); setMacroCarbs(''); setMacroFat(''); setMacroFibre(''); setMacroDish(''); }}
+                      style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-error)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--md-font)' }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  {/* Dish name (fills note) */}
+                  <IonInput
+                    value={macroDish}
+                    onIonInput={(e) => setMacroDish(e.detail.value ?? '')}
+                    placeholder="Dish name"
+                    style={{ '--background': 'var(--md-surface-container)', '--border-radius': 'var(--md-shape-md)', '--padding-start': '14px', '--padding-end': '14px' } as React.CSSProperties}
+                  />
+                  {/* Macro chips row — all editable */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    {([
+                      { label: 'Calories (kcal)', val: macroKcal, set: setMacroKcal },
+                      { label: 'Protein (g)',     val: macroProtein, set: setMacroProtein },
+                      { label: 'Carbs (g)',       val: macroCarbs, set: setMacroCarbs },
+                      { label: 'Fat (g)',         val: macroFat, set: setMacroFat },
+                      { label: 'Fibre (g)',       val: macroFibre, set: setMacroFibre },
+                    ] as { label: string; val: string; set: (v: string) => void }[]).map(({ label, val, set }) => (
+                      <div key={label}>
+                        <div style={{ fontSize: 'var(--md-label-sm)', color: 'var(--md-on-surface-variant)', fontFamily: 'var(--md-font)', marginBottom: 4 }}>{label}</div>
+                        <IonInput
+                          type="number"
+                          min="0"
+                          value={val}
+                          onIonInput={(e) => set(e.detail.value ?? '')}
+                          style={{ '--background': 'var(--md-surface-container)', '--border-radius': 'var(--md-shape-md)', '--padding-start': '12px', '--padding-end': '12px', fontSize: 'var(--md-body-md)' } as React.CSSProperties}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                /* Default: Scan button */
+                <IonButton
+                  fill="outline"
+                  size="small"
+                  disabled={!photoUri}
+                  onClick={handleScanWithAI}
+                  style={{ '--border-radius': 'var(--md-shape-full)', '--border-color': 'var(--md-primary)', '--color': 'var(--md-primary)' } as React.CSSProperties}
+                >
+                  <IonIcon slot="start" icon={sparkles} />
+                  {photoUri ? 'Scan with AI ✨' : 'Add a photo to scan'}
+                </IonButton>
+              )}
+            </div>
+
             {/* Note */}
             <div>
               <div style={{ fontSize: 'var(--md-label-lg)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
                 Note (optional)
               </div>
               <IonTextarea
-                value={note}
-                onIonInput={(e) => setNote(e.detail.value ?? '')}
+                value={macroResult ? macroDish : note}
+                onIonInput={(e) => macroResult ? setMacroDish(e.detail.value ?? '') : setNote(e.detail.value ?? '')}
                 placeholder="What did you eat?"
                 autoGrow
                 rows={3}
@@ -465,7 +659,8 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
               />
             </div>
 
-            {/* Calories */}
+            {/* Calories — only shown when no AI scan done */}
+            {!macroResult && (
             <div>
               <div style={{ fontSize: 'var(--md-label-lg)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
                 Calories (optional)
@@ -479,6 +674,7 @@ export const FoodTab: React.FC<FoodTabProps> = ({ openTrigger }) => {
                 style={{ '--background': 'var(--md-surface-container)', '--border-radius': 'var(--md-shape-md)', '--padding-start': '14px', '--padding-end': '14px' } as React.CSSProperties}
               />
             </div>
+            )}
 
             {/* Save */}
             <IonButton

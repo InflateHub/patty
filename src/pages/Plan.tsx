@@ -9,9 +9,10 @@ import {
   IonCardContent,
   IonIcon,
   IonButton,
+  IonButtons,
   IonListHeader,
 } from '@ionic/react';
-import { chevronBackOutline, chevronForwardOutline } from 'ionicons/icons';
+import { chevronBackOutline, chevronForwardOutline, sparkles } from 'ionicons/icons';
 import {
   useMealPlan,
   weekStart,
@@ -22,6 +23,8 @@ import {
 import MealPlanGrid from '../plan/MealPlanGrid';
 import GroceryList from '../plan/GroceryList';
 import RecipePickerModal from '../plan/RecipePickerModal';
+import AIPlannerSheet from '../plan/AIPlannerSheet';
+import { useRecipes } from '../hooks/useRecipes';
 import type { Recipe } from '../recipes/recipeData';
 
 const todayStr = (): string => new Date().toISOString().slice(0, 10);
@@ -35,6 +38,9 @@ const Plan: React.FC = () => {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pendingDate, setPendingDate] = useState<string>('');
   const [pendingSlot, setPendingSlot] = useState<SlotType>('breakfast');
+  const [aiPlannerOpen, setAiPlannerOpen] = useState(false);
+
+  const { allRecipes } = useRecipes();
 
   const today = todayStr();
   const weekContainsToday = dates.includes(today);
@@ -59,6 +65,15 @@ const Plan: React.FC = () => {
           <IonTitle style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-title-lg)' }}>
             Cook Plan
           </IonTitle>
+          <IonButtons slot="end">
+            <IonButton
+              fill="clear"
+              onClick={() => setAiPlannerOpen(true)}
+              style={{ '--color': 'var(--md-primary)' } as React.CSSProperties}
+            >
+              <IonIcon icon={sparkles} slot="icon-only" />
+            </IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
 
@@ -180,6 +195,15 @@ const Plan: React.FC = () => {
           isOpen={pickerOpen}
           onClose={() => setPickerOpen(false)}
           onSelect={handleSelect}
+        />
+        {/* ── AI Planner sheet */}
+        <AIPlannerSheet
+          isOpen={aiPlannerOpen}
+          onClose={() => setAiPlannerOpen(false)}
+          dates={dates}
+          weekPlan={weekPlan}
+          allRecipes={allRecipes}
+          assignSlot={assignSlot}
         />
       </IonContent>
     </IonPage>

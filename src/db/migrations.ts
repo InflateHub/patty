@@ -213,4 +213,14 @@ export const migrations: Migration[] = [
       );`,
     ],
   },
+  {
+    version: 16,
+    // 2.9.0 — macro columns on food_entries (AI Macro Scan)
+    statements: [
+      `ALTER TABLE food_entries ADD COLUMN protein_g REAL;`,
+      `ALTER TABLE food_entries ADD COLUMN carbs_g REAL;`,
+      `ALTER TABLE food_entries ADD COLUMN fat_g REAL;`,
+      `ALTER TABLE food_entries ADD COLUMN fibre_g REAL;`,
+    ],
+  },
 ];

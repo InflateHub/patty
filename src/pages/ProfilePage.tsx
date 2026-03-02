@@ -1,4 +1,4 @@
-/* ProfilePage — 2.8.0 */
+/* ProfilePage — 2.9.0 */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -27,7 +27,7 @@ import {
   IonToolbar,
   IonToast,
 } from '@ionic/react';
-import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline, chevronForwardOutline, notificationsOutline, trophyOutline } from 'ionicons/icons';
+import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline, chevronForwardOutline, notificationsOutline, trophyOutline, sparkles } from 'ionicons/icons';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
 import {
@@ -42,6 +42,8 @@ import { useGamification, getLevel } from '../hooks/useGamification';
 import PinSetupModal from '../components/PinSetupModal';
 import ColorPicker from '../components/ColorPicker';
 import { getDb } from '../db/database';
+import { useGeminiKey } from '../hooks/useGeminiKey';
+import { testGeminiKey, geminiErrorMessage } from '../utils/gemini';
 
 // ── Shared minor styles ───────────────────────────────────────────────────────
 const hdr: React.CSSProperties = { paddingTop: 20, paddingBottom: 4 };
@@ -77,6 +79,14 @@ const ProfilePage: React.FC = () => {
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [toast, setToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('Profile saved');
+
+  // AI Settings
+  const { geminiKey, saveKey: saveGeminiKey } = useGeminiKey();
+  const [keyInput, setKeyInput] = useState('');
+  const [testingKey, setTestingKey] = useState(false);
+
+  // Sync keyInput when hook loads
+  useEffect(() => { setKeyInput(geminiKey); }, [geminiKey]);
 
   // Privacy & Security modal state
   const [pinSetupOpen, setPinSetupOpen]     = useState(false);
@@ -689,7 +699,91 @@ const ProfilePage: React.FC = () => {
 
           </IonCardContent>
         </IonCard>
+        {/* ── AI Settings ─────────────────────────────────────────────── */}
+        <IonCard>
+          <IonListHeader style={hdr}>
+            <IonIcon icon={sparkles} style={{ marginRight: 8, color: 'var(--md-primary)', fontSize: 16 }} />
+            AI Settings
+          </IonListHeader>
+          <IonCardContent style={{ padding: '12px 16px 16px' }}>
+            <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', marginTop: 0, marginBottom: 12 }}>
+              Patty uses Gemini Flash to scan food photos for macros, generate recipes, and plan your week. Your key is stored locally and never shared.
+            </p>
 
+            {/* Key input */}
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: 'var(--md-label-lg)', color: 'var(--md-on-surface-variant)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Gemini API Key</div>
+              <IonInput
+                type="password"
+                value={keyInput}
+                onIonInput={(e) => setKeyInput(e.detail.value ?? '')}
+                placeholder="AIza…"
+                style={{ '--background': 'var(--md-surface-container)', '--border-radius': 'var(--md-shape-md)', '--padding-start': '14px', '--padding-end': '14px' } as React.CSSProperties}
+              />
+              <p style={{ fontFamily: 'var(--md-font)', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)', margin: '6px 4px 0' }}>
+                Get a free key at{' '}
+                <span
+                  style={{ color: 'var(--md-primary)', cursor: 'pointer', textDecoration: 'underline' }}
+                  onClick={() => window.open('https://aistudio.google.com/app/apikey', '_blank', 'noopener')}
+                >
+                  aistudio.google.com
+                </span>
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+              <IonButton
+                fill="outline"
+                size="small"
+                disabled={testingKey || !keyInput.trim()}
+                style={{ '--border-radius': 'var(--md-shape-full)', '--border-color': 'var(--md-outline)', '--color': 'var(--md-on-surface)' } as React.CSSProperties}
+                onClick={async () => {
+                  setTestingKey(true);
+                  try {
+                    await testGeminiKey(keyInput.trim());
+                    setToastMsg('✓ Key is valid!');
+                    setToast(true);
+                  } catch (err) {
+                    setToastMsg(geminiErrorMessage(err));
+                    setToast(true);
+                  } finally {
+                    setTestingKey(false);
+                  }
+                }}
+              >
+                {testingKey ? 'Testing…' : 'Test Key'}
+              </IonButton>
+              <IonButton
+                size="small"
+                disabled={!keyInput.trim()}
+                style={{ '--border-radius': 'var(--md-shape-full)', '--background': 'var(--md-primary)', '--color': 'var(--md-on-primary)' } as React.CSSProperties}
+                onClick={async () => {
+                  await saveGeminiKey(keyInput);
+                  setToastMsg('API key saved');
+                  setToast(true);
+                }}
+              >
+                Save Key
+              </IonButton>
+              {geminiKey && (
+                <IonButton
+                  fill="clear"
+                  size="small"
+                  style={{ '--color': 'var(--md-error)' } as React.CSSProperties}
+                  onClick={async () => {
+                    await saveGeminiKey('');
+                    setKeyInput('');
+                    setToastMsg('API key removed');
+                    setToast(true);
+                  }}
+                >
+                  Remove
+                </IonButton>
+              )}
+            </div>
+          </IonCardContent>
+        </IonCard>
         {/* ── Privacy & Security ────────────────────────────────────────── */}
         <IonCard>
           <IonListHeader style={hdr}>
@@ -799,7 +893,7 @@ const ProfilePage: React.FC = () => {
                 onClick={() => window.open('https://patty.saranmahadev.in', '_blank', 'noopener')}
               >
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">2.8.0</IonNote>
+                <IonNote slot="end">2.9.0</IonNote>
               </IonItem>
               <IonItem
                 style={{ ...transparentItem, cursor: 'pointer' }}
