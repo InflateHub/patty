@@ -1,7 +1,7 @@
 ﻿# Patty — Roadmap (3.0.0)
 
 All versions prior to 2.0.0 are archived in the [`ROADMAP/`](ROADMAP/) folder.
-Current production version: **2.2.0**. This document plans the path to **3.0.0**.
+Current production version: **2.8.0**. This document plans the path to **3.0.0**.
 
 ---
 
@@ -161,48 +161,114 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 3.0.0 — Advanced Features (Requires Discussion Before Implementation)
+## 2.9.5 — AI Foundation (User-Provided Key)
+*Goal: ship all three AI features using the user's own Gemini Flash API key. No account, no payment, no backend. Validates AI feature demand before investing in Pro infrastructure.*
 
-> Each item below needs a separate Phase 1 planning session before any code is written.
-> They are listed here to reserve scope and establish intent.
+### Setup
+- [ ] `src/utils/gemini.ts` — Gemini Flash client: handles both base64 image prompts and text prompts; enforces structured JSON output via response schema; surfaces clear error messages (invalid key, quota exceeded, network failure)
+- [ ] `src/hooks/useGeminiKey.ts` — reads and writes the Gemini API key from the SQLite `settings` table (`gemini_api_key`)
+- [ ] **Profile → App Settings** — "Gemini API Key" input field (password-masked); helper text with a tappable link to `aistudio.google.com/app/apikey`; "Test key" button that fires a minimal ping and shows success/failure
 
-### A01 — Google Health Connect Sync
-- Connect to Health Connect to read/write: Steps, Sleep, Weight, Workouts, Hydration
-- Permissions flow on Android 14+; graceful degradation on older versions
-- Sync settings card in Profile → Integrations
+### Feature 1 — AI Macro Scan (Food Tab)
+- [ ] After a food photo is captured in the Add Food modal, a **"Scan with AI ✨"** button appears below the image thumbnail
+- [ ] Sends the base64 image to Gemini Flash with a strict JSON schema: `{ dish_name, kcal, protein_g, carbs_g, fat_g, confidence }` — confidence is `"high" | "medium" | "low"`
+- [ ] Loading state: shimmer placeholder on the result panel while the API call is in-flight
+- [ ] Result panel shows: dish name, all four macros in styled chips, a coloured confidence badge (green/amber/red); every field is editable before saving
+- [ ] **DB migration v16:** `ALTER TABLE food_entries ADD COLUMN protein_g REAL`, `carbs_g REAL`, `fat_g REAL`
+- [ ] `useFoodLog` — extend `FoodEntry` type and `addEntry` signature to include the three new macro fields
+- [ ] Food log entry cards show a compact macro row (`P · C · F`) when any macro value is present
+- [ ] If no Gemini key is set, the "Scan with AI" button shows a "Set up AI in Profile to use this feature" tooltip instead
 
-### A02 — AI Insights (Gemini Flash)
-- Integrate Google Gemini Flash API (on-device prompt construction; data never leaves the device schema)
-- Weekly AI summary card on Home: trend observations, goal gap analysis, one actionable suggestion
-- AI chat modal: user can ask questions about their logs ("How has my sleep been this month?")
-- All prompts constructed locally from SQLite data; only the prompt text is sent to the API — no raw row data
+### Feature 2 — AI Recipe Generator (Recipes Page)
+- [ ] The `+` FAB on the Recipes page becomes a **speed-dial** using the existing `SpeedDial` component, with two arms:
+  - ✏️ **Manual** — opens the existing `RecipeFormModal` (unchanged)
+  - ✨ **AI Generate** — opens the new `AIRecipeModal`
+- [ ] `src/recipes/AIRecipeModal.tsx` — free-text description input (e.g. "high-protein low-carb chicken bowl, under 30 min"); optional dietary tags (multi-select chips: vegetarian / vegan / gluten-free / dairy-free / high-protein / low-carb)
+- [ ] Gemini returns structured JSON matching the `Recipe` type: `{ name, emoji, prepMin, cookMin, tags[], ingredients[], steps[] }`
+- [ ] Generated recipe is previewed in a layout identical to `RecipeDetailModal` — hero emoji, time chips, ingredient list, numbered steps — so the user sees the exact final result
+- [ ] "Save to my recipes" calls `useRecipes.addRecipe`; saved recipes are identical in storage to manually created ones
+- [ ] "Regenerate" button re-fires the same prompt for a different result without closing the modal
+- [ ] No Gemini key: "Set up AI in Profile" empty state instead of the description input
 
-### A03 — Subscription (In-App Purchases)
-- Define feature split: Free tier vs. Patty Pro
-- Candidates for Pro: AI insights, unlimited custom habits, cloud sync, advanced shareable cards, custom workout templates
-- Implement via Google Play Billing (Capacitor plugin); receipt validation server-side
-- Paywall modal: shown when a Pro feature is tapped; shows feature highlights + price
+### Feature 3 — AI Week Planner (Plan Page)
+- [ ] **"Plan my week ✨"** icon button added to the Plan page header (right side)
+- [ ] Opens `src/plan/AIPlannerSheet.tsx` — a bottom sheet with preferences:
+  - Dietary style: Balanced / High-Protein / Vegetarian / Low-Carb (single-select chips)
+  - Days to fill: 3 / 5 / 7 (chip toggle)
+  - Avoid repeats this week: toggle (on by default)
+- [ ] On "Generate", the prompt is assembled from: user `goal` + `activity` from `useProfile` + full recipe list names + already-assigned slots for the current week
+- [ ] Gemini returns: `{ date, slot, recipe_name }[]` — only slots not yet filled are returned
+- [ ] App maps `recipe_name` → nearest-matching Recipe object (case-insensitive), batch-calls `assignSlot`; unmatched names are silently skipped
+- [ ] "AI filled X slots" success toast; existing manual slots are **never overwritten**
+- [ ] No Gemini key: sheet shows "Set up AI in Profile" with a link instead of preferences
 
-### A04 — Ads (Free Tier)
-- Integrate Google AdMob (`@capacitor-community/admob`)
-- Ad placements: banner at bottom of Home tab (hidden for Pro users); interstitial between Recipes (max 1/session)
-- Ad-free is a Pro perk
+---
 
-### A05 — Referral Program
-- Unique referral code generated per user (stored locally + cloud)
-- Share via native share sheet: deep link to Play Store + referral code in UTM
-- Reward: 14-day Pro trial for the referrer when a referee completes onboarding
-- Referral history card in Profile
+## 3.0.0 — Patty Pro: Accounts, Sync & Monetisation
+*Goal: introduce Patty Pro — a paid subscription tier gating AI features, unlimited history, import/export, and cloud backup. Backed by Supabase (auth + sync) and RevenueCat (Play Store IAP). Free users can earn AI calls via rewarded ads or by providing their own Gemini key (always free, never removed).*
 
-### A06 — Updated Legal Pages
-- Rewrite `docs/privacy-policy.html` and `docs/terms-and-conditions.html` to cover: Health Connect data usage, AI data handling, subscription billing, ads, referral program
-- In-app links in Profile → App Info updated to point to the new pages
-- GDPR / data deletion section
+### Free vs Pro Feature Split
 
-### A07 — Website: Google Play Store Link
-- Replace the GitHub Releases download button on `docs/index.html` with the official Google Play badge
-- Update OG description to mention Play Store availability
-- Add Play Store badge to the hero section alongside the phone mockup
+| Feature | Free | Pro |
+|---|---|---|
+| All tracking (weight, water, sleep, food, workout) | ✓ | ✓ |
+| Habits, achievements, gamification, themes | ✓ | ✓ |
+| Manual recipe creation | ✓ | ✓ |
+| Manual meal planning + grocery list | ✓ | ✓ |
+| Log history visible | Last 90 days | Unlimited |
+| AI Macro Scan | Own key or rewarded ad | ✓ Unlimited |
+| AI Recipe Generator | Own key or rewarded ad | ✓ Unlimited |
+| AI Week Planner | Own key or rewarded ad | ✓ Unlimited |
+| Import / Export (CSV + JSON) | ✗ | ✓ |
+| Cloud backup + restore | ✗ | ✓ |
+| Multi-device sync | ✗ | ✓ |
+| Ad-free experience | ✗ | ✓ |
+
+**Pricing:** $2.99/month · $19.99/year (~$1.67/mo, ~44% saving)
+
+### Auth (Supabase)
+- [ ] Supabase Auth — Google Sign-In (Android primary) + email magic link fallback
+- [ ] `src/hooks/useAuth.ts` — session, user object, `signIn`, `signOut`, loading state
+- [ ] `src/pages/AccountPage.tsx` — sign-in flow (Google button + email fallback); when signed in: avatar, email, subscription status chip, renewal date, "Manage subscription" link, "Sign out", "Delete account"
+- [ ] Profile page gains a **"Patty Pro"** nav row when the user is not signed in; routes to `AccountPage`
+- [ ] `src/components/ProGateSheet.tsx` — bottom sheet shown when a Free user taps a Pro feature; lists the three Pro AI features + sync + unlimited history; "Subscribe" CTA + "Use own Gemini key instead" secondary link
+
+### Cloud Sync (Pro)
+- [ ] On first Pro sign-in: full local SQLite snapshot pushed to Supabase Postgres
+- [ ] Background sync every 30 minutes when signed in (last-write-wins per row by `created_at`)
+- [ ] "Restore from cloud" option on fresh install (shown on the Account page when remote data exists but local DB is empty)
+- [ ] Sync badge in Account page: last synced time + manual "Sync now" button
+- [ ] Supabase schema mirrors local tables: `weight_entries`, `water_log`, `sleep_log`, `food_entries`, `recipes`, `meal_plan`, `settings`, `habit_definitions`, `habit_completions`, `habit_relapses`, `workout_entries`
+
+### Import / Export (Pro)
+- [ ] **Export:** full JSON dump of all tables + per-table CSV; delivered via native system share sheet (`Filesystem` + `Share` Capacitor plugins)
+- [ ] **Import:** JSON full restore with two modes — Merge (append, skip duplicates by `id`) and Replace (wipe local, restore from file); confirmation alert before Replace
+- [ ] Import/Export card in Profile → App Settings, gated behind `useProStatus`
+
+### Logging Limit (Free)
+- [ ] Entries older than 90 days are hidden from all list views with a locked banner: "Upgrade to Pro to view full history"
+- [ ] Data is **never deleted** — upgrading reveals all history instantly, no data loss
+- [ ] Charts and trends use only the last 90 days for Free users; Pro users see all-time data
+
+### Subscription — RevenueCat + Play Store IAP
+- [ ] `@revenuecat/purchases-capacitor` integrated (Capacitor plugin)
+- [ ] Products: `patty_pro_monthly` ($2.99/mo), `patty_pro_annual` ($19.99/yr)
+- [ ] `src/hooks/useRevenueCat.ts` — wraps SDK; `isPro` boolean; `purchaseMonthly` / `purchaseAnnual` / `restorePurchases`
+- [ ] Purchase flow triggered from `ProGateSheet` and `AccountPage` — opens native Play Store billing sheet
+- [ ] On successful purchase: Supabase `users.tier` updated to `'pro'`; `useProStatus` updates immediately
+- [ ] `isPro` is derived from RevenueCat entitlement (source of truth) + local cache for offline use
+
+### Rewarded AI Calls — AdMob (Free Users Without Own Key)
+- [ ] `@capacitor-community/admob` integrated; **rewarded video format only** — no banners, no interstitials
+- [ ] Free users without a Gemini key get **5 AI calls/month** base quota (counter in SQLite `settings`: `ai_calls_used`, `ai_calls_reset_date`)
+- [ ] When quota is exhausted, the AI action button shows: **"Watch a short video to earn 3 AI calls"**; tapping loads an AdMob rewarded ad
+- [ ] On successful reward: `ai_calls_used` decremented by 3; ad is user-initiated and never shown automatically
+- [ ] Pro users: unlimited AI calls; AdMob SDK initialised but no ads ever requested
+- [ ] Own-key users: quota is bypassed entirely; calls go direct to Gemini with their key; no ads shown
+
+### Pro Badge
+- [ ] Signed-in Pro users get a small ✦ Pro chip on their Profile identity hero card
+- [ ] Level chip gains a gold border tint for Pro users (CSS token override, no separate component)
 
 ---
 
@@ -210,8 +276,14 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 
 - iOS App Store submission (requires macOS / Xcode build machine)
 - Apple Health two-way sync
+- Google Health Connect sync (Steps, Sleep, Weight, Workouts, Hydration)
 - Barcode scanner for food logging (Open Food Facts API)
-- Wearable data import: sleep (Fitbit, Garmin, Wear OS)
-- Social: optional friend leaderboard (cloud-backed habits leaderboard)
-- Meal prep timers integrated with the Plan tab
-- Widget support (Android App Widgets for quick water logging)
+- Wearable data import: sleep from Fitbit, Garmin, Wear OS
+- Social: optional friend leaderboard (cloud-backed habits)
+- Meal prep timers in Plan tab
+- Android App Widget for quick water logging
+- Referral program: unique code per user, 14-day Pro trial reward
+- AI nutrition coach weekly card on Home (trend observations + one actionable suggestion)
+- AI meal swap: long-press any plan slot → 3 smart alternatives
+- Custom macro targets per meal (protein / carbs / fat goals, not just kcal)
+- Updated legal pages covering AI data handling, subscription billing, ads, GDPR deletion
