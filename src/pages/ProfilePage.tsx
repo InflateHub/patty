@@ -799,7 +799,7 @@ const ProfilePage: React.FC = () => {
                 onClick={() => window.open('https://patty.saranmahadev.in', '_blank', 'noopener')}
               >
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">2.7.0</IonNote>
+                <IonNote slot="end">2.8.0</IonNote>
               </IonItem>
               <IonItem
                 style={{ ...transparentItem, cursor: 'pointer' }}

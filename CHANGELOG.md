@@ -2,6 +2,21 @@
 
 ---
 
+## [2.8.0] — Home Page Redesign & Profile Identity Hero
+*Goal: transform Home into a focused daily companion and evolve Profile into an identity-first page.*
+
+- [x] **Greeting + streak summary** — large time-based greeting, date, live habits done tally and best streak
+- [x] **Today's Progress card** — four slim rows (Water with fill bar, Sleep, Weight, Workout) replacing the old stat-row + water-ring + weight-chart + metrics cards
+- [x] **Habit Activity heatmap** — 14-day GitHub-style grid; one row per habit, colour-coded by completion/relapse/clean; empty state when no habits exist
+- [x] **Dynamic insight line** — single contextual sentence surfaced from live data (weight gap, water goal, sleep quality, habits remaining)
+- [x] **Speed Dial FAB** (`SpeedDial.tsx`) — `+` button expands into 4 staggered sub-FABs (Water / Weight / Food / Workout) with spring animation, scrim, and label chips; deep-links to the correct Track sub-tab via `sessionStorage`
+- [x] **Track deep-link** — `Track.tsx` reads `patty_track_tab_request` from `sessionStorage` on `useIonViewWillEnter` and switches to the requested sub-tab
+- [x] **Profile identity hero** — avatar circle with initial, display name, level chip (era colour + name), Total XP and Best Streak stats above all settings
+- [x] **Notifications & Achievements nav rows** in Profile — tappable chevron rows replacing the old header icons on Home
+- [x] Removed from Home: WaterRing card, WeightChart card, Your Metrics (BMI/BMR/TDEE) card, Today's Meals list, Notifications + Trophy header icons
+
+---
+
 ## [2.7.0] — Achievements Page Complete Redesign
 *Goal: replace the old Achievements page with a pure achievement collection driven by logging activity.*
 

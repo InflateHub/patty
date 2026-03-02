@@ -136,7 +136,20 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 2.8.0 — Post-Onboarding Tutorial Walkthrough
+## 2.8.0 — Home Page Redesign & Profile Identity Hero ✅
+*Goal: transform Home into a focused daily companion and evolve Profile into an identity-first page.*
+
+- [x] **Greeting + streak summary** — large time-based greeting, live habits done / best streak summary line
+- [x] **Today's Progress card** — four slim rows (Water bar, Sleep, Weight, Workout) replacing old bulky cards
+- [x] **14-day Habit Activity heatmap** — GitHub-style grid, colour per habit, empty state prompt
+- [x] **Dynamic insight line** — single contextual sentence from live data
+- [x] **Speed Dial FAB** — animated `+` → 4 spring-staggered sub-FABs with scrim; deep-links to Track sub-tab
+- [x] **Profile identity hero** — avatar, name, level chip, XP + streak stats above settings
+- [x] **Notifications & Achievements** folded into Profile as nav rows; removed from Home header
+
+---
+
+## 2.9.0 — Post-Onboarding Tutorial Walkthrough
 *Goal: guide new users through the app with a lightweight spotlight tour after onboarding completes.*
 
 - [ ] After the celebration screen routes to Home, a tooltip-based walkthrough launches automatically on first run
