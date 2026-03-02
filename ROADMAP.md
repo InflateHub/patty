@@ -37,13 +37,6 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 - [x] **Custom water goal picker** — the water goal step replaces the plain number input with a styled horizontal drum-roller or arc-slider component built in React (no native `<input type=number>`); shows the current value large and centred with ml / oz unit toggle; custom button increments (+100 ml / +250 ml quick-add chips below the picker)
 - [x] **Remove photo prompt** — no progress photo is requested during onboarding; the photo journey begins from the Track → Weight tab on first weigh-in
 
-### Tutorial Walkthrough (post-onboarding)
-- [ ] After the celebration screen routes to Home, a tooltip-based walkthrough launches automatically
-- [ ] Walkthrough highlights: Home dashboard → Track tab → Recipes → Plan tab → Profile
-- [ ] Each step: semi-transparent backdrop with a spotlight cutout on the target element, a bottom sheet tooltip card (title + one-sentence description + "Next" button)
-- [ ] **Skip button** always visible in the top-right corner; skipping or completing stores `tutorial_complete = 1` in `settings` so it never re-runs
-- [ ] 5 steps total; final step says "You're all set — let's go!" and dismisses the overlay
-
 ---
 
 ## 2.3.0 — Workout Tab
@@ -123,6 +116,18 @@ Current production version: **2.2.0**. This document plans the path to **3.0.0**
 - [ ] **New layout:** full-bleed photo marquee at top → XP/level card → shareable card carousel → empty state if no data
 - [ ] Weight Journey empty state: illustrated prompt "Log your first weigh-in to start your journey"
 - [ ] Shareable cards: Daily / Weekly / Monthly / Yearly — tapping opens a preview modal with a Share and Download button
+
+---
+
+## 2.8.0 — Post-Onboarding Tutorial Walkthrough
+*Goal: guide new users through the app with a lightweight spotlight tour after onboarding completes.*
+
+- [ ] After the celebration screen routes to Home, a tooltip-based walkthrough launches automatically on first run
+- [ ] **5 steps:** Home dashboard → Track tab → Recipes → Plan tab → Profile
+- [ ] Each step: full-screen semi-transparent backdrop with spotlight cutout on the target element; bottom sheet tooltip card (title + one-sentence description + "Next" button)
+- [ ] **Skip button** always visible in the top-right corner; skipping or completing stores `tutorial_complete = 1` in the `settings` table so it never re-runs
+- [ ] Final step reads "You're all set — let's go!" and dismisses the overlay
+- [ ] `TutorialOverlay.tsx` — self-contained component, no external library; mounted in `Home.tsx` behind the `tutorial_complete` flag
 
 ---
 
