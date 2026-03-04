@@ -192,75 +192,201 @@ Current production version: **2.9.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 3.0.0 — Patty Pro: Accounts, Sync & Monetisation
-*Goal: introduce Patty Pro — a paid subscription tier gating AI features, unlimited history, import/export, and cloud backup. Backed by Supabase (auth + sync) and RevenueCat (Play Store IAP). Free users can earn AI calls via rewarded ads or by providing their own Gemini key (always free, never removed).*
+## 3.0.0 — Pro UI Entry Points
+*Goal: plant every visual surface that leads the user to Patty Pro, with no backend dependencies. All UI is real and tappable; the ProPage is a full-fidelity paywall shell that renders correctly whether the user is signed in or not.*
 
 ### Free vs Pro Feature Split
 
 | Feature | Free | Pro |
 |---|---|---|
-| All tracking (weight, water, sleep, food, workout) | ✓ | ✓ |
+| All tracking — weight, water, sleep, food, workout | ✓ | ✓ |
 | Habits, achievements, gamification, themes | ✓ | ✓ |
-| Manual recipe creation | ✓ | ✓ |
-| Manual meal planning + grocery list | ✓ | ✓ |
+| Manual recipe creation + meal planning + grocery list | ✓ | ✓ |
 | Log history visible | Last 90 days | Unlimited |
-| AI Macro Scan | Own key or rewarded ad | ✓ Unlimited |
-| AI Recipe Generator | Own key or rewarded ad | ✓ Unlimited |
-| AI Week Planner | Own key or rewarded ad | ✓ Unlimited |
+| AI Macro Scan | Own key · 5 free/mo · rewarded ad | ✓ Unlimited |
+| AI Recipe Generator | Own key · quota · rewarded ad | ✓ Unlimited |
+| AI Week Planner | Own key · quota · rewarded ad | ✓ Unlimited |
 | Import / Export (CSV + JSON) | ✗ | ✓ |
 | Cloud backup + restore | ✗ | ✓ |
-| Multi-device sync | ✗ | ✓ |
 | Ad-free experience | ✗ | ✓ |
 
-**Pricing:** $2.99/month · $19.99/year (~$1.67/mo, ~44% saving)
+**Pricing:** $2.99 / month · $19.99 / year (~$1.67/mo · saves 44%)
 
-### Auth (Supabase)
-- [ ] Supabase Auth — Google Sign-In (Android primary) + email magic link fallback
-- [ ] `src/hooks/useAuth.ts` — session, user object, `signIn`, `signOut`, loading state
-- [ ] `src/pages/AccountPage.tsx` — sign-in flow (Google button + email fallback); when signed in: avatar, email, subscription status chip, renewal date, "Manage subscription" link, "Sign out", "Delete account"
-- [ ] Profile page gains a **"Patty Pro"** nav row when the user is not signed in; routes to `AccountPage`
-- [ ] `src/components/ProGateSheet.tsx` — bottom sheet shown when a Free user taps a Pro feature; lists the three Pro AI features + sync + unlimited history; "Subscribe" CTA + "Use own Gemini key instead" secondary link
+### Pro Card — ProfilePage
+- [ ] New `IonCard` inserted as the **first card** after the identity hero, before the Notifications row
+- [ ] **Free state:** crown icon · "Patty Pro" title · tagline "Unlimited AI, cloud backup, no ads" · "See plans →" tappable chevron row; routes to `/pro`
+- [ ] **Pro state:** ✦ Active badge · renewal date · "Manage" button; routes to `/account`
+- [ ] Styled with `--md-primary-container` background tint and `--md-shape-xl` radius to stand out from the settings rows below
 
-### Cloud Sync (Pro)
-- [ ] On first Pro sign-in: full local SQLite snapshot pushed to Supabase Postgres
-- [ ] Background sync every 30 minutes when signed in (last-write-wins per row by `created_at`)
-- [ ] "Restore from cloud" option on fresh install (shown on the Account page when remote data exists but local DB is empty)
-- [ ] Sync badge in Account page: last synced time + manual "Sync now" button
-- [ ] Supabase schema mirrors local tables: `weight_entries`, `water_log`, `sleep_log`, `food_entries`, `recipes`, `meal_plan`, `settings`, `habit_definitions`, `habit_completions`, `habit_relapses`, `workout_entries`
+### Animated Pro Badge — Home Toolbar
+- [ ] Small floating badge chip overlaid on the profile `IonButton` in the top-right toolbar
+- [ ] Three icons rotate in an infinite CSS keyframe animation: **ban** (no-ads) → **crownOutline** → **diamondOutline** — 1.5 s per icon, opacity cross-dissolve transition
+- [ ] **Free state:** animation runs continuously; tapping the profile icon navigates to ProfilePage (unchanged)
+- [ ] **Pro state:** animation stops; badge locks on `crownOutline` with a gold tint (`--md-tertiary` token); no text label needed
+- [ ] Badge size: 18 × 18 px circle, `position: absolute`, top-right of the profile button; does not obscure the icon
 
-### Import / Export (Pro)
-- [ ] **Export:** full JSON dump of all tables + per-table CSV; delivered via native system share sheet (`Filesystem` + `Share` Capacitor plugins)
-- [ ] **Import:** JSON full restore with two modes — Merge (append, skip duplicates by `id`) and Replace (wipe local, restore from file); confirmation alert before Replace
-- [ ] Import/Export card in Profile → App Settings, gated behind `useProStatus`
+### ProPage (`src/pages/ProPage.tsx`)
+- [ ] Route: `/pro`; full-screen `IonPage` with back button
+- [ ] **Hero section:** large animated crown illustration (CSS keyframe spin/pulse), "Patty Pro" headline, tagline
+- [ ] **Feature comparison list:** 6 rows — Unlimited AI calls · Unlimited log history · Cloud backup & restore · Import / Export · Ad-free · Priority support — each with ✓ Pro / ✗ Free columns
+- [ ] **Plan selector card:** two chips — "Monthly · $2.99" / "Annual · $19.99 (save 44%)" — selected chip uses `--md-primary-container`; annual chip has a "Best value" badge
+- [ ] **"Continue with Email" CTA:** opens a bottom sheet `IonModal` with a single email input + "Send magic link" button; tapping send calls Firebase Auth `sendSignInLinkToEmail` (wired in 3.1.0; in 3.0.0 shows a "Coming soon" toast)
+- [ ] **"Restore purchase" text link** below CTA
+- [ ] **Logged-in free state** (when Firebase session exists but not Pro): shows user email chip at top; "Subscribe" CTA replaces "Continue with Email"; plan selector still visible
+- [ ] **Pro state:** page redirects to `/account` immediately
 
-### Logging Limit (Free)
-- [ ] Entries older than 90 days are hidden from all list views with a locked banner: "Upgrade to Pro to view full history"
-- [ ] Data is **never deleted** — upgrading reveals all history instantly, no data loss
-- [ ] Charts and trends use only the last 90 days for Free users; Pro users see all-time data
+### ProGateSheet (`src/components/ProGateSheet.tsx`)
+- [ ] Reusable `IonModal` with `initialBreakpoint=0.55`; accepts `featureName` prop that sets the contextual headline (e.g. "Unlock unlimited AI scans")
+- [ ] Body: icon · headline · 3-bullet feature list · "Subscribe — from $2.99/mo" primary button (routes to `/pro`) · "Use own Gemini key" secondary link (AI gates only) · "Watch ad for 3 calls" tertiary link (AI gates only — visible but disabled in 3.0.0, wired in 3.5.0)
 
-### Subscription — RevenueCat + Play Store IAP
-- [ ] `@revenuecat/purchases-capacitor` integrated (Capacitor plugin)
-- [ ] Products: `patty_pro_monthly` ($2.99/mo), `patty_pro_annual` ($19.99/yr)
-- [ ] `src/hooks/useRevenueCat.ts` — wraps SDK; `isPro` boolean; `purchaseMonthly` / `purchaseAnnual` / `restorePurchases`
-- [ ] Purchase flow triggered from `ProGateSheet` and `AccountPage` — opens native Play Store billing sheet
-- [ ] On successful purchase: Supabase `users.tier` updated to `'pro'`; `useProStatus` updates immediately
-- [ ] `isPro` is derived from RevenueCat entitlement (source of truth) + local cache for offline use
-
-### Rewarded AI Calls — AdMob (Free Users Without Own Key)
-- [ ] `@capacitor-community/admob` integrated; **rewarded video format only** — no banners, no interstitials
-- [ ] Free users without a Gemini key get **5 AI calls/month** base quota (counter in SQLite `settings`: `ai_calls_used`, `ai_calls_reset_date`)
-- [ ] When quota is exhausted, the AI action button shows: **"Watch a short video to earn 3 AI calls"**; tapping loads an AdMob rewarded ad
-- [ ] On successful reward: `ai_calls_used` decremented by 3; ad is user-initiated and never shown automatically
-- [ ] Pro users: unlimited AI calls; AdMob SDK initialised but no ads ever requested
-- [ ] Own-key users: quota is bypassed entirely; calls go direct to Gemini with their key; no ads shown
-
-### Pro Badge
-- [ ] Signed-in Pro users get a small ✦ Pro chip on their Profile identity hero card
-- [ ] Level chip gains a gold border tint for Pro users (CSS token override, no separate component)
+### Routing
+- [ ] `/pro` and `/account` added to `App.tsx` as top-level `IonRoute`s (outside the tab shell)
 
 ---
 
-## Post-3.0.0 Backlog
+## 3.1.0 — Firebase Auth (Magic Link)
+*Goal: passwordless email sign-in backed by Firebase Auth. No passwords, no OAuth, no Google sign-in complexity.*
+
+### Firebase Setup
+- [ ] `@capacitor-firebase/authentication` Capacitor plugin integrated
+- [ ] `src/utils/firebase.ts` — Firebase app init with `firebaseConfig`; exports `auth` instance
+- [ ] Deep link configured: `patty.saranmahadev.in/auth` registered as the sign-in continuation URL in Firebase Console → Authentication → Sign-in methods → Email link
+- [ ] Android `AndroidManifest.xml` — intent filter for `patty.saranmahadev.in` added so the magic link re-opens the app
+
+### `src/hooks/useAuth.ts`
+- [ ] `user` — Firebase `User | null`
+- [ ] `loading` boolean
+- [ ] `sendMagicLink(email: string)` — calls `sendSignInLinkToEmail`; saves `email` to localStorage for the completion step
+- [ ] `completeMagicLink(email: string, link: string)` — calls `signInWithEmailLink`; on success writes `firebase_uid` to SQLite `settings`
+- [ ] `signOut()` — Firebase `signOut()` + clears local `firebase_uid` + clears RevenueCat identity (3.2.0)
+- [ ] Deep link handler in `App.tsx` — on app resume with a magic link URL, reads saved email from localStorage, calls `completeMagicLink`, routes to `/pro` on success
+
+### Single-Session Enforcement
+- [ ] On each successful sign-in, write a `session_token` (UUID v4) to `firestore/users/{uid}/session_token`
+- [ ] On app resume (every 30 min background check), compare local token to Firestore — if mismatch, call `signOut()` silently
+- [ ] Effect: a second sign-in from another device invalidates the first; no aggressive kick during active use
+- [ ] Firebase security rule: `allow write: if request.auth.uid == userId` — only the authenticated user can write their own doc
+
+### AccountPage Basic Shell (`src/pages/AccountPage.tsx`)
+- [ ] Route: `/account`; full-screen page with back button
+- [ ] **Signed-in free state:** avatar initial circle · email · "Free" chip · plan selector (mirrors ProPage) · "Subscribe" CTA
+- [ ] **Pro state:** avatar · email · ✦ Pro chip · renewal date · "Manage subscription" (Play Store URL) · "Restore purchases" · "Sign out" · "Delete account" (confirm alert → Firebase delete + local UID clear)
+- [ ] Import / Export card (gated; shows `ProGateSheet` for free users) — wired in 3.4.0
+
+---
+
+## 3.2.0 — RevenueCat + Play Store IAP
+*Goal: wire real payments. RevenueCat is initialised with the Firebase UID as the app user ID so entitlements are tied to the account, not the device.*
+
+### RevenueCat Setup
+- [ ] `@revenuecat/purchases-capacitor` Capacitor plugin integrated
+- [ ] Two subscription products created in Play Console: `patty_pro_monthly` ($2.99/mo) · `patty_pro_annual` ($19.99/yr)
+- [ ] RevenueCat project created; products + entitlement `pro` configured; Firebase extension enabled (auto-writes `stripeRole` / custom claim on purchase)
+
+### `src/hooks/useRevenueCat.ts`
+- [ ] `Purchases.configure({ apiKey: RC_PUBLIC_KEY, appUserID: firebaseUID })` — called on app init after Firebase session resolves
+- [ ] `isPro` — derived from `ENTITLEMENT_PRO` active entitlement; cached in SQLite `settings` (`pro_status`, `pro_renewal`) for offline use
+- [ ] `purchaseMonthly()` — `Purchases.purchaseStoreProduct` for `patty_pro_monthly`
+- [ ] `purchaseAnnual()` — same for `patty_pro_annual`
+- [ ] `restorePurchases()` — `Purchases.restorePurchases()`; re-checks entitlement; updates local cache
+- [ ] `renewalDate` — ISO string from active subscription `expirationDate`
+- [ ] On successful purchase: write `{ tier: 'pro', renewal: date }` to `firestore/users/{uid}` (Firestore write, not a backend call)
+
+### `src/hooks/useProStatus.ts`
+- [ ] Single source of truth consumed everywhere in the app
+- [ ] Priority: RevenueCat entitlement → Firestore `tier` field → local SQLite cache (offline fallback)
+- [ ] Returns: `{ isPro, isSignedIn, user, renewalDate, loading }`
+
+### Purchase Flow
+- [ ] ProPage "Subscribe" CTA and AccountPage CTA both call `purchaseMonthly()` / `purchaseAnnual()` based on selected plan chip
+- [ ] On success: `useProStatus.isPro` flips `true` instantly; ProPage redirects to `/account`; success toast "Welcome to Patty Pro ✦"
+- [ ] On error: toast with RevenueCat error message; no crash
+
+### Pro Badge
+- [ ] Profile identity hero gains a ✦ Pro chip when `isPro` is `true` (gold tint, `--md-tertiary` token)
+- [ ] Level chip gains a gold border using `outline: 2px solid var(--md-tertiary)` for Pro users
+
+---
+
+## 3.3.0 — Feature Gates + 90-Day History Limit
+*Goal: enforce the Free vs Pro split across the app. Data is never deleted — gates only hide or block access.*
+
+### `useProStatus` gates applied across the app
+
+**AI features (all three: Macro Scan · Recipe Generator · Week Planner)**
+- [ ] If `isPro`: calls go through unlimited, no quota check
+- [ ] If own Gemini key set: quota bypassed, calls go direct, no ads
+- [ ] If free + no key: `useAIQuota` checks remaining calls; if > 0 allow and decrement; if 0 show `ProGateSheet` with ad option (wired in 3.5.0, shows disabled link for now)
+
+### `src/hooks/useAIQuota.ts`
+- [ ] `callsRemaining` — reads `ai_calls_used` and `ai_calls_reset_date` from SQLite; auto-resets to 5 if reset date is in the past
+- [ ] `consumeCall()` — decrements `ai_calls_used`, persists to SQLite
+- [ ] `earnCalls(n)` — decrements `ai_calls_used` by n (net gain), floor 0
+- [ ] Monthly free cap: **5 calls / month**; reset date = 1st of next month
+
+### 90-Day History Limit (Free)
+- [ ] All list views (Weight / Water / Sleep / Food / Workout history modals) apply a date filter for free users: `date >= today − 90 days`
+- [ ] Entries older than 90 days are replaced by a single locked row at the bottom of each list: "🔒 Older entries hidden — upgrade to Pro to view full history" with a "See plans" button
+- [ ] Charts and trends use only the 90-day window for free users; `useProStatus.isPro` passed as a prop to chart hooks
+- [ ] Data is **never deleted from SQLite** — upgrading immediately reveals all history, no migration needed
+
+### Import / Export (Pro gate)
+- [ ] **Export (Pro):** full JSON dump of all tables + per-table CSV; delivered via `@capacitor/share` share sheet
+- [ ] **Import (Pro):** JSON full restore — Merge mode (append, skip duplicate `id`s) or Replace mode (wipe local + restore); confirmation alert before Replace
+- [ ] Both actions live in AccountPage → "Data" card; tapping while Free shows `ProGateSheet`
+
+---
+
+## 3.4.0 — Cloud Backup + Restore (Pro)
+*Goal: let Pro users back up and restore their full local SQLite database to Firebase Storage. No real-time sync — explicit backup/restore only.*
+
+### Backup
+- [ ] "Back up now" button in AccountPage → Data card (Pro only)
+- [ ] Serialises entire SQLite database to JSON (all tables, all rows)
+- [ ] Uploads to Firebase Storage: `users/{uid}/backups/latest.json` (overwrites) + a dated snapshot `users/{uid}/backups/{date}.json`
+- [ ] Last backed-up timestamp written to `firestore/users/{uid}/last_backup`
+- [ ] AccountPage shows: last backup date · "Back up now" button
+
+### Restore
+- [ ] "Restore from backup" button in AccountPage → Data card (Pro only)
+- [ ] Downloads `users/{uid}/backups/latest.json` from Firebase Storage
+- [ ] Shows confirmation alert: "This will replace all local data. Continue?"
+- [ ] On confirm: wipes local SQLite tables, re-inserts all rows from backup JSON, re-runs any missing migrations
+- [ ] Success toast; app reloads to Home
+
+### Firebase Storage Rules
+- [ ] `allow read, write: if request.auth.uid == uid` — users can only access their own backup files
+
+---
+
+## 3.5.0 — Rewarded Ads (AdMob)
+*Goal: give free users a non-paywalled path to more AI calls via user-initiated rewarded video ads. No banners. No interstitials. Ever.*
+
+### AdMob Setup
+- [ ] `@capacitor-community/admob` Capacitor plugin integrated
+- [ ] Rewarded ad unit ID created in AdMob console: `patty_rewarded_ai`
+- [ ] SDK initialised on app start; test ad IDs used in debug builds, real IDs in release
+- [ ] `AndroidManifest.xml` — AdMob App ID meta-data added
+
+### `useAIQuota` — Ad Integration
+- [ ] `showRewardedAd()` — loads `RewardedAd`, shows it; on `onRewarded` callback calls `earnCalls(3)`; resolves `true` on reward, `false` on dismiss/error
+- [ ] Pro users: `showRewardedAd` is a no-op, returns `true` (never requested)
+- [ ] Own-key users: same no-op path
+
+### ProGateSheet — Ad CTA Wired
+- [ ] "Watch a short video (+3 calls)" button in `ProGateSheet` now active for AI gates
+- [ ] Tapping calls `useAIQuota.showRewardedAd()`; on success closes the sheet and re-triggers the original AI action automatically
+- [ ] If ad fails to load: toast "Couldn't load ad — try again later"
+- [ ] Button hidden entirely for Pro users and own-key users (no ad path needed)
+
+### Ad Policy
+- [ ] Rewarded video only — **no banners, no interstitials, ever**
+- [ ] Ad is always **user-initiated** — never shown on screen transition, navigation, or background event
+- [ ] Pro upgrade always prominently offered alongside (never hidden behind) the ad option
+
+---
+
+## Post-3.5.0 Backlog
 
 - iOS App Store submission (requires macOS / Xcode build machine)
 - Apple Health two-way sync
