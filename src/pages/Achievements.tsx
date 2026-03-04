@@ -25,6 +25,7 @@ import {
   IonModal,
   IonButtons,
   IonButton,
+  IonBackButton,
   useIonViewWillEnter,
 } from '@ionic/react';
 import { IonIcon } from '@ionic/react';
@@ -731,6 +732,9 @@ const AchievementsPage: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
+          <IonButtons slot="start">
+            <IonBackButton defaultHref="/tabs/profile" />
+          </IonButtons>
           <IonTitle style={{ fontFamily: 'var(--md-font)', fontWeight: 600 }}>Achievements</IonTitle>
         </IonToolbar>
       </IonHeader>

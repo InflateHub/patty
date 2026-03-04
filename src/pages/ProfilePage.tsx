@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
+  IonActionSheet,
   IonAlert,
   IonBackButton,
   IonButton,
@@ -27,7 +28,8 @@ import {
   IonToolbar,
   IonToast,
 } from '@ionic/react';
-import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline, chevronForwardOutline, notificationsOutline, trophyOutline, sparkles } from 'ionicons/icons';
+import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline, chevronForwardOutline, notificationsOutline, trophyOutline, sparkles, cameraOutline, imageOutline } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
 import {
@@ -46,6 +48,13 @@ import { useGeminiKey } from '../hooks/useGeminiKey';
 import { testGeminiKey, geminiErrorMessage } from '../utils/gemini';
 
 // ── Shared minor styles ───────────────────────────────────────────────────────
+// Gender emoji helper
+function genderEmoji(sex: string): string {
+  if (sex === 'male')   return '\ud83d\udc68';
+  if (sex === 'female') return '\ud83d\udc69';
+  return '\ud83e\uddd1';
+}
+
 const hdr: React.CSSProperties = { paddingTop: 20, paddingBottom: 4 };
 const transparentItem = { '--background': 'transparent' } as React.CSSProperties;
 
@@ -80,6 +89,10 @@ const ProfilePage: React.FC = () => {
   const [toast, setToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('Profile saved');
 
+  // Profile photo
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [photoSheetOpen, setPhotoSheetOpen] = useState(false);
+
   // AI Settings
   const { geminiKey, saveKey: saveGeminiKey } = useGeminiKey();
   const [keyInput, setKeyInput] = useState('');
@@ -101,9 +114,54 @@ const ProfilePage: React.FC = () => {
     if (!loading) {
       setForm(profile);
       setPrefForm(prefs);
-      // no extra state to init
+      // Load profile photo from settings
+      (async () => {
+        try {
+          const db = await import('../db/database').then(m => m.getDb());
+          const res = await db.query("SELECT value FROM settings WHERE key = 'profile_photo';");
+          const val = res.values?.[0]?.value as string | undefined;
+          if (val) setProfilePhoto(val);
+        } catch { /* ignore */ }
+      })();
     }
   }, [loading, profile, prefs]);
+
+  // Save or clear profile photo in settings
+  const handleSaveProfilePhoto = useCallback(async (dataUrl: string | null) => {
+    try {
+      const db = await import('../db/database').then(m => m.getDb());
+      if (dataUrl) {
+        await db.run(
+          "INSERT INTO settings (key, value) VALUES ('profile_photo', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value;",
+          [dataUrl],
+        );
+      } else {
+        await db.run("DELETE FROM settings WHERE key = 'profile_photo';");
+      }
+      setProfilePhoto(dataUrl);
+    } catch { setToastMsg('Could not save photo'); setToast(true); }
+  }, []);
+
+  // Capture profile photo
+  const pickProfilePhoto = useCallback(async (source: CameraSource) => {
+    try {
+      const photo = await Camera.getPhoto({
+        resultType: CameraResultType.DataUrl,
+        source,
+        quality: 70,
+        width: 512,
+        height: 512,
+        correctOrientation: true,
+      });
+      if (photo.dataUrl) await handleSaveProfilePhoto(photo.dataUrl);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!msg.toLowerCase().includes('cancel')) {
+        setToastMsg('Could not capture photo');
+        setToast(true);
+      }
+    }
+  }, [handleSaveProfilePhoto]);
 
   // ── Save profile
   const dobAge = ageFromDob(form.dob);
@@ -262,23 +320,38 @@ const ProfilePage: React.FC = () => {
         <IonCard>
           <IonCardContent style={{ padding: '20px 16px 16px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-              {/* Avatar circle */}
-              <div style={{
-                width: 72, height: 72, borderRadius: '50%',
-                background: 'var(--md-primary-container)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <span style={{
-                  fontSize: 'var(--md-headline-lg)',
-                  fontFamily: 'var(--md-font)',
-                  fontWeight: 700,
-                  color: 'var(--md-on-primary-container)',
-                  lineHeight: 1,
-                  userSelect: 'none',
+              {/* Avatar circle — tappable */}
+              <div
+                style={{ position: 'relative', flexShrink: 0, cursor: 'pointer', width: 88, height: 88 }}
+                onClick={() => setPhotoSheetOpen(true)}
+              >
+                {/* Circle */}
+                <div style={{
+                  width: 88, height: 88, borderRadius: '50%',
+                  background: 'var(--md-primary-container)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  overflow: 'hidden',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 }}>
-                  {profile.name ? profile.name.charAt(0).toUpperCase() : '?'}
-                </span>
+                  {profilePhoto ? (
+                    <img src={profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    <span style={{ fontSize: 36, lineHeight: 1, userSelect: 'none' }}>
+                      {form.sex ? genderEmoji(form.sex) : (profile.name ? profile.name.charAt(0).toUpperCase() : '?')}
+                    </span>
+                  )}
+                </div>
+                {/* Camera badge — outside the circle so it isn't clipped */}
+                <div style={{
+                  position: 'absolute', bottom: 0, right: 0,
+                  width: 26, height: 26, borderRadius: '50%',
+                  background: 'var(--md-primary)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: '2.5px solid var(--md-surface)',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
+                }}>
+                  <IonIcon icon={cameraOutline} style={{ fontSize: 13, color: 'var(--md-on-primary)' }} />
+                </div>
               </div>
 
               {/* Name */}
@@ -1006,6 +1079,32 @@ const ProfilePage: React.FC = () => {
           duration={1800}
           onDidDismiss={() => setToast(false)}
           style={{ '--background': 'var(--md-inverse-surface)', '--color': 'var(--md-inverse-on-surface)' } as React.CSSProperties}
+        />
+
+        {/* ── Profile photo action sheet */}
+        <IonActionSheet
+          isOpen={photoSheetOpen}
+          onDidDismiss={() => setPhotoSheetOpen(false)}
+          header="Profile Photo"
+          buttons={[
+            {
+              text: 'Take Photo',
+              icon: cameraOutline,
+              handler: () => pickProfilePhoto(CameraSource.Camera),
+            },
+            {
+              text: 'Choose from Gallery',
+              icon: imageOutline,
+              handler: () => pickProfilePhoto(CameraSource.Photos),
+            },
+            ...(profilePhoto ? [{
+              text: 'Remove Photo',
+              icon: trashOutline,
+              role: 'destructive' as const,
+              handler: () => handleSaveProfilePhoto(null),
+            }] : []),
+            { text: 'Cancel', role: 'cancel' as const },
+          ]}
         />
 
       </IonContent>

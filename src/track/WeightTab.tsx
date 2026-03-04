@@ -37,40 +37,64 @@ const PhotoMarquee: React.FC<{
   onTap: (uri: string) => void;
 }> = ({ entries, onTap }) => {
   const todayStr = new Date().toISOString().slice(0, 10);
+  // Chronological order (oldest → newest) for delta calculation
   const recent = useMemo(() => [...entries].slice(0, 7).reverse(), [entries]);
   if (recent.length === 0) return null;
   return (
     <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '4px 2px 8px', scrollbarWidth: 'none' } as React.CSSProperties}>
-      {recent.map((entry) => {
+      {recent.map((entry, idx) => {
         const isEntryToday = entry.date === todayStr;
+        // Compute delta from previous entry (only from 2nd entry onwards)
+        const prev = idx > 0 ? recent[idx - 1] : null;
+        const delta = prev && prev.unit === entry.unit
+          ? Math.round((entry.value - prev.value) * 10) / 10
+          : null;
+        const deltaColor = delta === null ? undefined : delta > 0 ? '#ef4444' : delta < 0 ? '#22c55e' : '#aaa';
         return (
           <div
             key={entry.id}
             style={{
-              flex: '0 0 auto', width: 72, height: 72,
+              flex: '0 0 auto', width: 72, height: 80,
               borderRadius: 'var(--md-shape-md)',
               overflow: 'hidden', position: 'relative',
               outline: isEntryToday ? '2.5px solid var(--md-primary)' : 'none',
               outlineOffset: isEntryToday ? 2 : 0,
               background: 'var(--md-surface-container)',
               cursor: entry.photo_uri ? 'pointer' : 'default',
+              display: 'flex', flexDirection: 'column',
             }}
             onClick={() => entry.photo_uri && onTap(entry.photo_uri)}
           >
-            {entry.photo_uri ? (
-              <img src={entry.photo_uri} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-            ) : (
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, opacity: 0.3 }}>
-                &#9878;&#65039;
+            {/* Photo or emoji placeholder */}
+            <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+              {entry.photo_uri ? (
+                <img src={entry.photo_uri} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, opacity: 0.35 }}>
+                  &#9878;&#65039;
+                </div>
+              )}
+              {/* Weight value chip at bottom of photo area */}
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0,
+                background: 'rgba(0,0,0,0.52)', padding: '2px 4px',
+                textAlign: 'center', fontSize: 10, fontFamily: 'var(--md-font)',
+                color: '#fff', fontWeight: 600,
+              }}>
+                {entry.value} {entry.unit}
               </div>
-            )}
+            </div>
+            {/* Delta row — only shown from 2nd entry */}
             <div style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0,
-              background: 'rgba(0,0,0,0.52)', padding: '2px 4px',
-              textAlign: 'center', fontSize: 10, fontFamily: 'var(--md-font)',
-              color: '#fff', fontWeight: 600,
+              height: 18, background: 'var(--md-surface-container-high)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 9, fontFamily: 'var(--md-font)', fontWeight: 700,
+              color: deltaColor ?? 'transparent',
+              flexShrink: 0,
             }}>
-              {entry.value} {entry.unit}
+              {delta !== null
+                ? `${delta > 0 ? '+' : ''}${delta.toFixed(1)}`
+                : '\u00a0'}
             </div>
           </div>
         );
@@ -162,12 +186,8 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
     }
   }
 
-  /** Step 2: save with photo */
+  /** Step 2: save (photo is optional) */
   async function handleWeightSave() {
-    if (!photoUri) {
-      setErrorMsg('Please take or choose a photo to complete your weigh-in.');
-      return;
-    }
     const num = parseFloat(value);
     setSaving(true);
     try {
@@ -176,7 +196,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
         value: num,
         unit,
         note: note.trim() || undefined,
-        photo_path: photoUri, // addEntry saves to FS and replaces with real path
+        photo_path: photoUri ?? undefined, // optional: may be null
       });
       resetWeightForm();
       setModalOpen(false);
@@ -380,7 +400,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
             <IonButtons slot="end">
               {step === 'entry'
                 ? <IonButton strong onClick={handleAdvanceToPhoto}>Next</IonButton>
-                : <IonButton strong onClick={handleWeightSave} disabled={saving || !photoUri}>Save</IonButton>
+                : <IonButton strong onClick={handleWeightSave} disabled={saving}>Save</IonButton>
               }
             </IonButtons>
           </IonToolbar>
@@ -446,7 +466,7 @@ export const WeightTab: React.FC<WeightTabProps> = ({ openTrigger }) => {
                 color: 'var(--md-on-surface-variant)',
                 textAlign: 'center',
               }}>
-                A photo is required with every weigh-in. It powers your timeline in Achievements.
+                Add a progress photo (optional) — it powers your timeline in Achievements.
               </p>
 
               {photoUri ? (
