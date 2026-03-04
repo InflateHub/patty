@@ -15,7 +15,7 @@ import {
   IonToolbar,
   useIonViewWillEnter,
 } from '@ionic/react';
-import { personCircleOutline } from 'ionicons/icons';
+import { personCircleOutline, banOutline, ribbonOutline, sparklesOutline } from 'ionicons/icons';
 
 import { useWeightLog } from '../hooks/useWeightLog';
 import { useWaterLog } from '../hooks/useWaterLog';
@@ -146,13 +146,49 @@ const Home: React.FC = () => {
         <IonToolbar>
           <IonTitle>Patty</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={() => history.push('/tabs/profile')}>
-              <IonIcon
-                icon={personCircleOutline}
-                style={{ fontSize: 26, color: 'var(--md-on-surface-variant)' }}
-              />
-            </IonButton>
+            {/* Wrapper for animated Pro badge */}
+            <div style={{ position: 'relative', display: 'inline-flex' }}>
+              <IonButton onClick={() => history.push('/tabs/profile')}>
+                <IonIcon
+                  icon={personCircleOutline}
+                  style={{ fontSize: 26, color: 'var(--md-on-surface-variant)' }}
+                />
+              </IonButton>
+              {/* Rotating Pro badge */}
+              <div style={{
+                position: 'absolute',
+                top: 4,
+                right: 4,
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                background: 'var(--md-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                pointerEvents: 'none',
+                border: '1.5px solid var(--md-surface)',
+              }}>
+                {([banOutline, ribbonOutline, sparklesOutline] as string[]).map((icon, i) => (
+                  <IonIcon
+                    key={i}
+                    icon={icon}
+                    style={{
+                      position: 'absolute',
+                      fontSize: 10,
+                      color: 'var(--md-on-primary)',
+                      opacity: 0,
+                      animation: 'pro-icon-rotate 4.5s ease-in-out infinite',
+                      animationDelay: `${i * 1.5}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           </IonButtons>
+          {/* Pro badge icon keyframe */}
+          <style>{`@keyframes pro-icon-rotate{0%{opacity:0;}4%{opacity:1;}29%{opacity:1;}33%{opacity:0;}100%{opacity:0;}}`}</style>
         </IonToolbar>
       </IonHeader>
 

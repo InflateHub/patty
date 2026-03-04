@@ -1,7 +1,7 @@
 ﻿# Patty — Roadmap (3.0.0)
 
 All versions prior to 2.0.0 are archived in the [`ROADMAP/`](ROADMAP/) folder.
-Current production version: **2.9.0**. This document plans the path to **3.0.0**.
+Current production version: **3.0.0**. This document plans the path to **3.0.0**.
 
 ---
 
@@ -192,7 +192,7 @@ Current production version: **2.9.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 3.0.0 — Pro UI Entry Points
+## 3.0.0 — Pro UI Entry Points ✅
 *Goal: plant every visual surface that leads the user to Patty Pro, with no backend dependencies. All UI is real and tappable; the ProPage is a full-fidelity paywall shell that renders correctly whether the user is signed in or not.*
 
 ### Free vs Pro Feature Split
@@ -213,34 +213,34 @@ Current production version: **2.9.0**. This document plans the path to **3.0.0**
 **Pricing:** $2.99 / month · $19.99 / year (~$1.67/mo · saves 44%)
 
 ### Pro Card — ProfilePage
-- [ ] New `IonCard` inserted as the **first card** after the identity hero, before the Notifications row
-- [ ] **Free state:** crown icon · "Patty Pro" title · tagline "Unlimited AI, cloud backup, no ads" · "See plans →" tappable chevron row; routes to `/pro`
-- [ ] **Pro state:** ✦ Active badge · renewal date · "Manage" button; routes to `/account`
-- [ ] Styled with `--md-primary-container` background tint and `--md-shape-xl` radius to stand out from the settings rows below
+- [x] New `IonCard` inserted as the **first card** after the identity hero, before the Notifications row
+- [x] **Free state:** crown icon · "Patty Pro" title · tagline "Unlimited AI, cloud backup, no ads" · "See plans →" tappable chevron row; routes to `/pro`
+- [x] **Pro state:** ❖ Active badge · renewal date · "Manage" button; routes to `/account`
+- [x] Styled with `--md-primary-container` background tint and `--md-shape-xl` radius to stand out from the settings rows below
 
 ### Animated Pro Badge — Home Toolbar
-- [ ] Small floating badge chip overlaid on the profile `IonButton` in the top-right toolbar
-- [ ] Three icons rotate in an infinite CSS keyframe animation: **ban** (no-ads) → **crownOutline** → **diamondOutline** — 1.5 s per icon, opacity cross-dissolve transition
-- [ ] **Free state:** animation runs continuously; tapping the profile icon navigates to ProfilePage (unchanged)
-- [ ] **Pro state:** animation stops; badge locks on `crownOutline` with a gold tint (`--md-tertiary` token); no text label needed
-- [ ] Badge size: 18 × 18 px circle, `position: absolute`, top-right of the profile button; does not obscure the icon
+- [x] Small floating badge chip overlaid on the profile `IonButton` in the top-right toolbar
+- [x] Three icons rotate in an infinite CSS keyframe animation: **ban** (no-ads) → **crownOutline** → **diamondOutline** — 1.5 s per icon, opacity cross-dissolve transition
+- [x] **Free state:** animation runs continuously; tapping the profile icon navigates to ProfilePage (unchanged)
+- [x] **Pro state:** animation stops; badge locks on `crownOutline` with a gold tint (`--md-tertiary` token); no text label needed
+- [x] Badge size: 18 × 18 px circle, `position: absolute`, top-right of the profile button; does not obscure the icon
 
 ### ProPage (`src/pages/ProPage.tsx`)
-- [ ] Route: `/pro`; full-screen `IonPage` with back button
-- [ ] **Hero section:** large animated crown illustration (CSS keyframe spin/pulse), "Patty Pro" headline, tagline
-- [ ] **Feature comparison list:** 6 rows — Unlimited AI calls · Unlimited log history · Cloud backup & restore · Import / Export · Ad-free · Priority support — each with ✓ Pro / ✗ Free columns
-- [ ] **Plan selector card:** two chips — "Monthly · $2.99" / "Annual · $19.99 (save 44%)" — selected chip uses `--md-primary-container`; annual chip has a "Best value" badge
-- [ ] **"Continue with Email" CTA:** opens a bottom sheet `IonModal` with a single email input + "Send magic link" button; tapping send calls Firebase Auth `sendSignInLinkToEmail` (wired in 3.1.0; in 3.0.0 shows a "Coming soon" toast)
-- [ ] **"Restore purchase" text link** below CTA
-- [ ] **Logged-in free state** (when Firebase session exists but not Pro): shows user email chip at top; "Subscribe" CTA replaces "Continue with Email"; plan selector still visible
-- [ ] **Pro state:** page redirects to `/account` immediately
+- [x] Route: `/pro`; full-screen `IonPage` with back button
+- [x] **Hero section:** large animated crown illustration (CSS keyframe spin/pulse), "Patty Pro" headline, tagline
+- [x] **Feature comparison list:** 6 rows — Unlimited AI calls · Unlimited log history · Cloud backup & restore · Import / Export · Ad-free · Priority support — each with ✓ Pro / ✗ Free columns
+- [x] **Plan selector card:** two chips — "Monthly · $2.99" / "Annual · $19.99 (save 44%)" — selected chip uses `--md-primary-container`; annual chip has a "Best value" badge
+- [x] **"Continue with Email" CTA:** opens a bottom sheet `IonModal` with a single email input + "Send magic link" button; tapping send calls Firebase Auth `sendSignInLinkToEmail` (wired in 3.1.0; in 3.0.0 shows a "Coming soon" toast)
+- [x] **"Restore purchase" text link** below CTA
+- [x] **Logged-in free state** (when Firebase session exists but not Pro): shows user email chip at top; "Subscribe" CTA replaces "Continue with Email"; plan selector still visible
+- [x] **Pro state:** page redirects to `/account` immediately
 
 ### ProGateSheet (`src/components/ProGateSheet.tsx`)
-- [ ] Reusable `IonModal` with `initialBreakpoint=0.55`; accepts `featureName` prop that sets the contextual headline (e.g. "Unlock unlimited AI scans")
-- [ ] Body: icon · headline · 3-bullet feature list · "Subscribe — from $2.99/mo" primary button (routes to `/pro`) · "Use own Gemini key" secondary link (AI gates only) · "Watch ad for 3 calls" tertiary link (AI gates only — visible but disabled in 3.0.0, wired in 3.5.0)
+- [x] Reusable `IonModal` with `initialBreakpoint=0.55`; accepts `featureName` prop that sets the contextual headline (e.g. "Unlock unlimited AI scans")
+- [x] Body: icon · headline · 3-bullet feature list · "Subscribe — from $2.99/mo" primary button (routes to `/pro`) · "Use own Gemini key" secondary link (AI gates only) · "Watch ad for 3 calls" tertiary link (AI gates only — visible but disabled in 3.0.0, wired in 3.5.0)
 
 ### Routing
-- [ ] `/pro` and `/account` added to `App.tsx` as top-level `IonRoute`s (outside the tab shell)
+- [x] `/pro` and `/account` added to `App.tsx` as top-level `IonRoute`s (outside the tab shell)
 
 ---
 

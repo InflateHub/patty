@@ -2,6 +2,18 @@
 
 ---
 
+## [3.0.0] — Pro UI Entry Points
+*Goal: plant every visual surface that leads the user to Patty Pro, with no backend dependencies. All UI is real and tappable; ProPage is a full-fidelity paywall shell that renders correctly regardless of auth state.*
+
+- [x] **`src/pages/ProPage.tsx`** — route `/pro`; full-screen paywall: animated crown hero (CSS pulse keyframe), 6-row Free vs Pro feature comparison table, monthly ($2.99) / annual ($19.99, “Best value” badge) plan chip selector, “Continue with Email” CTA + “Restore purchase” link (both show “coming soon” toast in 3.0.0)
+- [x] **`src/pages/AccountPage.tsx`** — route `/account`; minimal stub page; links to `/pro`; sign-in + subscription management wired in 3.1.0
+- [x] **`src/components/ProGateSheet.tsx`** — reusable `IonModal` bottom sheet (55–65% breakpoint); accepts `featureName` prop for contextual headline; 3-bullet feature list; “Subscribe — from $2.99/mo” primary CTA (routes to `/pro`); `isAIGate` prop adds “Use own Gemini key” secondary link and disabled “Watch ad for 3 calls” tertiary button
+- [x] **Pro card — ProfilePage** — first card after identity hero; `--md-primary-container` tinted background + `--md-shape-xl` radius; crown icon, “Patty Pro” title, tagline, “See plans →” chevron row; routes to `/pro`
+- [x] **Animated Pro badge — Home toolbar** — 18×18px circle overlaid on the profile `IonButton`; three `ionicons` icons (ban → crown → diamond) rotate via `pro-icon-rotate` CSS keyframe animation (1.5 s per icon, opacity cross-dissolve, 4.5 s total cycle)
+- [x] **Routing** — `/pro` and `/account` added in `App.tsx` as top-level routes outside the tab shell
+
+---
+
 ## [2.9.0] — AI Foundation (User-Provided Key)
 *Goal: ship all three AI features using the user’s own Gemini Flash API key. No account, no payment, no backend.*
 

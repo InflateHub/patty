@@ -33,6 +33,8 @@ import NotificationsPage from './pages/NotificationsPage';
 import OnboardingPage from './pages/OnboardingPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
+import ProPage from './pages/ProPage';
+import AccountPage from './pages/AccountPage';
 import { getDb } from './db/database';
 import LockScreen from './components/LockScreen';
 import SplashOverlay from './components/SplashOverlay';
@@ -228,6 +230,16 @@ const AppContent: React.FC = () => {
           {/* Terms & Conditions — no tab bar */}
           <Route exact path="/terms">
             <TermsPage />
+          </Route>
+
+          {/* Pro paywall — no tab bar */}
+          <Route exact path="/pro">
+            <ProPage />
+          </Route>
+
+          {/* Account — no tab bar */}
+          <Route exact path="/account">
+            <AccountPage />
           </Route>
 
           {/* Main tab shell */}

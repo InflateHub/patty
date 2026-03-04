@@ -1,4 +1,4 @@
-/* ProfilePage — 2.9.0 */
+/* ProfilePage — 3.0.0 */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -28,7 +28,7 @@ import {
   IonToolbar,
   IonToast,
 } from '@ionic/react';
-import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline, chevronForwardOutline, notificationsOutline, trophyOutline, sparkles, cameraOutline, imageOutline } from 'ionicons/icons';
+import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline, chevronForwardOutline, notificationsOutline, trophyOutline, sparkles, cameraOutline, imageOutline, ribbonOutline } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
@@ -404,6 +404,32 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
             </div>
+          </IonCardContent>
+        </IonCard>
+
+        {/* ── Pro card ────────────────────────────────────────────────── */}
+        <IonCard style={{
+          margin: '12px 16px 0',
+          background: 'color-mix(in srgb, var(--md-primary-container) 55%, var(--md-surface))',
+          borderRadius: 'var(--md-shape-xl)',
+          border: '1px solid color-mix(in srgb, var(--md-primary) 25%, transparent)',
+        }}>
+          <IonCardContent style={{ padding: '4px 0 4px' }}>
+            <IonList lines="none" style={{ background: 'transparent' }}>
+              <IonItem
+                style={{ '--background': 'transparent', cursor: 'pointer' } as React.CSSProperties}
+                button
+                detail={false}
+                onClick={() => history.push('/pro')}
+              >
+                <IonIcon icon={ribbonOutline} slot="start" style={{ color: 'var(--md-primary)', fontSize: 22 }} />
+                <IonLabel style={{ fontFamily: 'var(--md-font)' }}>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--md-title-sm)', color: 'var(--md-on-surface)' }}>Patty Pro</p>
+                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>Unlimited AI, cloud backup, no ads</p>
+                </IonLabel>
+                <IonIcon icon={chevronForwardOutline} slot="end" style={{ color: 'var(--md-on-surface-variant)', fontSize: 18 }} />
+              </IonItem>
+            </IonList>
           </IonCardContent>
         </IonCard>
 
@@ -966,7 +992,7 @@ const ProfilePage: React.FC = () => {
                 onClick={() => window.open('https://patty.saranmahadev.in', '_blank', 'noopener')}
               >
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">2.9.0</IonNote>
+                <IonNote slot="end">3.0.0</IonNote>
               </IonItem>
               <IonItem
                 style={{ ...transparentItem, cursor: 'pointer' }}
