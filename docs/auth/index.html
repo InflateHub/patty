@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patty — Sign In</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    :root {
+      --seed: #5C7A6E;
+      --bg: #0f1a16;
+      --card: #1a2820;
+      --border: #2a3d35;
+      --text: #d4e3db;
+      --muted: #7a9b8e;
+      --accent: #7ec8a8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 40px 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .logo { font-size: 48px; margin-bottom: 12px; }
+    h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+    p  { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+    .input-wrap { margin-bottom: 16px; text-align: left; }
+    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+    }
+    input:focus { border-color: var(--accent); }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: var(--seed);
+      color: #fff;
+      border: none;
+      border-radius: 9999px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    button:disabled { opacity: .5; cursor: default; }
+    .open-btn {
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      margin-top: 12px;
+    }
+    .status {
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .status.error   { background: #3d1a1a; color: #f28b82; }
+    .status.success { background: #1a3d2a; color: #81c995; }
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🥗</div>
+    <h1 id="title">Signing you in…</h1>
+    <p   id="subtitle">Please wait while we verify your magic link.</p>
+
+    <div id="status-box" class="status hidden"></div>
+
+    <!-- Shown if email is needed (opened on a different device) -->
+    <div id="email-section" class="hidden">
+      <div class="input-wrap">
+        <label for="email-input">Enter the email you used to sign in</label>
+        <input id="email-input" type="email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <button id="confirm-btn" onclick="confirmEmail()">Confirm &amp; Sign In</button>
+    </div>
+
+    <!-- Shown after success -->
+    <div id="success-section" class="hidden">
+      <button class="open-btn" onclick="openApp()">Open Patty App</button>
+    </div>
+  </div>
+
+  <!-- Firebase JS SDK (compat for simplicity) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // ── Firebase config ─────────────────────────────────────────────
+    // These are public-safe client keys (not secrets).
+    // Update these to match your Firebase project.
+    const firebaseConfig = {
+      apiKey:            "REPLACE_WITH_YOUR_API_KEY",
+      authDomain:        "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+      projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",
+      storageBucket:     "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+      messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+      appId:             "REPLACE_WITH_YOUR_APP_ID",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const EMAIL_KEY = 'patty_auth_email';
+    const currentUrl = window.location.href;
+
+    const title      = document.getElementById('title');
+    const subtitle   = document.getElementById('subtitle');
+    const statusBox  = document.getElementById('status-box');
+    const emailSec   = document.getElementById('email-section');
+    const successSec = document.getElementById('success-section');
+
+    function showStatus(msg, type) {
+      statusBox.textContent = msg;
+      statusBox.className = 'status ' + type;
+    }
+
+    function showSuccess() {
+      title.textContent    = 'You\'re signed in ✦';
+      subtitle.textContent = 'Return to the Patty app to continue.';
+      successSec.classList.remove('hidden');
+    }
+
+    function openApp() {
+      // Android intent URI — opens Patty directly if installed
+      window.location.href =
+        'intent://tabs/home#Intent;scheme=patty;package=in.saranmahadev.patty;' +
+        'S.browser_fallback_url=https://patty.saranmahadev.in;end';
+    }
+
+    async function doSignIn(email) {
+      try {
+        await auth.signInWithEmailLink(email, currentUrl);
+        localStorage.removeItem(EMAIL_KEY);
+        showSuccess();
+      } catch (err) {
+        showStatus('Sign-in failed: ' + (err.message || err), 'error');
+        emailSec.classList.remove('hidden');
+      }
+    }
+
+    async function confirmEmail() {
+      const email = document.getElementById('email-input').value.trim();
+      if (!email) { showStatus('Please enter your email address.', 'error'); return; }
+      const btn = document.getElementById('confirm-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Signing in…';
+      await doSignIn(email);
+      btn.disabled = false;
+      btn.textContent = 'Confirm & Sign In';
+    }
+
+    // ── Auto-run on page load ────────────────────────────────────────
+    (async function init() {
+      if (!auth.isSignInWithEmailLink(currentUrl)) {
+        title.textContent    = 'Invalid link';
+        subtitle.textContent = 'This link has expired or is not a valid Patty sign-in link.';
+        showStatus('Please request a new magic link from the Patty app.', 'error');
+        return;
+      }
+
+      const savedEmail = localStorage.getItem(EMAIL_KEY);
+
+      if (savedEmail) {
+        // Same device — complete automatically
+        await doSignIn(savedEmail);
+      } else {
+        // Different device — ask for email
+        title.textContent    = 'Confirm your email';
+        subtitle.textContent = 'You opened this link on a different device. Enter your email to continue.';
+        emailSec.classList.remove('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>

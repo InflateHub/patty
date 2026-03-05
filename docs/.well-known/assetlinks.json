@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "in.saranmahadev.patty",
+    "sha256_cert_fingerprints": [
+      "D3:E2:30:B9:3D:5D:7A:14:C9:A7:6E:27:53:BC:AB:24:0D:60:2F:7B:3F:24:AD:D1:B7:33:0B:9E:3D:88:94:75"
+    ]
+  }
+}]
