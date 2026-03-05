@@ -1,4 +1,4 @@
-/* ProPage — 3.0.0 */
+/* ProPage — 3.1.0 */
 import React, { useState } from 'react';
 import {
   IonBackButton,
@@ -7,12 +7,16 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
+  IonInput,
+  IonModal,
   IonPage,
+  IonSpinner,
   IonTitle,
   IonToast,
   IonToolbar,
 } from '@ionic/react';
-import { checkmarkCircle, closeCircleOutline, ribbonOutline } from 'ionicons/icons';
+import { checkmarkCircle, closeCircleOutline, ribbonOutline, mailOutline } from 'ionicons/icons';
+import { useAuth } from '../hooks/useAuth';
 
 // ── Feature comparison data ───────────────────────────────────────────────────
 const FEATURES: { label: string; free: boolean; pro: boolean }[] = [
@@ -26,7 +30,24 @@ const FEATURES: { label: string; free: boolean; pro: boolean }[] = [
 // ── Component ─────────────────────────────────────────────────────────────────
 const ProPage: React.FC = () => {
   const [plan, setPlan] = useState<'monthly' | 'annual'>('annual');
-  const [toast, setToast] = useState(false);
+  const [emailSheet, setEmailSheet] = useState(false);
+  const [email, setEmail]           = useState('');
+  const [sentToast, setSentToast]   = useState(false);
+  const [errorToast, setErrorToast] = useState('');
+  const { sendMagicLink, sending }  = useAuth();
+
+  async function handleSend() {
+    if (!email.trim()) return;
+    try {
+      await sendMagicLink(email.trim());
+      setEmailSheet(false);
+      setEmail('');
+      setSentToast(true);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to send link';
+      setErrorToast(msg);
+    }
+  }
 
   return (
     <IonPage>
@@ -203,7 +224,7 @@ const ProPage: React.FC = () => {
               fontFamily: 'var(--md-font)',
               fontWeight: 700,
             } as React.CSSProperties}
-            onClick={() => setToast(true)}
+            onClick={() => setEmailSheet(true)}
           >
             Buy
           </IonButton>
@@ -216,7 +237,7 @@ const ProPage: React.FC = () => {
               color: 'var(--md-primary)',
               cursor: 'pointer',
             }}
-            onClick={() => setToast(true)}
+            onClick={() => setEmailSheet(true)}
           >
             Restore purchase
           </p>
@@ -228,11 +249,85 @@ const ProPage: React.FC = () => {
         <style>{`@keyframes pro-crown-pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.1);opacity:0.85;} }`}</style>
       </IonContent>
 
+      {/* ── Email sign-in bottom sheet ─────────────────────────────────── */}
+      <IonModal
+        isOpen={emailSheet}
+        onDidDismiss={() => setEmailSheet(false)}
+        initialBreakpoint={0.55}
+        breakpoints={[0, 0.55]}
+        handle
+      >
+        <div style={{ padding: '28px 24px 40px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {/* Icon */}
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              width: 56, height: 56, borderRadius: '50%',
+              background: 'var(--md-primary-container)',
+            }}>
+              <IonIcon icon={mailOutline} style={{ fontSize: 26, color: 'var(--md-on-primary-container)' }} />
+            </div>
+          </div>
+
+          {/* Copy */}
+          <p style={{ margin: '0 0 4px', textAlign: 'center', fontSize: 'var(--md-title-md)', fontFamily: 'var(--md-font)', fontWeight: 700, color: 'var(--md-on-surface)' }}>
+            Sign in to continue
+          </p>
+          <p style={{ margin: '0 0 24px', textAlign: 'center', fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>
+            We'll send a magic link to your email — no password needed.
+          </p>
+
+          {/* Email input */}
+          <IonInput
+            type="email"
+            placeholder="your@email.com"
+            value={email}
+            onIonInput={e => setEmail(String(e.detail.value ?? ''))}
+            fill="outline"
+            style={{
+              '--border-radius': 'var(--md-shape-md)',
+              '--color': 'var(--md-on-surface)',
+              '--placeholder-color': 'var(--md-on-surface-variant)',
+              marginBottom: 16,
+              fontFamily: 'var(--md-font)',
+            } as React.CSSProperties}
+          />
+
+          {/* Send button */}
+          <IonButton
+            expand="block"
+            disabled={!email.trim() || sending}
+            style={{
+              '--border-radius': 'var(--md-shape-xl)',
+              '--background': 'var(--md-primary)',
+              '--color': 'var(--md-on-primary)',
+              fontFamily: 'var(--md-font)',
+              fontWeight: 700,
+              height: 48,
+            } as React.CSSProperties}
+            onClick={handleSend}
+          >
+            {sending ? <IonSpinner name="crescent" style={{ color: 'var(--md-on-primary)' }} /> : 'Send magic link'}
+          </IonButton>
+        </div>
+      </IonModal>
+
+      {/* Sent confirmation */}
       <IonToast
-        isOpen={toast}
-        message="Payments are coming soon — stay tuned! ✦"
-        duration={2800}
-        onDidDismiss={() => setToast(false)}
+        isOpen={sentToast}
+        message="Check your inbox — magic link sent! ✨"
+        duration={3200}
+        onDidDismiss={() => setSentToast(false)}
+        position="bottom"
+      />
+
+      {/* Error */}
+      <IonToast
+        isOpen={!!errorToast}
+        message={errorToast}
+        duration={3200}
+        color="danger"
+        onDidDismiss={() => setErrorToast('')}
         position="bottom"
       />
     </IonPage>

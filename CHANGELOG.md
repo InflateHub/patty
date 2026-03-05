@@ -2,6 +2,18 @@
 
 ---
 
+## [3.1.0] — Firebase Auth (Magic Link)
+*Goal: passwordless email sign-in triggered only when the user taps "Buy". App remains fully functional without an account.*
+
+- [x] **`src/utils/firebase.ts`** — Firebase app init with env-var backed config (`VITE_FIREBASE_*`); exports `auth` instance and `MAGIC_LINK_URL` / `EMAIL_KEY` constants
+- [x] **`src/hooks/useAuth.ts`** — `user`, `loading`, `sending`, `sendMagicLink(email)`, `completeMagicLink(url)`, `signOut()`; persists `firebase_uid` to SQLite settings; `onAuthStateChanged` mirrors Firebase session to React state
+- [x] **`src/pages/ProPage.tsx`** — "Buy" and "Restore purchase" now open an email bottom-sheet `IonModal` (55% breakpoint) instead of a "coming soon" toast; `handleSend` calls `sendMagicLink` and shows success toast "Check your inbox"; error toast on failure
+- [x] **`src/App.tsx`** — `MagicLinkHandler` component listens to `CapApp.appUrlOpen` events; on magic-link URL detected, calls `completeMagicLink` then navigates to `/pro`
+- [x] **`android/app/src/main/AndroidManifest.xml`** — `android:autoVerify="true"` intent filter added for `https://patty.saranmahadev.in/auth`; enables Android App Links so magic link re-opens Patty directly
+- [x] **Profile Free chip** — "Free" tier pill badge added to the XP stat row in ProfilePage, tappable (routes to `/pro`); replaced with Pro indicator in 3.2.0
+
+---
+
 ## [3.0.0] — Pro UI Entry Points
 *Goal: plant every visual surface that leads the user to Patty Pro, with no backend dependencies. All UI is real and tappable; ProPage is a full-fidelity paywall shell that renders correctly regardless of auth state.*
 

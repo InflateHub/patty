@@ -40,6 +40,7 @@ import LockScreen from './components/LockScreen';
 import SplashOverlay from './components/SplashOverlay';
 import { useAppLock } from './hooks/useAppLock';
 import { useTheme } from './hooks/useTheme';
+import { useAuth } from './hooks/useAuth';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -68,6 +69,38 @@ import './theme/variables.css';
 import './theme/md3.css';
 
 setupIonicReact();
+
+/**
+ * MagicLinkHandler — listens for the Firebase magic-link deep link.
+ * When the app is opened from the sign-in email, completes the Firebase
+ * sign-in and redirects to /pro (where RevenueCat purchase will proceed).
+ * Must live inside IonReactRouter to access useHistory.
+ */
+const MagicLinkHandler: React.FC = () => {
+  const history = useHistory();
+  const { completeMagicLink } = useAuth();
+
+  useEffect(() => {
+    let handle: Awaited<ReturnType<typeof CapApp.addListener>> | null = null;
+
+    CapApp.addListener('appUrlOpen', async (event: { url: string }) => {
+      const url = event.url;
+      // Firebase magic links always contain 'apiKey' and 'mode=signIn'
+      if (url.includes('apiKey=') || url.includes('mode=signIn') || url.includes('oobCode=')) {
+        try {
+          await completeMagicLink(url);
+          history.push('/pro');
+        } catch {
+          // Silent — user will see no change; they can retry from ProPage
+        }
+      }
+    }).then(h => { handle = h; });
+
+    return () => { handle?.remove(); };
+  }, [completeMagicLink, history]);
+
+  return null;
+};
 
 /**
  * BackButtonHandler — intercepts the Android hardware back button.
@@ -216,6 +249,7 @@ const AppContent: React.FC = () => {
     <>
       <IonReactRouter>
         <BackButtonHandler />
+        <MagicLinkHandler />
         <IonRouterOutlet id="main-outlet">
           {/* Onboarding — no tab bar */}
           <Route exact path="/onboarding">

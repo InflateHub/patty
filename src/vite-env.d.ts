@@ -1,5 +1,18 @@
 /// <reference types="vite/client" />
 
+// Firebase env vars injected via .env.local (see src/utils/firebase.ts)
+interface ImportMetaEnv {
+  readonly VITE_FIREBASE_API_KEY: string;
+  readonly VITE_FIREBASE_AUTH_DOMAIN: string;
+  readonly VITE_FIREBASE_PROJECT_ID: string;
+  readonly VITE_FIREBASE_STORAGE_BUCKET: string;
+  readonly VITE_FIREBASE_MESSAGING_SENDER_ID: string;
+  readonly VITE_FIREBASE_APP_ID: string;
+}
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 // ionicons 7.x does not ship .d.ts files in this install;
 // declare the module so TypeScript accepts the import.
 // Icons are typed as `string` (they are SVG path strings at runtime).
@@ -59,5 +72,6 @@ declare module 'ionicons/icons' {
   export const keyOutline: string;
   export const videocamOutline: string;
   export const closeCircleOutline: string;
+  export const mailOutline: string;
   export default icons;
 }

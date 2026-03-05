@@ -389,6 +389,29 @@ const ProfilePage: React.FC = () => {
 
               {/* XP + Streak quick stats */}
               <div style={{ display: 'flex', gap: 24, marginTop: 4 }}>
+                {/* Tier badge — TODO: replace `false` with `isPro` from useProStatus in 3.2.0 */}
+                {!false && (
+                  <div style={{ textAlign: 'center' }}>
+                    <div
+                      onClick={() => history.push('/pro')}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        padding: '3px 10px',
+                        borderRadius: 'var(--md-shape-full)',
+                        background: 'color-mix(in srgb, var(--md-outline) 14%, transparent)',
+                        border: '1px solid color-mix(in srgb, var(--md-outline) 35%, transparent)',
+                        cursor: 'pointer',
+                        marginBottom: 2,
+                      }}
+                    >
+                      <span style={{ fontSize: 11, fontFamily: 'var(--md-font)', fontWeight: 700, color: 'var(--md-on-surface-variant)', letterSpacing: 0.5, textTransform: 'uppercase' }}>Free</span>
+                    </div>
+                    <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'transparent' }}>·</p>
+                  </div>
+                )}
+                {!false && <div style={{ width: 1, background: 'var(--md-outline-variant)' }} />}
                 <div style={{ textAlign: 'center' }}>
                   <p style={{ margin: 0, fontSize: 'var(--md-title-md)', fontFamily: 'var(--md-font)', fontWeight: 700, color: 'var(--md-on-surface)' }}>
                     {gamification.loading ? '—' : gamification.xp.toLocaleString()}
@@ -425,7 +448,7 @@ const ProfilePage: React.FC = () => {
                 <IonIcon icon={ribbonOutline} slot="start" style={{ color: 'var(--md-primary)', fontSize: 22 }} />
                 <IonLabel style={{ fontFamily: 'var(--md-font)' }}>
                   <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--md-title-sm)', color: 'var(--md-on-surface)' }}>Patty Pro</p>
-                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>Unlimited AI, cloud backup, no ads</p>
+                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>Unlimited AI, no ads &amp; more</p>
                 </IonLabel>
                 <IonIcon icon={chevronForwardOutline} slot="end" style={{ color: 'var(--md-on-surface-variant)', fontSize: 18 }} />
               </IonItem>
@@ -992,7 +1015,7 @@ const ProfilePage: React.FC = () => {
                 onClick={() => window.open('https://patty.saranmahadev.in', '_blank', 'noopener')}
               >
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">3.0.0</IonNote>
+                <IonNote slot="end">3.1.0</IonNote>
               </IonItem>
               <IonItem
                 style={{ ...transparentItem, cursor: 'pointer' }}
