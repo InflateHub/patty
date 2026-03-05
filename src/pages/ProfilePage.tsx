@@ -317,144 +317,267 @@ const ProfilePage: React.FC = () => {
       <IonContent fullscreen>
 
         {/* ── Identity Hero ────────────────────────────────────────────── */}
-        <IonCard>
-          <IonCardContent style={{ padding: '20px 16px 16px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-              {/* Avatar circle — tappable */}
-              <div
-                style={{ position: 'relative', flexShrink: 0, cursor: 'pointer', width: 88, height: 88 }}
-                onClick={() => setPhotoSheetOpen(true)}
-              >
-                {/* Circle */}
-                <div style={{
-                  width: 88, height: 88, borderRadius: '50%',
-                  background: 'var(--md-primary-container)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                }}>
-                  {profilePhoto ? (
-                    <img src={profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  ) : (
-                    <span style={{ fontSize: 36, lineHeight: 1, userSelect: 'none' }}>
-                      {form.sex ? genderEmoji(form.sex) : (profile.name ? profile.name.charAt(0).toUpperCase() : '?')}
-                    </span>
-                  )}
-                </div>
-                {/* Camera badge — outside the circle so it isn't clipped */}
-                <div style={{
-                  position: 'absolute', bottom: 0, right: 0,
-                  width: 26, height: 26, borderRadius: '50%',
-                  background: 'var(--md-primary)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: '2.5px solid var(--md-surface)',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
-                }}>
-                  <IonIcon icon={cameraOutline} style={{ fontSize: 13, color: 'var(--md-on-primary)' }} />
-                </div>
-              </div>
+        <div style={{
+          margin: '16px 16px 0',
+          borderRadius: 'var(--md-shape-xl)',
+          overflow: 'hidden',
+          position: 'relative',
+          animation: 'profile-hero-in 0.45s cubic-bezier(0.34,1.56,0.64,1) both',
+        }}>
+          {/* Animated gradient background */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: !gamification.loading
+              ? `linear-gradient(145deg, color-mix(in srgb, ${gamification.level.color} 28%, var(--md-surface)) 0%, color-mix(in srgb, var(--md-primary-container) 70%, var(--md-surface)) 55%, var(--md-surface-variant) 100%)`
+              : 'var(--md-surface-variant)',
+            transition: 'background 1.2s ease',
+          }} />
+          {/* Subtle mesh circles */}
+          <div style={{
+            position: 'absolute', top: -40, right: -30,
+            width: 160, height: 160, borderRadius: '50%',
+            background: !gamification.loading ? `radial-gradient(circle, ${gamification.level.color}33 0%, transparent 70%)` : 'transparent',
+            animation: 'profile-orb-drift 6s ease-in-out infinite alternate',
+          }} />
+          <div style={{
+            position: 'absolute', bottom: -50, left: -20,
+            width: 130, height: 130, borderRadius: '50%',
+            background: 'radial-gradient(circle, color-mix(in srgb, var(--md-primary) 18%, transparent) 0%, transparent 70%)',
+            animation: 'profile-orb-drift 8s ease-in-out infinite alternate-reverse',
+          }} />
 
-              {/* Name */}
-              <p style={{
-                margin: 0,
-                fontSize: 'var(--md-title-lg)',
-                fontFamily: 'var(--md-font)',
-                fontWeight: 600,
-                color: 'var(--md-on-surface)',
-                textAlign: 'center',
+          <div style={{ position: 'relative', padding: '24px 20px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
+
+            {/* Tier badge — top-right */}
+            <div
+              onClick={() => history.push('/pro')}
+              style={{
+                position: 'absolute', top: 16, right: 16,
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                padding: '4px 10px',
+                borderRadius: 'var(--md-shape-full)',
+                background: 'color-mix(in srgb, var(--md-surface) 60%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--md-outline) 30%, transparent)',
+                backdropFilter: 'blur(8px)',
+                cursor: 'pointer',
+                animation: 'profile-badge-in 0.5s 0.2s cubic-bezier(0.34,1.56,0.64,1) both',
+              }}
+            >
+              {/* TODO: swap to "✦ Pro" chip in 3.2.0 when isPro */}
+              <span style={{ fontSize: 10, fontFamily: 'var(--md-font)', fontWeight: 800, color: 'var(--md-on-surface-variant)', letterSpacing: 0.8, textTransform: 'uppercase' }}>Free</span>
+            </div>
+
+            {/* Avatar with glowing ring */}
+            <div
+              style={{ position: 'relative', cursor: 'pointer', marginBottom: 14 }}
+              onClick={() => setPhotoSheetOpen(true)}
+            >
+              {/* Pulsing ring */}
+              <div style={{
+                position: 'absolute', inset: -4,
+                borderRadius: '50%',
+                border: !gamification.loading ? `2.5px solid ${gamification.level.color}` : '2.5px solid var(--md-primary)',
+                animation: 'profile-ring-pulse 2.8s ease-in-out infinite',
+              }} />
+              {/* Outer glow */}
+              <div style={{
+                position: 'absolute', inset: -8,
+                borderRadius: '50%',
+                background: !gamification.loading ? `radial-gradient(circle, ${gamification.level.color}28 0%, transparent 70%)` : 'transparent',
+              }} />
+              {/* Avatar */}
+              <div style={{
+                width: 96, height: 96, borderRadius: '50%',
+                background: 'color-mix(in srgb, var(--md-primary-container) 80%, var(--md-surface))',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.22)',
               }}>
-                {profile.name || 'Your Name'}
-              </p>
-
-              {/* Level chip */}
-              {!gamification.loading && (
-                <div style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '4px 14px',
-                  borderRadius: 'var(--md-shape-full)',
-                  background: gamification.level.color + '22',
-                  border: `1px solid ${gamification.level.color}55`,
-                }}>
-                  <span style={{ fontSize: 14 }}>{gamification.level.emoji}</span>
-                  <span style={{
-                    fontSize: 'var(--md-label-lg)',
-                    fontFamily: 'var(--md-font)',
-                    fontWeight: 600,
-                    color: gamification.level.color,
-                  }}>
-                    Level {gamification.xp > 0 ? Math.floor(Math.log2(gamification.xp / 50) + 2) : 1} · {gamification.level.name}
+                {profilePhoto ? (
+                  <img src={profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                ) : (
+                  <span style={{ fontSize: 40, lineHeight: 1, userSelect: 'none' }}>
+                    {form.sex ? genderEmoji(form.sex) : (profile.name ? profile.name.charAt(0).toUpperCase() : '?')}
                   </span>
-                </div>
-              )}
-
-              {/* XP + Streak quick stats */}
-              <div style={{ display: 'flex', gap: 24, marginTop: 4 }}>
-                {/* Tier badge — TODO: replace `false` with `isPro` from useProStatus in 3.2.0 */}
-                {!false && (
-                  <div style={{ textAlign: 'center' }}>
-                    <div
-                      onClick={() => history.push('/pro')}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        padding: '3px 10px',
-                        borderRadius: 'var(--md-shape-full)',
-                        background: 'color-mix(in srgb, var(--md-outline) 14%, transparent)',
-                        border: '1px solid color-mix(in srgb, var(--md-outline) 35%, transparent)',
-                        cursor: 'pointer',
-                        marginBottom: 2,
-                      }}
-                    >
-                      <span style={{ fontSize: 11, fontFamily: 'var(--md-font)', fontWeight: 700, color: 'var(--md-on-surface-variant)', letterSpacing: 0.5, textTransform: 'uppercase' }}>Free</span>
-                    </div>
-                    <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'transparent' }}>·</p>
-                  </div>
                 )}
-                {!false && <div style={{ width: 1, background: 'var(--md-outline-variant)' }} />}
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ margin: 0, fontSize: 'var(--md-title-md)', fontFamily: 'var(--md-font)', fontWeight: 700, color: 'var(--md-on-surface)' }}>
-                    {gamification.loading ? '—' : gamification.xp.toLocaleString()}
-                  </p>
-                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>Total XP</p>
-                </div>
-                <div style={{ width: 1, background: 'var(--md-outline-variant)' }} />
-                <div style={{ textAlign: 'center' }}>
-                  <p style={{ margin: 0, fontSize: 'var(--md-title-md)', fontFamily: 'var(--md-font)', fontWeight: 700, color: 'var(--md-on-surface)' }}>
-                    {gamification.loading ? '—' : gamification.bestStreak}
-                  </p>
-                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>Best Streak</p>
-                </div>
+              </div>
+              {/* Camera badge */}
+              <div style={{
+                position: 'absolute', bottom: 2, right: 2,
+                width: 26, height: 26, borderRadius: '50%',
+                background: 'var(--md-primary)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '2.5px solid var(--md-surface)',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+              }}>
+                <IonIcon icon={cameraOutline} style={{ fontSize: 12, color: 'var(--md-on-primary)' }} />
               </div>
             </div>
-          </IonCardContent>
-        </IonCard>
 
-        {/* ── Pro card ────────────────────────────────────────────────── */}
-        <IonCard style={{
-          margin: '12px 16px 0',
-          background: 'color-mix(in srgb, var(--md-primary-container) 55%, var(--md-surface))',
-          borderRadius: 'var(--md-shape-xl)',
-          border: '1px solid color-mix(in srgb, var(--md-primary) 25%, transparent)',
-        }}>
-          <IonCardContent style={{ padding: '4px 0 4px' }}>
-            <IonList lines="none" style={{ background: 'transparent' }}>
-              <IonItem
-                style={{ '--background': 'transparent', cursor: 'pointer' } as React.CSSProperties}
-                button
-                detail={false}
-                onClick={() => history.push('/pro')}
-              >
-                <IonIcon icon={ribbonOutline} slot="start" style={{ color: 'var(--md-primary)', fontSize: 22 }} />
-                <IonLabel style={{ fontFamily: 'var(--md-font)' }}>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--md-title-sm)', color: 'var(--md-on-surface)' }}>Patty Pro</p>
-                  <p style={{ margin: '2px 0 0', fontSize: 'var(--md-body-sm)', color: 'var(--md-on-surface-variant)' }}>Unlimited AI, no ads &amp; more</p>
-                </IonLabel>
-                <IonIcon icon={chevronForwardOutline} slot="end" style={{ color: 'var(--md-on-surface-variant)', fontSize: 18 }} />
-              </IonItem>
-            </IonList>
-          </IonCardContent>
-        </IonCard>
+            {/* Name */}
+            <p style={{
+              margin: '0 0 10px',
+              fontSize: 'var(--md-headline-sm)',
+              fontFamily: 'var(--md-font)',
+              fontWeight: 700,
+              color: 'var(--md-on-surface)',
+              textAlign: 'center',
+              letterSpacing: -0.3,
+            }}>
+              {profile.name || 'Your Name'}
+            </p>
+
+            {/* Level chip — with shimmer */}
+            {!gamification.loading && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '5px 16px',
+                borderRadius: 'var(--md-shape-full)',
+                background: `color-mix(in srgb, ${gamification.level.color} 18%, var(--md-surface))`,
+                border: `1.5px solid ${gamification.level.color}66`,
+                marginBottom: 16,
+                position: 'relative',
+                overflow: 'hidden',
+              }}>
+                {/* Shimmer sweep */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%)',
+                  animation: 'profile-shimmer 3.5s ease-in-out infinite',
+                }} />
+                <span style={{ fontSize: 15 }}>{gamification.level.emoji}</span>
+                <span style={{
+                  fontSize: 'var(--md-label-lg)',
+                  fontFamily: 'var(--md-font)',
+                  fontWeight: 700,
+                  color: gamification.level.color,
+                }}>
+                  Level {gamification.xp > 0 ? Math.floor(Math.log2(gamification.xp / 50) + 2) : 1} · {gamification.level.name}
+                </span>
+              </div>
+            )}
+
+            {/* XP progress bar toward next level */}
+            {!gamification.loading && (() => {
+              const lvl = gamification.xp > 0 ? Math.floor(Math.log2(gamification.xp / 50) + 2) : 1;
+              const curThreshold = lvl <= 1 ? 0 : Math.round(50 * Math.pow(2, lvl - 2));
+              const nextThreshold = Math.round(50 * Math.pow(2, lvl - 1));
+              const pct = Math.min(100, Math.round(((gamification.xp - curThreshold) / (nextThreshold - curThreshold)) * 100));
+              return (
+                <div style={{ width: '100%', marginBottom: 18 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <span style={{ fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>{gamification.xp.toLocaleString()} XP</span>
+                    <span style={{ fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>Next: {nextThreshold.toLocaleString()}</span>
+                  </div>
+                  <div style={{
+                    height: 6, borderRadius: 99,
+                    background: 'color-mix(in srgb, var(--md-outline-variant) 60%, transparent)',
+                    overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${pct}%`,
+                      borderRadius: 99,
+                      background: `linear-gradient(90deg, ${gamification.level.color}, color-mix(in srgb, ${gamification.level.color} 70%, var(--md-primary)))`,
+                      animation: 'profile-xp-fill 1.1s 0.3s cubic-bezier(0.4,0,0.2,1) both',
+                      boxShadow: `0 0 8px ${gamification.level.color}88`,
+                    }} />
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Stats row */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1px 1fr',
+              width: '100%',
+              background: 'color-mix(in srgb, var(--md-surface) 50%, transparent)',
+              borderRadius: 'var(--md-shape-lg)',
+              border: '1px solid color-mix(in srgb, var(--md-outline-variant) 50%, transparent)',
+              backdropFilter: 'blur(6px)',
+              overflow: 'hidden',
+            }}>
+              <div style={{ textAlign: 'center', padding: '12px 8px' }}>
+                <p style={{ margin: 0, fontSize: 'var(--md-title-lg)', fontFamily: 'var(--md-font)', fontWeight: 800, color: 'var(--md-on-surface)', letterSpacing: -0.5 }}>
+                  {gamification.loading ? '—' : gamification.xp.toLocaleString()}
+                </p>
+                <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>Total XP</p>
+              </div>
+              <div style={{ background: 'var(--md-outline-variant)', opacity: 0.5 }} />
+              <div style={{ textAlign: 'center', padding: '12px 8px' }}>
+                <p style={{ margin: 0, fontSize: 'var(--md-title-lg)', fontFamily: 'var(--md-font)', fontWeight: 800, color: 'var(--md-on-surface)', letterSpacing: -0.5 }}>
+                  {gamification.loading ? '—' : `${gamification.bestStreak}🔥`}
+                </p>
+                <p style={{ margin: '2px 0 0', fontSize: 'var(--md-label-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>Best Streak</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ── Pro banner ───────────────────────────────────────────────── */}
+        <div
+          onClick={() => history.push('/pro')}
+          style={{
+            margin: '10px 16px 0',
+            padding: '12px 16px',
+            borderRadius: 'var(--md-shape-xl)',
+            background: 'linear-gradient(110deg, color-mix(in srgb, var(--md-primary-container) 80%, var(--md-surface)), color-mix(in srgb, var(--md-primary) 22%, var(--md-surface-variant)))',
+            border: '1px solid color-mix(in srgb, var(--md-primary) 28%, transparent)',
+            display: 'flex', alignItems: 'center', gap: 12,
+            cursor: 'pointer',
+            position: 'relative', overflow: 'hidden',
+            animation: 'profile-hero-in 0.45s 0.1s cubic-bezier(0.34,1.56,0.64,1) both',
+          }}
+        >
+          {/* Moving shimmer */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%)',
+            animation: 'profile-shimmer 4s 1s ease-in-out infinite',
+          }} />
+          <div style={{
+            width: 40, height: 40, flexShrink: 0, borderRadius: 'var(--md-shape-md)',
+            background: 'var(--md-primary)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 10px color-mix(in srgb, var(--md-primary) 40%, transparent)',
+          }}>
+            <IonIcon icon={ribbonOutline} style={{ fontSize: 20, color: 'var(--md-on-primary)' }} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--md-title-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface)' }}>Patty Pro</p>
+            <p style={{ margin: '1px 0 0', fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>Unlimited AI · no ads · and more</p>
+          </div>
+          <IonIcon icon={chevronForwardOutline} style={{ color: 'var(--md-primary)', fontSize: 20, flexShrink: 0 }} />
+        </div>
+
+        {/* Keyframes */}
+        <style>{`
+          @keyframes profile-hero-in {
+            from { opacity: 0; transform: translateY(18px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+          }
+          @keyframes profile-badge-in {
+            from { opacity: 0; transform: scale(0.7); }
+            to   { opacity: 1; transform: scale(1); }
+          }
+          @keyframes profile-ring-pulse {
+            0%, 100% { transform: scale(1);    opacity: 1; }
+            50%       { transform: scale(1.06); opacity: 0.65; }
+          }
+          @keyframes profile-orb-drift {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(14px, -10px) scale(1.12); }
+          }
+          @keyframes profile-shimmer {
+            0%   { transform: translateX(-100%); }
+            60%, 100% { transform: translateX(200%); }
+          }
+          @keyframes profile-xp-fill {
+            from { width: 0%; }
+          }
+        `}</style>
 
         {/* ── Notifications + Achievements nav ─────────────────────────── */}
         <IonCard>
