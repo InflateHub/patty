@@ -8,10 +8,11 @@ Current production version: **3.0.0**. This document plans the path to **3.5.0**
 ## Product Philosophy
 
 - **App always feels free and premium at the same time** — no feature is locked, no data is ever hidden, no punitive gates.
-- **Free tier** = full app + banner ads on Home & Track + earn AI credits by watching rewarded ads (1 credit per ad). Zero free monthly AI credits — credits must be earned.
-- **Pro tier** = zero ads + 300 AI credits per month automatically.
+- **Free tier** = full app + banner ads on Home & Track + a monthly AI token budget. When budget runs out, users can watch a rewarded ad to refill it. Zero upfront tokens — budget is standard, refill via ads.
+- **Pro tier** = zero ads + unlimited AI (no token budget enforced at all).
 - **Auth is deferred** — no account required to use any part of the app. Authentication is triggered only when the user taps **Buy** on the ProPage. The app must feel fully functional before that moment.
 - **No punitive gates** — full log history is always visible, all tracking features always available, no data ever hidden behind a paywall.
+- **No cloud backup** — data lives entirely on-device. Users who want to move to a new device use the built-in **P2P app transfer**: export a local file, share to the new device, import. No server, no account required for this.
 
 ---
 
@@ -222,17 +223,17 @@ Current production version: **3.0.0**. This document plans the path to **3.5.0**
 | Full log history — no limits, ever | ✓ | ✓ |
 | Habits, achievements, gamification, themes | ✓ | ✓ |
 | Manual recipe creation + meal planning + grocery list | ✓ | ✓ |
-| AI features | Earn credits by watching rewarded ads (1 cr / ad) | 300 credits / month |
+| AI features | Monthly token budget — refill by watching rewarded ads | **Unlimited AI** |
 | Banner ads | On Home & Track screens | **None** |
-| Rewarded ads | Available to earn credits | Not shown |
+| Rewarded ads | Available to refill AI token budget | Not shown |
 | Import / Export (CSV + JSON) | ✗ | ✓ |
-| Cloud backup + restore | ✗ | ✓ |
+| P2P device transfer (local file) | ✓ | ✓ |
 
 **Pricing:** ₹99/mo · ₹699/yr (India) · $3.49/mo · $25/yr (Global)
 
 ### Pro Card — ProfilePage
 - [x] New `IonCard` inserted as the **first card** after the identity hero, before the Notifications row
-- [x] **Free state:** crown icon · "Patty Pro" title · tagline "Unlimited AI, cloud backup, no ads" · "See plans →" tappable chevron row; routes to `/pro`
+- [x] **Free state:** crown icon · "Patty Pro" title · tagline "Unlimited AI, no ads & more" · "See plans →" tappable chevron row; routes to `/pro`
 - [x] **Pro state:** ❖ Active badge · renewal date · "Manage" button; routes to `/account`
 - [x] Styled with `--md-primary-container` background tint and `--md-shape-xl` radius to stand out from the settings rows below
 
@@ -337,33 +338,43 @@ Current production version: **3.0.0**. This document plans the path to **3.5.0**
 
 ---
 
-## 3.3.0 — AI Credit System & Feature Gates
-*Goal: enforce the Free vs Pro AI split with a credit-based system. No punitive gates — full history always visible, all tracking always free. The only gate is AI usage.*
+## 3.3.0 — AI Token Budget System & Feature Gates
+*Goal: enforce the Free vs Pro AI split by tracking real Gemini token usage. No credits, no arbitrary call counts — actual tokens returned by the API. Pro users are completely unlimited. Free users have a monthly budget they can see and refill via ads.*
 
 ### Core Principle
-- **No history limits. No feature removal. No data hidden.** The app is identical for free and Pro users except: (1) Pro users have no ads, (2) Pro users get 300 AI credits/month automatically.
-- Free users start with **zero AI credits**. Credits are earned exclusively by watching rewarded ads — 1 credit per completed ad.
+- **No history limits. No feature removal. No data hidden.** The only gate is AI usage for free users.
+- Pro users: **unlimited AI** — no budget checked, no gate shown, ever.
+- Free users: **100,000 tokens / month** budget. Budget refillable by watching rewarded ads (+20,000 tokens per ad). Budget resets on the 1st of each month.
+- Own-key users: bypass the budget entirely — their own Gemini quota, no Patty gate.
 
-### `src/hooks/useCreditBalance.ts` (replaces `useAIQuota`)
-- [ ] `credits` — reads `ai_credits` from SQLite `settings`; starts at 0 for new users
-- [ ] `consumeCredit(cost: number)` — deducts from balance, floor 0, persists to SQLite
-- [ ] `earnCredits(n: number)` — adds n credits (called on rewarded ad completion), persists to SQLite
-- [ ] `resetMonthlyPro()` — sets credits to 300 on first day of each month for Pro users; called on app resume
-- [ ] No monthly reset for free users — credits only come from watching ads
-- [ ] DB migration v17: `ai_credits INTEGER DEFAULT 0` in `settings` table
+### Token Tracking — `src/hooks/useAITokens.ts`
+- [ ] `tokensUsed` — reads `ai_tokens_used` INTEGER from SQLite `settings`; starts 0
+- [ ] `tokenBudget` — 100,000 for free users; `Infinity` for Pro and own-key users
+- [ ] `tokensRemaining` — `tokenBudget - tokensUsed`, floor 0
+- [ ] `budgetPercent` — `tokensUsed / tokenBudget`, clamped 0–1; used by the progress bar
+- [ ] `consumeTokens(n: number)` — adds n to `ai_tokens_used`, persists to SQLite; no-op for Pro/own-key
+- [ ] `earnTokens(n: number)` — subtracts n from `ai_tokens_used` (floor 0); called on rewarded ad completion
+- [ ] `resetMonthly()` — resets `ai_tokens_used` to 0 on 1st of month; called on every app resume; both free and Pro (keeps the bar informative)
+- [ ] DB migration v17: `ai_tokens_used INTEGER DEFAULT 0`, `ai_tokens_reset_date TEXT` in `settings`
 
-### Credit cost per AI feature
-| Feature | Credits | Reasoning |
-|---|---|---|
-| Macro Scan 📸 | 1 cr | Most frequent, cheapest API call |
-| Recipe Generator ✨ | 2 cr | Larger output, less frequent |
-| Week Planner 📅 | 3 cr | Heaviest prompt, rarest |
+### Capturing Tokens from Gemini Responses
+- [ ] Every Gemini call already returns `response.usageMetadata.totalTokenCount` (promptTokenCount + candidatesTokenCount)
+- [ ] All three AI hooks (Macro Scan, Recipe Generator, Week Planner) call `consumeTokens(response.usageMetadata.totalTokenCount)` on each successful response
+- [ ] No estimation — real token counts only
 
 ### AI Gate Logic
-- [ ] If `isPro`: deduct from 300/month pool; show remaining credit count in AI feature header
-- [ ] If own Gemini key set: bypass credit system entirely; calls go direct, no credits consumed
-- [ ] If free + credits > 0: allow call, deduct credits
-- [ ] If free + credits = 0: show `ProGateSheet` with two options — **"Subscribe ₹99/mo"** (primary) + **"Watch ad for 1 credit"** (secondary, wired in 3.5.0, disabled button in 3.3.0)
+- [ ] If `isPro` or own key: allow call unconditionally; still track tokens for the progress bar (informational only)
+- [ ] If free + `tokensRemaining > 0`: allow call, consume tokens after response
+- [ ] If free + `tokensRemaining === 0`: show `ProGateSheet` with — **"Subscribe ₹99/mo"** (primary) + **"Watch ad (+20k tokens)"** (secondary, wired in 3.5.0, disabled in 3.3.0)
+
+### AI Usage Progress Bar — ProfilePage
+- [ ] The Pro promo banner on ProfilePage is **replaced** by an AI usage card once user is Pro
+- [ ] Free users see the same card below the Pro promo banner
+- [ ] Card layout: icon · "AI this month" heading · tokens display line · progress bar · "Ad" chip button
+  - **Free:** `12,450 / 100,000 tokens` · bar fills toward 100% · "Ad" chip calls `showRewardedAd()` (wired in 3.5.0, disabled in 3.3.0)
+  - **Pro:** `12,450 tokens used` · bar is informational (never full-red) · no Ad chip
+- [ ] Bar colour: green 0–60% → amber 60–85% → red 85–100% (free only; Pro bar always primary colour)
+- [ ] Pro upgraded state: Pro banner is **hidden**, replaced entirely by this usage card
 
 ### Import / Export (Pro gate)
 - [ ] **Export (Pro):** full JSON dump of all tables + per-table CSV; delivered via `@capacitor/share` share sheet
@@ -372,81 +383,93 @@ Current production version: **3.0.0**. This document plans the path to **3.5.0**
 
 ---
 
-## 3.4.0 — Cloud Backup + Restore (Pro)
-*Goal: let Pro users back up and restore their full local SQLite database to Firebase Storage. No real-time sync — explicit backup/restore only.*
+## 3.4.0 — Peer-to-Peer App Transfer
+*Goal: let users move their complete Patty data to a new device with zero cloud dependency. Works via a local file that is shared device-to-device (AirDrop, Nearby Share, cable, or any share target).*
 
-### Backup
-- [ ] "Back up now" button in AccountPage → Data card (Pro only)
-- [ ] Serialises entire SQLite database to JSON (all tables, all rows)
-- [ ] Uploads to Firebase Storage: `users/{uid}/backups/latest.json` (overwrites) + a dated snapshot `users/{uid}/backups/{date}.json`
-- [ ] Last backed-up timestamp written to `firestore/users/{uid}/last_backup`
-- [ ] AccountPage shows: last backup date · "Back up now" button
+### Export ("Save my data")
+- [ ] "Export data" button in AccountPage → Data card (available to all users, free and Pro)
+- [ ] Serialises all SQLite tables to a single JSON file: `patty-backup-{date}.patty`
+- [ ] File delivered via `@capacitor/share` Share Sheet — user picks destination: Files, Drive, Nearby Share, AirDrop, messaging app, USB, etc.
+- [ ] No upload, no server, no account needed
+- [ ] File format: `{ version: number, exportedAt: string, tables: { [tableName]: row[] } }`
 
-### Restore
-- [ ] "Restore from backup" button in AccountPage → Data card (Pro only)
-- [ ] Downloads `users/{uid}/backups/latest.json` from Firebase Storage
-- [ ] Shows confirmation alert: "This will replace all local data. Continue?"
-- [ ] On confirm: wipes local SQLite tables, re-inserts all rows from backup JSON, re-runs any missing migrations
-- [ ] Success toast; app reloads to Home
+### Import ("Restore on this device")
+- [ ] "Import data" button in AccountPage → Data card (free and Pro)
+- [ ] Opens native file picker filtered to `.patty` and `.json`
+- [ ] Validates format version; shows a summary alert: "Found X weight entries, Y food logs, Z recipes — restore?"
+- [ ] Two modes selectable in alert:
+  - **Merge** — appends rows, skips duplicates by `id`; safe for partial restores
+  - **Replace** — wipes local tables then restores from file; confirmation required
+- [ ] Success toast + app reloads to Home
+- [ ] Migration gap handling: if file `version` is older, run any missing migrations before inserting
 
-### Firebase Storage Rules
-- [ ] `allow read, write: if request.auth.uid == uid` — users can only access their own backup files
+### QR Device-to-Device Transfer (Pro)
+- [ ] Pro-only convenience mode: generates a QR code on the source device that encodes a local Wi-Fi direct URL
+- [ ] Other device scans QR from within Patty → downloads file over local network → auto-imports in Merge mode
+- [ ] No internet required — works purely on the same Wi-Fi network or hotspot
+- [ ] Implementation: `@capacitor-community/http` for local server + `@capacitor-community/barcode-scanner` for QR scan
 
 ---
 
 ## 3.5.0 — AdMob Integration
-*Goal: monetise the free user base with (1) passive banner ads on Home & Track and (2) user-initiated rewarded ads that earn 1 AI credit per view. Pro users see zero ads.*
+*Goal: monetise the free user base with (1) passive banner ads on Home & Track as mild friction and (2) user-initiated rewarded ads that refill the AI token budget. Pro users see zero ads.*
 
 ### AdMob Setup
 - [ ] `@capacitor-community/admob` Capacitor plugin integrated
 - [ ] Three ad unit IDs created in AdMob console:
   - `patty_banner_home` — banner on Home screen
   - `patty_banner_track` — banner on Track screen
-  - `patty_rewarded_ai` — rewarded ad for AI credit earn
+  - `patty_rewarded_ai` — rewarded ad for AI token refill
 - [ ] AdMob Mediation enabled (Meta Audience Network + AppLovin) to maximise fill rate and eCPM
 - [ ] SDK initialised on app start; Google test ad IDs used in debug builds (`import.meta.env.DEV`), real IDs in release
 - [ ] `AndroidManifest.xml` — AdMob App ID meta-data added
 
-### Banner Ads (Free users only)
+### Banner Ads (Free users only — mild friction)
 - [ ] Small banner (320×50) rendered at the bottom of Home screen for free users — above the FAB
 - [ ] Small banner rendered at the bottom of Track screen for free users — above the segment bar
 - [ ] `isPro` flag passed to both pages; banner component unmounts immediately when Pro activates
 - [ ] No banners on Recipes, Plan, Habits, Profile, or any modal — only Home & Track
 - [ ] Banner never overlaps interactive elements; safe-area insets respected
 
-### Rewarded Ads (Free users — earn AI credits)
-- [ ] `showRewardedAd()` in `useCreditBalance` — loads `RewardedAd`, shows it; on `onRewarded` callback calls `earnCredits(1)`; resolves `true` on reward, `false` on skip/error
-- [ ] Pro users: `showRewardedAd` is a no-op, never called
+### Rewarded Ads (Free users — refill AI token budget)
+- [ ] `showRewardedAd()` in `useAITokens` — loads `RewardedAd`, shows it; on `onRewarded` callback calls `earnTokens(20000)` (+20,000 tokens); resolves `true` on reward, `false` on skip/error
+- [ ] Pro users: `showRewardedAd` is a no-op, never called, "Ad" chip hidden on Profile
 - [ ] Own-key users: same no-op path
 
+### Profile Progress Bar — "Ad" Chip Wired
+- [ ] "Ad" chip button in the Profile AI usage card now active
+- [ ] Tapping calls `showRewardedAd()`; on success progress bar visibly reduces; toast "+20,000 tokens added"
+- [ ] If ad fails to load: toast "Couldn't load ad — try again later"
+- [ ] Chip hidden for Pro users and own-key users
+
 ### ProGateSheet — Rewarded CTA Wired
-- [ ] "Watch a short video (+1 credit)" button in `ProGateSheet` now active
+- [ ] "Watch a short video (+20k tokens)" button in `ProGateSheet` now active for AI gates
 - [ ] Tapping calls `showRewardedAd()`; on success closes the sheet and re-triggers the original AI action automatically
 - [ ] If ad fails to load: toast "Couldn't load ad — try again later"
-- [ ] Button hidden entirely for Pro users and own-key users
+- [ ] Button hidden for Pro users and own-key users
 
 ### Ad Policy
 - [ ] **Banners only on Home & Track** — the two highest-traffic screens
 - [ ] **No interstitials. Ever.** — never on navigation, never on tab switch
-- [ ] **Rewarded ads are always user-initiated** — only from ProGateSheet, never automatic
+- [ ] **Rewarded ads are always user-initiated** — from ProGateSheet or the Profile "Ad" chip only, never automatic
 - [ ] Pro upgrade always the primary CTA alongside the ad option — never hidden behind it
 
 ---
 
 ## Post-3.5.0 Backlog
 
-### AI Credit Top-up Packs (one-time IAP)
-Revenue supplement for power users who need more credits between monthly cycles.
+### AI Token Top-up Packs (one-time IAP)
+Revenue supplement for free users who want more AI without subscribing.
 
-| Pack | Credits | India | Global |
+| Pack | Tokens | India | Global |
 |---|---|---|---|
-| Starter | 50 cr | ₹49 | $0.99 |
-| Standard | 150 cr | ₹99 | $1.99 |
-| Power | 400 cr | ₹199 | $3.99 |
+| Starter | +100k tokens | ₹49 | $0.99 |
+| Standard | +300k tokens | ₹99 | $1.99 |
+| Power | +1M tokens | ₹199 | $3.99 |
 
-- Credits granted immediately on purchase via RevenueCat non-consumable → consumable product type
-- Top-up credits carry over and never expire (unlike monthly Pro grant which resets)
-- Offer these only after 3.5.0 when credit system is live and well-tested
+- Tokens granted immediately on purchase via RevenueCat consumable product type
+- Top-up tokens stack on top of the monthly budget and carry over (never expire)
+- Offer these only after 3.5.0 when the token system is live and well-tested
 
 ---
 

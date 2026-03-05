@@ -16,11 +16,11 @@ import { checkmarkCircle, closeCircleOutline, ribbonOutline } from 'ionicons/ico
 
 // ── Feature comparison data ───────────────────────────────────────────────────
 const FEATURES: { label: string; free: boolean; pro: boolean }[] = [
-  { label: '300 AI credits / month',     free: false, pro: true },
-  { label: 'No ads — ever',              free: false, pro: true },
-  { label: 'Import / Export data',       free: false, pro: true },
-  { label: 'Cloud backup & restore',     free: false, pro: true },
-  { label: 'Priority support',           free: false, pro: true },
+  { label: 'Unlimited AI — no token limits', free: false, pro: true },
+  { label: 'No ads — ever',                  free: false, pro: true },
+  { label: 'Import / Export data',           free: false, pro: true },
+  { label: 'P2P device transfer (QR)',       free: false, pro: true },
+  { label: 'Priority support',              free: false, pro: true },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────

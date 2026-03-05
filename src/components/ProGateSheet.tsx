@@ -23,9 +23,9 @@ interface Props {
 }
 
 const BULLETS = [
-  '300 AI credits / month — no throttling',
-  'Earn 1 credit per ad as a free user',
+  'Unlimited AI — no token budget, ever',
   'Ad-free experience, always',
+  'P2P QR device transfer + Import / Export',
 ];
 
 const ProGateSheet: React.FC<Props> = ({ isOpen, onClose, featureName, isAIGate = false }) => {
@@ -143,7 +143,7 @@ const ProGateSheet: React.FC<Props> = ({ isOpen, onClose, featureName, isAIGate 
               } as React.CSSProperties}
             >
               <IonIcon icon={videocamOutline} slot="start" />
-              Watch ad for +1 credit
+              Watch ad (+20k tokens)
             </IonButton>
           </>
         )}
