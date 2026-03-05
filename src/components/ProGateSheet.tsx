@@ -23,8 +23,8 @@ interface Props {
 }
 
 const BULLETS = [
-  'Unlimited calls — no monthly quotas',
-  'Cloud backup & restore across devices',
+  '300 AI credits / month — no throttling',
+  'Earn 1 credit per ad as a free user',
   'Ad-free experience, always',
 ];
 
@@ -114,7 +114,7 @@ const ProGateSheet: React.FC<Props> = ({ isOpen, onClose, featureName, isAIGate 
           } as React.CSSProperties}
           onClick={() => { onClose(); history.push('/pro'); }}
         >
-          Subscribe — from $2.99/mo
+          Subscribe — from ₹99/mo
         </IonButton>
 
         {/* AI-gate secondary options */}
@@ -143,7 +143,7 @@ const ProGateSheet: React.FC<Props> = ({ isOpen, onClose, featureName, isAIGate 
               } as React.CSSProperties}
             >
               <IonIcon icon={videocamOutline} slot="start" />
-              Watch ad for 3 calls
+              Watch ad for +1 credit
             </IonButton>
           </>
         )}

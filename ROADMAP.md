@@ -1,7 +1,26 @@
-﻿# Patty — Roadmap (3.0.0)
+﻿# Patty — Roadmap (3.5.0)
 
 All versions prior to 2.0.0 are archived in the [`ROADMAP/`](ROADMAP/) folder.
-Current production version: **3.0.0**. This document plans the path to **3.0.0**.
+Current production version: **3.0.0**. This document plans the path to **3.5.0**.
+
+---
+
+## Product Philosophy
+
+- **App always feels free and premium at the same time** — no feature is locked, no data is ever hidden, no punitive gates.
+- **Free tier** = full app + banner ads on Home & Track + earn AI credits by watching rewarded ads (1 credit per ad). Zero free monthly AI credits — credits must be earned.
+- **Pro tier** = zero ads + 300 AI credits per month automatically.
+- **Auth is deferred** — no account required to use any part of the app. Authentication is triggered only when the user taps **Buy** on the ProPage. The app must feel fully functional before that moment.
+- **No punitive gates** — full log history is always visible, all tracking features always available, no data ever hidden behind a paywall.
+
+---
+
+## Pricing
+
+| Region | Monthly | Annual |
+|---|---|---|
+| India | ₹99 / month | ₹699 / year (save 41%) |
+| Global | $3.49 / month | $25 / year (save 40%) |
 
 ---
 
@@ -200,17 +219,16 @@ Current production version: **3.0.0**. This document plans the path to **3.0.0**
 | Feature | Free | Pro |
 |---|---|---|
 | All tracking — weight, water, sleep, food, workout | ✓ | ✓ |
+| Full log history — no limits, ever | ✓ | ✓ |
 | Habits, achievements, gamification, themes | ✓ | ✓ |
 | Manual recipe creation + meal planning + grocery list | ✓ | ✓ |
-| Log history visible | Last 90 days | Unlimited |
-| AI Macro Scan | Own key · 5 free/mo · rewarded ad | ✓ Unlimited |
-| AI Recipe Generator | Own key · quota · rewarded ad | ✓ Unlimited |
-| AI Week Planner | Own key · quota · rewarded ad | ✓ Unlimited |
+| AI features | Earn credits by watching rewarded ads (1 cr / ad) | 300 credits / month |
+| Banner ads | On Home & Track screens | **None** |
+| Rewarded ads | Available to earn credits | Not shown |
 | Import / Export (CSV + JSON) | ✗ | ✓ |
 | Cloud backup + restore | ✗ | ✓ |
-| Ad-free experience | ✗ | ✓ |
 
-**Pricing:** $2.99 / month · $19.99 / year (~$1.67/mo · saves 44%)
+**Pricing:** ₹99/mo · ₹699/yr (India) · $3.49/mo · $25/yr (Global)
 
 ### Pro Card — ProfilePage
 - [x] New `IonCard` inserted as the **first card** after the identity hero, before the Notifications row
@@ -230,14 +248,14 @@ Current production version: **3.0.0**. This document plans the path to **3.0.0**
 - [x] **Hero section:** large animated crown illustration (CSS keyframe spin/pulse), "Patty Pro" headline, tagline
 - [x] **Feature comparison list:** 6 rows — Unlimited AI calls · Unlimited log history · Cloud backup & restore · Import / Export · Ad-free · Priority support — each with ✓ Pro / ✗ Free columns
 - [x] **Plan selector card:** two chips — "Monthly · $2.99" / "Annual · $19.99 (save 44%)" — selected chip uses `--md-primary-container`; annual chip has a "Best value" badge
-- [x] **"Continue with Email" CTA:** opens a bottom sheet `IonModal` with a single email input + "Send magic link" button; tapping send calls Firebase Auth `sendSignInLinkToEmail` (wired in 3.1.0; in 3.0.0 shows a "Coming soon" toast)
+- [x] **"Buy" CTA:** primary action button labelled **"Buy"**; tapping triggers Firebase Auth email sign-in (wired in 3.1.0; in 3.0.0 shows a "Coming soon" toast); auth is never shown before this tap — the app is fully usable without an account
 - [x] **"Restore purchase" text link** below CTA
-- [x] **Logged-in free state** (when Firebase session exists but not Pro): shows user email chip at top; "Subscribe" CTA replaces "Continue with Email"; plan selector still visible
+- [x] **Logged-in free state** (when Firebase session exists but not Pro): shows user email chip at top; "Subscribe" CTA replaces "Buy"; plan selector still visible
 - [x] **Pro state:** page redirects to `/account` immediately
 
 ### ProGateSheet (`src/components/ProGateSheet.tsx`)
 - [x] Reusable `IonModal` with `initialBreakpoint=0.55`; accepts `featureName` prop that sets the contextual headline (e.g. "Unlock unlimited AI scans")
-- [x] Body: icon · headline · 3-bullet feature list · "Subscribe — from $2.99/mo" primary button (routes to `/pro`) · "Use own Gemini key" secondary link (AI gates only) · "Watch ad for 3 calls" tertiary link (AI gates only — visible but disabled in 3.0.0, wired in 3.5.0)
+- [x] Body: icon · headline · 3-bullet feature list · "Subscribe — from ₹99/mo" primary button (routes to `/pro`) · "Use own Gemini key" secondary link (AI gates only) · "Watch ad for 1 credit" tertiary link (AI gates only — visible but disabled in 3.0.0, wired in 3.5.0)
 
 ### Routing
 - [x] `/pro` and `/account` added to `App.tsx` as top-level `IonRoute`s (outside the tab shell)
@@ -245,7 +263,12 @@ Current production version: **3.0.0**. This document plans the path to **3.0.0**
 ---
 
 ## 3.1.0 — Firebase Auth (Magic Link)
-*Goal: passwordless email sign-in backed by Firebase Auth. No passwords, no OAuth, no Google sign-in complexity.*
+*Goal: passwordless email sign-in backed by Firebase Auth. Auth is triggered exclusively when the user taps "Buy" on ProPage — never before. The app is 100% functional without an account.*
+
+### Auth Trigger Flow
+- [ ] Tapping **"Buy"** on ProPage opens a bottom sheet `IonModal` with a single email input + "Send magic link" button
+- [ ] Auth sheet only appears at this moment — never on app launch, never on tab switch, never proactively
+- [ ] If user already has a Firebase session, "Buy" skips auth and goes straight to RevenueCat purchase (3.2.0)
 
 ### Firebase Setup
 - [ ] `@capacitor-firebase/authentication` Capacitor plugin integrated
@@ -257,7 +280,7 @@ Current production version: **3.0.0**. This document plans the path to **3.0.0**
 - [ ] `user` — Firebase `User | null`
 - [ ] `loading` boolean
 - [ ] `sendMagicLink(email: string)` — calls `sendSignInLinkToEmail`; saves `email` to localStorage for the completion step
-- [ ] `completeMagicLink(email: string, link: string)` — calls `signInWithEmailLink`; on success writes `firebase_uid` to SQLite `settings`
+- [ ] `completeMagicLink(email: string, link: string)` — calls `signInWithEmailLink`; on success writes `firebase_uid` to SQLite `settings`; then immediately proceeds to RevenueCat purchase
 - [ ] `signOut()` — Firebase `signOut()` + clears local `firebase_uid` + clears RevenueCat identity (3.2.0)
 - [ ] Deep link handler in `App.tsx` — on app resume with a magic link URL, reads saved email from localStorage, calls `completeMagicLink`, routes to `/pro` on success
 
@@ -269,7 +292,7 @@ Current production version: **3.0.0**. This document plans the path to **3.0.0**
 
 ### AccountPage Basic Shell (`src/pages/AccountPage.tsx`)
 - [ ] Route: `/account`; full-screen page with back button
-- [ ] **Signed-in free state:** avatar initial circle · email · "Free" chip · plan selector (mirrors ProPage) · "Subscribe" CTA
+- [ ] **Signed-in free state:** avatar initial circle · email · "Free" chip · plan selector (mirrors ProPage) · "Buy" CTA
 - [ ] **Pro state:** avatar · email · ✦ Pro chip · renewal date · "Manage subscription" (Play Store URL) · "Restore purchases" · "Sign out" · "Delete account" (confirm alert → Firebase delete + local UID clear)
 - [ ] Import / Export card (gated; shows `ProGateSheet` for free users) — wired in 3.4.0
 
@@ -280,8 +303,13 @@ Current production version: **3.0.0**. This document plans the path to **3.0.0**
 
 ### RevenueCat Setup
 - [ ] `@revenuecat/purchases-capacitor` Capacitor plugin integrated
-- [ ] Two subscription products created in Play Console: `patty_pro_monthly` ($2.99/mo) · `patty_pro_annual` ($19.99/yr)
-- [ ] RevenueCat project created; products + entitlement `pro` configured; Firebase extension enabled (auto-writes `stripeRole` / custom claim on purchase)
+- [ ] Four subscription products created in Play Console:
+  - `patty_pro_monthly_in` (₹99/mo — India)
+  - `patty_pro_annual_in` (₹699/yr — India)
+  - `patty_pro_monthly` ($3.49/mo — Global)
+  - `patty_pro_annual` ($25/yr — Global)
+- [ ] Play Console country-level price overrides set for Tier C/D markets (Brazil, Mexico, Turkey, Indonesia, Philippines, Vietnam)
+- [ ] RevenueCat project created; products + entitlement `pro` configured; Firebase extension enabled (auto-writes custom claim on purchase)
 
 ### `src/hooks/useRevenueCat.ts`
 - [ ] `Purchases.configure({ apiKey: RC_PUBLIC_KEY, appUserID: firebaseUID })` — called on app init after Firebase session resolves
@@ -298,8 +326,9 @@ Current production version: **3.0.0**. This document plans the path to **3.0.0**
 - [ ] Returns: `{ isPro, isSignedIn, user, renewalDate, loading }`
 
 ### Purchase Flow
-- [ ] ProPage "Subscribe" CTA and AccountPage CTA both call `purchaseMonthly()` / `purchaseAnnual()` based on selected plan chip
-- [ ] On success: `useProStatus.isPro` flips `true` instantly; ProPage redirects to `/account`; success toast "Welcome to Patty Pro ✦"
+- [ ] ProPage **"Buy"** CTA and AccountPage CTA both call `purchaseMonthly()` / `purchaseAnnual()` based on selected plan chip
+- [ ] RevenueCat automatically selects the correct regional product based on Play Store storefront locale — no manual country detection needed
+- [ ] On success: `useProStatus.isPro` flips `true` instantly; ProPage redirects to `/account`; success toast "Welcome to Patty Pro ✦"; banner ads removed immediately
 - [ ] On error: toast with RevenueCat error message; no crash
 
 ### Pro Badge
@@ -308,27 +337,33 @@ Current production version: **3.0.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 3.3.0 — Feature Gates + 90-Day History Limit
-*Goal: enforce the Free vs Pro split across the app. Data is never deleted — gates only hide or block access.*
+## 3.3.0 — AI Credit System & Feature Gates
+*Goal: enforce the Free vs Pro AI split with a credit-based system. No punitive gates — full history always visible, all tracking always free. The only gate is AI usage.*
 
-### `useProStatus` gates applied across the app
+### Core Principle
+- **No history limits. No feature removal. No data hidden.** The app is identical for free and Pro users except: (1) Pro users have no ads, (2) Pro users get 300 AI credits/month automatically.
+- Free users start with **zero AI credits**. Credits are earned exclusively by watching rewarded ads — 1 credit per completed ad.
 
-**AI features (all three: Macro Scan · Recipe Generator · Week Planner)**
-- [ ] If `isPro`: calls go through unlimited, no quota check
-- [ ] If own Gemini key set: quota bypassed, calls go direct, no ads
-- [ ] If free + no key: `useAIQuota` checks remaining calls; if > 0 allow and decrement; if 0 show `ProGateSheet` with ad option (wired in 3.5.0, shows disabled link for now)
+### `src/hooks/useCreditBalance.ts` (replaces `useAIQuota`)
+- [ ] `credits` — reads `ai_credits` from SQLite `settings`; starts at 0 for new users
+- [ ] `consumeCredit(cost: number)` — deducts from balance, floor 0, persists to SQLite
+- [ ] `earnCredits(n: number)` — adds n credits (called on rewarded ad completion), persists to SQLite
+- [ ] `resetMonthlyPro()` — sets credits to 300 on first day of each month for Pro users; called on app resume
+- [ ] No monthly reset for free users — credits only come from watching ads
+- [ ] DB migration v17: `ai_credits INTEGER DEFAULT 0` in `settings` table
 
-### `src/hooks/useAIQuota.ts`
-- [ ] `callsRemaining` — reads `ai_calls_used` and `ai_calls_reset_date` from SQLite; auto-resets to 5 if reset date is in the past
-- [ ] `consumeCall()` — decrements `ai_calls_used`, persists to SQLite
-- [ ] `earnCalls(n)` — decrements `ai_calls_used` by n (net gain), floor 0
-- [ ] Monthly free cap: **5 calls / month**; reset date = 1st of next month
+### Credit cost per AI feature
+| Feature | Credits | Reasoning |
+|---|---|---|
+| Macro Scan 📸 | 1 cr | Most frequent, cheapest API call |
+| Recipe Generator ✨ | 2 cr | Larger output, less frequent |
+| Week Planner 📅 | 3 cr | Heaviest prompt, rarest |
 
-### 90-Day History Limit (Free)
-- [ ] All list views (Weight / Water / Sleep / Food / Workout history modals) apply a date filter for free users: `date >= today − 90 days`
-- [ ] Entries older than 90 days are replaced by a single locked row at the bottom of each list: "🔒 Older entries hidden — upgrade to Pro to view full history" with a "See plans" button
-- [ ] Charts and trends use only the 90-day window for free users; `useProStatus.isPro` passed as a prop to chart hooks
-- [ ] Data is **never deleted from SQLite** — upgrading immediately reveals all history, no migration needed
+### AI Gate Logic
+- [ ] If `isPro`: deduct from 300/month pool; show remaining credit count in AI feature header
+- [ ] If own Gemini key set: bypass credit system entirely; calls go direct, no credits consumed
+- [ ] If free + credits > 0: allow call, deduct credits
+- [ ] If free + credits = 0: show `ProGateSheet` with two options — **"Subscribe ₹99/mo"** (primary) + **"Watch ad for 1 credit"** (secondary, wired in 3.5.0, disabled button in 3.3.0)
 
 ### Import / Export (Pro gate)
 - [ ] **Export (Pro):** full JSON dump of all tables + per-table CSV; delivered via `@capacitor/share` share sheet
@@ -359,34 +394,61 @@ Current production version: **3.0.0**. This document plans the path to **3.0.0**
 
 ---
 
-## 3.5.0 — Rewarded Ads (AdMob)
-*Goal: give free users a non-paywalled path to more AI calls via user-initiated rewarded video ads. No banners. No interstitials. Ever.*
+## 3.5.0 — AdMob Integration
+*Goal: monetise the free user base with (1) passive banner ads on Home & Track and (2) user-initiated rewarded ads that earn 1 AI credit per view. Pro users see zero ads.*
 
 ### AdMob Setup
 - [ ] `@capacitor-community/admob` Capacitor plugin integrated
-- [ ] Rewarded ad unit ID created in AdMob console: `patty_rewarded_ai`
-- [ ] SDK initialised on app start; test ad IDs used in debug builds, real IDs in release
+- [ ] Three ad unit IDs created in AdMob console:
+  - `patty_banner_home` — banner on Home screen
+  - `patty_banner_track` — banner on Track screen
+  - `patty_rewarded_ai` — rewarded ad for AI credit earn
+- [ ] AdMob Mediation enabled (Meta Audience Network + AppLovin) to maximise fill rate and eCPM
+- [ ] SDK initialised on app start; Google test ad IDs used in debug builds (`import.meta.env.DEV`), real IDs in release
 - [ ] `AndroidManifest.xml` — AdMob App ID meta-data added
 
-### `useAIQuota` — Ad Integration
-- [ ] `showRewardedAd()` — loads `RewardedAd`, shows it; on `onRewarded` callback calls `earnCalls(3)`; resolves `true` on reward, `false` on dismiss/error
-- [ ] Pro users: `showRewardedAd` is a no-op, returns `true` (never requested)
+### Banner Ads (Free users only)
+- [ ] Small banner (320×50) rendered at the bottom of Home screen for free users — above the FAB
+- [ ] Small banner rendered at the bottom of Track screen for free users — above the segment bar
+- [ ] `isPro` flag passed to both pages; banner component unmounts immediately when Pro activates
+- [ ] No banners on Recipes, Plan, Habits, Profile, or any modal — only Home & Track
+- [ ] Banner never overlaps interactive elements; safe-area insets respected
+
+### Rewarded Ads (Free users — earn AI credits)
+- [ ] `showRewardedAd()` in `useCreditBalance` — loads `RewardedAd`, shows it; on `onRewarded` callback calls `earnCredits(1)`; resolves `true` on reward, `false` on skip/error
+- [ ] Pro users: `showRewardedAd` is a no-op, never called
 - [ ] Own-key users: same no-op path
 
-### ProGateSheet — Ad CTA Wired
-- [ ] "Watch a short video (+3 calls)" button in `ProGateSheet` now active for AI gates
-- [ ] Tapping calls `useAIQuota.showRewardedAd()`; on success closes the sheet and re-triggers the original AI action automatically
+### ProGateSheet — Rewarded CTA Wired
+- [ ] "Watch a short video (+1 credit)" button in `ProGateSheet` now active
+- [ ] Tapping calls `showRewardedAd()`; on success closes the sheet and re-triggers the original AI action automatically
 - [ ] If ad fails to load: toast "Couldn't load ad — try again later"
-- [ ] Button hidden entirely for Pro users and own-key users (no ad path needed)
+- [ ] Button hidden entirely for Pro users and own-key users
 
 ### Ad Policy
-- [ ] Rewarded video only — **no banners, no interstitials, ever**
-- [ ] Ad is always **user-initiated** — never shown on screen transition, navigation, or background event
-- [ ] Pro upgrade always prominently offered alongside (never hidden behind) the ad option
+- [ ] **Banners only on Home & Track** — the two highest-traffic screens
+- [ ] **No interstitials. Ever.** — never on navigation, never on tab switch
+- [ ] **Rewarded ads are always user-initiated** — only from ProGateSheet, never automatic
+- [ ] Pro upgrade always the primary CTA alongside the ad option — never hidden behind it
 
 ---
 
 ## Post-3.5.0 Backlog
+
+### AI Credit Top-up Packs (one-time IAP)
+Revenue supplement for power users who need more credits between monthly cycles.
+
+| Pack | Credits | India | Global |
+|---|---|---|---|
+| Starter | 50 cr | ₹49 | $0.99 |
+| Standard | 150 cr | ₹99 | $1.99 |
+| Power | 400 cr | ₹199 | $3.99 |
+
+- Credits granted immediately on purchase via RevenueCat non-consumable → consumable product type
+- Top-up credits carry over and never expire (unlike monthly Pro grant which resets)
+- Offer these only after 3.5.0 when credit system is live and well-tested
+
+---
 
 - iOS App Store submission (requires macOS / Xcode build machine)
 - Apple Health two-way sync

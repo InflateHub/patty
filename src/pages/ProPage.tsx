@@ -16,11 +16,10 @@ import { checkmarkCircle, closeCircleOutline, ribbonOutline } from 'ionicons/ico
 
 // ── Feature comparison data ───────────────────────────────────────────────────
 const FEATURES: { label: string; free: boolean; pro: boolean }[] = [
-  { label: 'Unlimited AI calls',        free: false, pro: true },
-  { label: 'Unlimited log history',      free: false, pro: true },
-  { label: 'Cloud backup & restore',     free: false, pro: true },
+  { label: '300 AI credits / month',     free: false, pro: true },
+  { label: 'No ads — ever',              free: false, pro: true },
   { label: 'Import / Export data',       free: false, pro: true },
-  { label: 'Ad-free experience',         free: false, pro: true },
+  { label: 'Cloud backup & restore',     free: false, pro: true },
   { label: 'Priority support',           free: false, pro: true },
 ];
 
@@ -75,7 +74,7 @@ const ProPage: React.FC = () => {
             fontFamily: 'var(--md-font)',
             color: 'var(--md-on-surface-variant)',
           }}>
-            Unlimited AI · cloud backup · no ads
+            Unlimited AI · no ads & more
           </p>
         </div>
 
@@ -148,7 +147,7 @@ const ProPage: React.FC = () => {
             }}
           >
             <p style={{ margin: '0 0 2px', fontSize: 'var(--md-label-lg)', fontFamily: 'var(--md-font)', fontWeight: 700, color: plan === 'monthly' ? 'var(--md-on-primary-container)' : 'var(--md-on-surface)' }}>Monthly</p>
-            <p style={{ margin: 0, fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)', color: plan === 'monthly' ? 'var(--md-on-primary-container)' : 'var(--md-on-surface-variant)' }}>$2.99 / month</p>
+            <p style={{ margin: 0, fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)', color: plan === 'monthly' ? 'var(--md-on-primary-container)' : 'var(--md-on-surface-variant)' }}>₹99 / month</p>
           </div>
 
           {/* Annual */}
@@ -187,7 +186,7 @@ const ProPage: React.FC = () => {
               Best value
             </div>
             <p style={{ margin: '0 0 2px', fontSize: 'var(--md-label-lg)', fontFamily: 'var(--md-font)', fontWeight: 700, color: plan === 'annual' ? 'var(--md-on-primary-container)' : 'var(--md-on-surface)' }}>Annual</p>
-            <p style={{ margin: 0, fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)', color: plan === 'annual' ? 'var(--md-on-primary-container)' : 'var(--md-on-surface-variant)' }}>$19.99 / year · save 44%</p>
+            <p style={{ margin: 0, fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)', color: plan === 'annual' ? 'var(--md-on-primary-container)' : 'var(--md-on-surface-variant)' }}>$25 / year · save 40%</p>
           </div>
         </div>
 
@@ -206,7 +205,7 @@ const ProPage: React.FC = () => {
             } as React.CSSProperties}
             onClick={() => setToast(true)}
           >
-            Continue with Email
+            Buy
           </IonButton>
           <p
             style={{
