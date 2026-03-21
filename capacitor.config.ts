@@ -21,6 +21,12 @@ const config: CapacitorConfig = {
       iconColor: '#5C7A6E',
       // sound: omit — 'beep.wav' does not exist in res/raw; system default is used
     },
+    GoogleAuth: {
+      scopes: ['profile', 'email'],
+      clientId: '39988707420-5fuk2vur22r6f750cdfm6o5m8rkhlvd4.apps.googleusercontent.com',
+      androidClientId: '39988707420-ea091hdn2ljjvh9pju5sfh1abqbp12us.apps.googleusercontent.com',
+      forceCodeForRefreshToken: true,
+    },
   },
 };
 

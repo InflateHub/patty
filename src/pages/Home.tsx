@@ -1,5 +1,5 @@
 /* Dashboard — 2.8.0 */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   IonButton,
@@ -15,7 +15,7 @@ import {
   IonToolbar,
   useIonViewWillEnter,
 } from '@ionic/react';
-import { personCircleOutline, banOutline, ribbonOutline, sparklesOutline } from 'ionicons/icons';
+import { personCircleOutline, sparkles, ribbonOutline, flashOutline, starOutline } from 'ionicons/icons';
 
 import { useWeightLog } from '../hooks/useWeightLog';
 import { useWaterLog } from '../hooks/useWaterLog';
@@ -62,6 +62,13 @@ const Home: React.FC = () => {
   const { habits, reload: reloadHabits } = useHabits();
 
   const [heatmap, setHeatmap] = useState<HeatmapMap>(new Map());
+
+  // Animated Pro button state — icons merge into pill after entry
+  const [proReady, setProReady] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setProReady(true), 1100);
+    return () => clearTimeout(t);
+  }, []);
 
   const loadHeatmap = useCallback(async () => {
     const oldest = buildDateRange(HEATMAP_DAYS)[0];
@@ -145,50 +152,119 @@ const Home: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonTitle>Patty</IonTitle>
-          <IonButtons slot="end">
-            {/* Wrapper for animated Pro badge */}
-            <div style={{ position: 'relative', display: 'inline-flex' }}>
-              <IonButton onClick={() => history.push('/tabs/profile')}>
-                <IonIcon
-                  icon={personCircleOutline}
-                  style={{ fontSize: 26, color: 'var(--md-on-surface-variant)' }}
-                />
-              </IonButton>
-              {/* Rotating Pro badge */}
+          <IonButtons slot="end" style={{ display: 'flex', alignItems: 'center', gap: 2, paddingRight: 4 }}>
+            {/* Animated Go Pro pill */}
+            <div style={{ position: 'relative', height: 36, display: 'flex', alignItems: 'center' }}>
+              {/* Icon 1 — sparkles (rightmost, enters first) */}
               <div style={{
-                position: 'absolute',
-                top: 4,
-                right: 4,
-                width: 18,
-                height: 18,
-                borderRadius: '50%',
-                background: 'var(--md-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
+                position: 'absolute', right: 0,
+                width: 30, height: 30, borderRadius: '50%',
+                background: 'color-mix(in srgb, var(--md-primary-container) 90%, transparent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                 pointerEvents: 'none',
-                border: '1.5px solid var(--md-surface)',
+                animation: proReady
+                  ? 'hm-icon1-merge 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards'
+                  : 'hm-icon-in 0.45s 0.2s cubic-bezier(0.34,1.56,0.64,1) both',
               }}>
-                {([banOutline, ribbonOutline, sparklesOutline] as string[]).map((icon, i) => (
-                  <IonIcon
-                    key={i}
-                    icon={icon}
-                    style={{
-                      position: 'absolute',
-                      fontSize: 10,
-                      color: 'var(--md-on-primary)',
-                      opacity: 0,
-                      animation: 'pro-icon-rotate 4.5s ease-in-out infinite',
-                      animationDelay: `${i * 1.5}s`,
-                    }}
-                  />
-                ))}
+                <IonIcon icon={sparkles} style={{ fontSize: 14, color: 'var(--md-primary)' }} />
               </div>
+              {/* Icon 2 — star */}
+              <div style={{
+                position: 'absolute', right: 34,
+                width: 30, height: 30, borderRadius: '50%',
+                background: 'color-mix(in srgb, var(--md-secondary-container, var(--md-primary-container)) 85%, transparent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                pointerEvents: 'none',
+                animation: proReady
+                  ? 'hm-icon2-merge 0.5s 0.04s cubic-bezier(0.34,1.56,0.64,1) forwards'
+                  : 'hm-icon-in 0.45s 0.38s cubic-bezier(0.34,1.56,0.64,1) both',
+              }}>
+                <IonIcon icon={starOutline} style={{ fontSize: 14, color: 'var(--md-on-surface-variant)' }} />
+              </div>
+              {/* Icon 3 — flash (leftmost, enters last) */}
+              <div style={{
+                position: 'absolute', right: 68,
+                width: 30, height: 30, borderRadius: '50%',
+                background: 'color-mix(in srgb, var(--md-tertiary-container, var(--md-primary-container)) 80%, transparent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                pointerEvents: 'none',
+                animation: proReady
+                  ? 'hm-icon3-merge 0.5s 0.08s cubic-bezier(0.34,1.56,0.64,1) forwards'
+                  : 'hm-icon-in 0.45s 0.56s cubic-bezier(0.34,1.56,0.64,1) both',
+              }}>
+                <IonIcon icon={flashOutline} style={{ fontSize: 14, color: 'var(--md-on-surface-variant)' }} />
+              </div>
+              {/* Merged pill */}
+              {proReady && (
+                <div
+                  onClick={() => history.push('/pro')}
+                  style={{
+                    position: 'absolute', right: 0,
+                    height: 32,
+                    borderRadius: 'var(--md-shape-full)',
+                    background: 'linear-gradient(110deg, var(--md-primary), color-mix(in srgb, var(--md-primary) 70%, var(--md-primary-container)))',
+                    border: '1px solid color-mix(in srgb, var(--md-primary) 50%, transparent)',
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '0 13px',
+                    cursor: 'pointer',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    boxShadow: '0 3px 12px color-mix(in srgb, var(--md-primary) 38%, transparent)',
+                    animation: 'hm-pill-in 0.55s cubic-bezier(0.34,1.56,0.64,1) both',
+                  }}
+                >
+                  {/* Shimmer sweep */}
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)',
+                    animation: 'hm-shimmer 3.2s 1s ease-in-out infinite',
+                  }} />
+                  <IonIcon icon={ribbonOutline} style={{ fontSize: 13, color: 'var(--md-on-primary)', position: 'relative' }} />
+                  <span style={{ fontSize: 11, fontFamily: 'var(--md-font)', fontWeight: 800, color: 'var(--md-on-primary)', letterSpacing: 1, textTransform: 'uppercase', position: 'relative' }}>Go Pro</span>
+                </div>
+              )}
+              {/* Reserve space so toolbar doesn't jump */}
+              <div style={{ width: proReady ? 95 : 98, height: 30, flexShrink: 0 }} />
             </div>
+            {/* Profile icon */}
+            <IonButton onClick={() => history.push('/tabs/profile')}>
+              <IonIcon icon={personCircleOutline} style={{ fontSize: 26, color: 'var(--md-on-surface-variant)' }} />
+            </IonButton>
           </IonButtons>
-          {/* Pro badge icon keyframe */}
-          <style>{`@keyframes pro-icon-rotate{0%{opacity:0;}4%{opacity:1;}29%{opacity:1;}33%{opacity:0;}100%{opacity:0;}}`}</style>
+          {/* Home page Pro button keyframes */}
+          <style>{`
+            @keyframes hm-icon-in {
+              from { opacity: 0; transform: translateY(-10px) scale(0.5); }
+              to   { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            @keyframes hm-icon1-merge {
+              0%   { opacity: 1; transform: translateX(0) scale(1); }
+              55%  { opacity: 0.5; transform: translateX(20px) scale(0.65); }
+              100% { opacity: 0; transform: translateX(14px) scale(0); }
+            }
+            @keyframes hm-icon2-merge {
+              0%   { opacity: 1; transform: translateX(0) scale(1); }
+              55%  { opacity: 0.5; transform: translateX(36px) scale(0.65); }
+              100% { opacity: 0; transform: translateX(28px) scale(0); }
+            }
+            @keyframes hm-icon3-merge {
+              0%   { opacity: 1; transform: translateX(0) scale(1); }
+              55%  { opacity: 0.5; transform: translateX(52px) scale(0.65); }
+              100% { opacity: 0; transform: translateX(42px) scale(0); }
+            }
+            @keyframes hm-pill-in {
+              0%   { opacity: 0; transform: scale(0.35); }
+              65%  { opacity: 1; transform: scale(1.06); }
+              100% { opacity: 1; transform: scale(1); }
+            }
+            @keyframes hm-shimmer {
+              0%   { transform: translateX(-100%); }
+              60%, 100% { transform: translateX(220%); }
+            }
+          `}</style>
         </IonToolbar>
       </IonHeader>
 

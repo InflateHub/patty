@@ -9,15 +9,15 @@
  * Firebase Console → Authentication → Settings → Authorised domains.
  */
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { getAuth, Auth, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY            ?? 'REPLACE_WITH_YOUR_API_KEY',
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN        ?? 'REPLACE_WITH_YOUR_AUTH_DOMAIN',
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID         ?? 'REPLACE_WITH_YOUR_PROJECT_ID',
-  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET     ?? 'REPLACE_WITH_YOUR_STORAGE_BUCKET',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? 'REPLACE_WITH_YOUR_MESSAGING_SENDER_ID',
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID             ?? 'REPLACE_WITH_YOUR_APP_ID',
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY            ?? 'AIzaSyAZOxf45NPATEbgmDi_CDsBarvearQunfo',
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN        ?? 'stride-11129.firebaseapp.com',
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID         ?? 'stride-11129',
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET     ?? 'stride-11129.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ?? '39988707420',
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID             ?? '1:39988707420:web:8d2ac03ec82340a7072699',
 };
 
 // Avoid duplicate app initialisation during hot-reload
@@ -26,6 +26,15 @@ const app: FirebaseApp = getApps().length === 0
   : getApps()[0];
 
 export const auth: Auth = getAuth(app);
+
+/**
+ * signInWithGoogleCredential — takes the idToken from capacitor-google-auth
+ * and signs into Firebase with a Google credential.
+ */
+export async function signInWithGoogleCredential(idToken: string) {
+  const credential = GoogleAuthProvider.credential(idToken);
+  return signInWithCredential(auth, credential);
+}
 
 /** Continuation URL sent inside the magic link email.
  *  Must match an authorised domain in Firebase Console. */

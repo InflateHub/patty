@@ -2,6 +2,19 @@
 
 ---
 
+## [3.2.0] — RevenueCat + Google Sign-In
+*Goal: replace manual paywall logic with RevenueCat SDK; authenticate users with Google before purchasing; show dynamic Pro tier across the app.*
+
+- [x] **`src/hooks/useRevenueCat.ts`** — new hook; configures RC on native platforms, identifies user by Firebase UID, listens for `CustomerInfo` updates, exposes `isPro`, `refreshCustomerInfo`, `restorePurchases`
+- [x] **`src/App.tsx`** — `RevenueCatInitializer` component mounts the RC hook alongside the existing auth handler so RC is configured as soon as the app starts
+- [x] **`src/pages/ProPage.tsx`** — rewired to RC: "Get Pro" opens native `RevenueCatUI.presentPaywall()`; post-sign-in also opens paywall; "Manage Subscription" opens `RevenueCatUI.presentCustomerCenter()`; `isPro` state derived from `useRevenueCat`; pricing updated to ₹99/month (~~₹149~~) and ₹999/year (~~₹1499~~)
+- [x] **`src/hooks/useAuth.ts`** — `signInWithGoogle()` added: native → `capacitor-google-auth` plugin; web → `signInWithPopup`; exported and used in ProPage sign-in sheet
+- [x] **`src/pages/ProfilePage.tsx`** — tier badge dynamically shows "✦ Pro" (primary colour) or "Free"; "Manage Subscription" list item added to App Info section (visible only when `isPro`)
+- [x] **`android/app/src/main/AndroidManifest.xml`** — `launchMode` changed to `singleTop` (required by RevenueCat / Google Play Billing)
+- [x] **`capacitor.config.ts`** — `GoogleAuth` plugin block with real web + Android OAuth client IDs
+
+---
+
 ## [3.1.0] — Firebase Auth (Magic Link)
 *Goal: passwordless email sign-in triggered only when the user taps "Buy". App remains fully functional without an account.*
 

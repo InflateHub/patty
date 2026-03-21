@@ -17,12 +17,16 @@ import {
   onAuthStateChanged,
   sendSignInLinkToEmail,
   signInWithEmailLink,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   isSignInWithEmailLink,
   User,
   ActionCodeSettings,
 } from 'firebase/auth';
-import { auth, EMAIL_KEY, MAGIC_LINK_URL } from '../utils/firebase';
+import { Capacitor } from '@capacitor/core';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { auth, EMAIL_KEY, MAGIC_LINK_URL, signInWithGoogleCredential } from '../utils/firebase';
 import { getDb } from '../db/database';
 
 const ACTION_CODE_SETTINGS: ActionCodeSettings = {
@@ -101,6 +105,32 @@ export function useAuth() {
   }
 
   /**
+   * signInWithGoogle — uses capacitor-google-auth to get a Google ID token
+   * natively on device, then exchanges it for a Firebase credential.
+   */
+  async function signInWithGoogle(): Promise<User> {
+    // On native (Android/iOS) use capacitor-google-auth for native account picker.
+    // On web fall back to Firebase signInWithPopup which handles COOP correctly.
+    if (Capacitor.isNativePlatform()) {
+      GoogleAuth.initialize({
+        clientId: '39988707420-5fuk2vur22r6f750cdfm6o5m8rkhlvd4.apps.googleusercontent.com',
+        scopes: ['profile', 'email'],
+        grantOfflineAccess: true,
+      });
+      const googleUser = await GoogleAuth.signIn();
+      const idToken = googleUser.authentication.idToken;
+      const result = await signInWithGoogleCredential(idToken);
+      return result.user;
+    } else {
+      const provider = new GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
+      const result = await signInWithPopup(auth, provider);
+      return result.user;
+    }
+  }
+
+  /**
    * signOut — clears Firebase session + removes local firebase_uid.
    */
   async function signOut(): Promise<void> {
@@ -113,5 +143,5 @@ export function useAuth() {
     }
   }
 
-  return { user, loading, sending, sendMagicLink, completeMagicLink, signOut };
+  return { user, loading, sending, sendMagicLink, completeMagicLink, signInWithGoogle, signOut };
 }

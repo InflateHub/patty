@@ -1,4 +1,4 @@
-/* ProfilePage — 3.0.0 */
+/* ProfilePage — 3.2.0 */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
@@ -28,7 +28,7 @@ import {
   IonToolbar,
   IonToast,
 } from '@ionic/react';
-import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline, chevronForwardOutline, notificationsOutline, trophyOutline, sparkles, cameraOutline, imageOutline, ribbonOutline } from 'ionicons/icons';
+import { lockClosedOutline, trashOutline, warningOutline, refreshOutline, fingerPrintOutline, brushOutline, checkmarkOutline, chevronForwardOutline, notificationsOutline, trophyOutline, sparkles, cameraOutline, imageOutline } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
@@ -45,6 +45,9 @@ import PinSetupModal from '../components/PinSetupModal';
 import ColorPicker from '../components/ColorPicker';
 import { getDb } from '../db/database';
 import { useGeminiKey } from '../hooks/useGeminiKey';
+import { useAuth } from '../hooks/useAuth';
+import { useRevenueCat } from '../hooks/useRevenueCat';
+import { RevenueCatUI } from '@revenuecat/purchases-capacitor-ui';
 import { testGeminiKey, geminiErrorMessage } from '../utils/gemini';
 
 // ── Shared minor styles ───────────────────────────────────────────────────────
@@ -64,6 +67,8 @@ const ProfilePage: React.FC = () => {
   const history = useHistory();
   const { profile, prefs, loading, saveProfile, savePrefs } = useProfile();
   const gamification = useGamification();
+  const { user } = useAuth();
+  const { isPro } = useRevenueCat(user?.uid ?? null);
   const {
     lockEnabled, biometricEnabled, biometricAvailable,
     enableLock, disableLock, changePIN, setBiometricEnabled,
@@ -363,8 +368,7 @@ const ProfilePage: React.FC = () => {
                 animation: 'profile-badge-in 0.5s 0.2s cubic-bezier(0.34,1.56,0.64,1) both',
               }}
             >
-              {/* TODO: swap to "✦ Pro" chip in 3.2.0 when isPro */}
-              <span style={{ fontSize: 10, fontFamily: 'var(--md-font)', fontWeight: 800, color: 'var(--md-on-surface-variant)', letterSpacing: 0.8, textTransform: 'uppercase' }}>Free</span>
+              <span style={{ fontSize: 10, fontFamily: 'var(--md-font)', fontWeight: 800, color: isPro ? 'var(--md-primary)' : 'var(--md-on-surface-variant)', letterSpacing: 0.8, textTransform: 'uppercase' }}>{isPro ? '✦ Pro' : 'Free'}</span>
             </div>
 
             {/* Avatar with glowing ring */}
@@ -514,42 +518,6 @@ const ProfilePage: React.FC = () => {
             </div>
 
           </div>
-        </div>
-
-        {/* ── Pro banner ───────────────────────────────────────────────── */}
-        <div
-          onClick={() => history.push('/pro')}
-          style={{
-            margin: '10px 16px 0',
-            padding: '12px 16px',
-            borderRadius: 'var(--md-shape-xl)',
-            background: 'linear-gradient(110deg, color-mix(in srgb, var(--md-primary-container) 80%, var(--md-surface)), color-mix(in srgb, var(--md-primary) 22%, var(--md-surface-variant)))',
-            border: '1px solid color-mix(in srgb, var(--md-primary) 28%, transparent)',
-            display: 'flex', alignItems: 'center', gap: 12,
-            cursor: 'pointer',
-            position: 'relative', overflow: 'hidden',
-            animation: 'profile-hero-in 0.45s 0.1s cubic-bezier(0.34,1.56,0.64,1) both',
-          }}
-        >
-          {/* Moving shimmer */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%)',
-            animation: 'profile-shimmer 4s 1s ease-in-out infinite',
-          }} />
-          <div style={{
-            width: 40, height: 40, flexShrink: 0, borderRadius: 'var(--md-shape-md)',
-            background: 'var(--md-primary)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 10px color-mix(in srgb, var(--md-primary) 40%, transparent)',
-          }}>
-            <IonIcon icon={ribbonOutline} style={{ fontSize: 20, color: 'var(--md-on-primary)' }} />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--md-title-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface)' }}>Patty Pro</p>
-            <p style={{ margin: '1px 0 0', fontSize: 'var(--md-body-sm)', fontFamily: 'var(--md-font)', color: 'var(--md-on-surface-variant)' }}>Unlimited AI · no ads · and more</p>
-          </div>
-          <IonIcon icon={chevronForwardOutline} style={{ color: 'var(--md-primary)', fontSize: 20, flexShrink: 0 }} />
         </div>
 
         {/* Keyframes */}
@@ -1131,6 +1099,17 @@ const ProfilePage: React.FC = () => {
           <IonListHeader style={hdr}>App Info</IonListHeader>
           <IonCardContent style={{ padding: '4px 0 12px' }}>
             <IonList lines="none" style={{ background: 'transparent' }}>
+              {isPro && (
+                <IonItem
+                  style={{ ...transparentItem, cursor: 'pointer' }}
+                  button
+                  detail
+                  onClick={() => RevenueCatUI.presentCustomerCenter()}
+                >
+                  <IonLabel style={{ color: 'var(--md-primary)' }}>Manage Subscription</IonLabel>
+                  <IonNote slot="end" style={{ color: 'var(--md-primary)' }}>✦ Pro</IonNote>
+                </IonItem>
+              )}
               <IonItem
                 style={{ ...transparentItem, cursor: 'pointer' }}
                 button
@@ -1138,7 +1117,7 @@ const ProfilePage: React.FC = () => {
                 onClick={() => window.open('https://patty.saranmahadev.in', '_blank', 'noopener')}
               >
                 <IonLabel>Version</IonLabel>
-                <IonNote slot="end">3.1.0</IonNote>
+                <IonNote slot="end">3.2.0</IonNote>
               </IonItem>
               <IonItem
                 style={{ ...transparentItem, cursor: 'pointer' }}

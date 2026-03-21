@@ -1,0 +1,12 @@
+{
+  "projects": {
+    "default": "stride-11129"
+  },
+  "targets": {
+    "stride-11129": {
+      "hosting": {
+        "patty-site": ["patty-saranmahadev"]
+      }
+    }
+  }
+}

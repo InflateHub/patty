@@ -41,6 +41,7 @@ import SplashOverlay from './components/SplashOverlay';
 import { useAppLock } from './hooks/useAppLock';
 import { useTheme } from './hooks/useTheme';
 import { useAuth } from './hooks/useAuth';
+import { useRevenueCat } from './hooks/useRevenueCat';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -239,6 +240,13 @@ const TabShell: React.FC = () => (
   </IonTabs>
 );
 
+// ── RevenueCat initialiser — configures + identifies user with RC SDK ─────────────────
+const RevenueCatInitializer: React.FC = () => {
+  const { user } = useAuth();
+  useRevenueCat(user?.uid ?? null);
+  return null;
+};
+
 // ── App content (needs to be inside IonApp for hook context) ────────────────
 
 const AppContent: React.FC = () => {
@@ -250,6 +258,7 @@ const AppContent: React.FC = () => {
       <IonReactRouter>
         <BackButtonHandler />
         <MagicLinkHandler />
+        <RevenueCatInitializer />
         <IonRouterOutlet id="main-outlet">
           {/* Onboarding — no tab bar */}
           <Route exact path="/onboarding">
